@@ -1,0 +1,1 @@
+# ancuk kabeh asu, gila raimu asu
