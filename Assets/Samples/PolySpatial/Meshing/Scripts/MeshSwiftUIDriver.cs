@@ -10,7 +10,7 @@ using Object = UnityEngine.Object;
 using System.Runtime.InteropServices;
 #endif
 
-namespace Samples.PolySpatial.SwiftUI.Scripts
+namespace Assets.Scripts.Scripts
 {
     // This is a driver MonoBehaviour that connects to SwiftUISamplePlugin.swift via
     // C# DllImport. See MeshSamplePlugin.swift for more information.

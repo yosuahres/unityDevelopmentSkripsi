@@ -48,9 +48,6 @@ public typealias SetFPSDelegateType = (Float) -> Void
 
 var callbackDelegate: CallbackDelegateType? = nil
 var setFPSDelegate: SetFPSDelegateType? = nil
-var sphereCount: Int = 0
-var cubeCount: Int = 0
-var lastObjectInstanceId: Int32 = 0
 
 // Declared in C# as: static extern void SetNativeCallback(CallbackDelegate callback);
 @_cdecl("SetNativeCallback")
@@ -95,46 +92,25 @@ func closeSwiftUIWindow(_ cname: UnsafePointer<CChar>)
     dismissWindow(id: name)
 }
 
-// Declared in C# as: static extern void SetSphereCount(int count);
-@_cdecl("SetSphereCount")
-func setSphereCount(_ count: Int)
+// immersive space scene controls
+@_cdecl("OpenControlsUIWindow")  
+func openControlsUIWindow(_ cname: UnsafePointer<CChar>)
 {
-    sphereCount = count
+    let openWindow = EnvironmentValues().openWindow
+
+    let name = String(cString: cname)
+    print("############ OPEN WINDOW \(name)")
+    openWindow(id: name)
 }
 
-// Declared in C# as: static extern void SetCubeCount(int count);
-@_cdecl("SetCubeCount")
-func setCubeCount(_ count: Int)
+@_cdecl("CloseControlsUIWindow")
+func closeControlsUIWindow(_ cname: UnsafePointer<CChar>)
 {
-    cubeCount = count
-}
+    let dismissWindow = EnvironmentValues().dismissWindow
 
-// Declared in C# as: static extern void SetLastObjectInstanceID(int instanceId);
-@_cdecl("SetLastObjectInstanceID")
-func setLastObjectInstanceID(_ instanceId: Int32)
-{
-    lastObjectInstanceId = instanceId
-}
-
-// Called by button callbacks in HelloWorldContentView
-public func GetCubeCount() -> Int {
-    return cubeCount
-}
-
-// Called by button callbacks in HelloWorldContentView
-public func GetSphereCount() -> Int {
-    return sphereCount
-}
-
-// Called by button callbacks in HelloWorldContentView
-public func GetLastObjectInstanceID() -> Int32 {
-    return lastObjectInstanceId
-}
-
-// Declared in C# as: static extern void SetFPS(float fps);
-@_cdecl("SetFPS")
-func setFPS(_ fps: Float) {
-    setFPSDelegate?(fps)
+    let name = String(cString: cname)
+    print("############ CLOSE WINDOW \(name)")
+    dismissWindow(id: name)
 }
 
 // ContentView should call this on appear, setting up a callback for when SwiftFPSCounter pushes new FPS values

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: VisionOSSettings
   m_EditorClassIdentifier: Unity.XR.VisionOS.Editor::UnityEditor.XR.VisionOS.VisionOSSettings
   m_AppMode: 1
-  m_HandsTrackingUsageDescription: 
+  m_HandsTrackingUsageDescription: Enable for VR Interaction
   m_WorldSensingUsageDescription: 
   m_RuntimeSettings: {fileID: 11400000, guid: cb80a455589e04834b28ae7c363d76d3, type: 2}
   m_UpperLimbVisibility: 0

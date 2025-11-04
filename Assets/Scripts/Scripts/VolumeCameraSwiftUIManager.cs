@@ -1,8 +1,9 @@
-using Samples.PolySpatial.SwiftUI.Scripts;
+//volumecameraswiftuimanager.cs
+using Assets.Scripts.Scripts;
 using Unity.PolySpatial;
 using UnityEngine;
 
-namespace PolySpatial.Samples
+namespace Assets.Scripts.Scripts
 {
     public class VolumeCameraSwiftUIManager : MonoBehaviour
     {

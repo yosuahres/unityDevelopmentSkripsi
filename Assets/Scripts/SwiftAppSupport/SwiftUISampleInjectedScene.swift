@@ -14,6 +14,12 @@ struct SwiftUISampleInjectedScene {
             HomeView()
         }.defaultSize(width: 1600.0, height: 900.0)
 
+        WindowGroup(id: "ControlView") {
+            // The sample defines a custom view, but you can also put your entire window's
+            // structure here as you can with SwiftUI.
+            ControlImmersiveView()
+        }.defaultSize(width: 400.0, height: 600.0)
+
         // You can create multiple WindowGroups here for different wnidows;
         // they need a distinct id. If you include multiple items,
         // the scene property must be decorated with "@SceneBuilder" as above.

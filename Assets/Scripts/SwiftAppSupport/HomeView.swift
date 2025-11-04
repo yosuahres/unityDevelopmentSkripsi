@@ -94,7 +94,7 @@ struct HomeView: View {
         .toolbar {
             ToolbarItem(placement: .bottomOrnament) {
                 VStack {
-                    if selection !=nil {
+                    if selection != nil {
                         Button("Go to Immersive Space") {
                             CallCSharpCallback("TriggerImmersiveScene")
                         }

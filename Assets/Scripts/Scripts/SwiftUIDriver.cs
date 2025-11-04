@@ -12,58 +12,26 @@ using Random = UnityEngine.Random;
 using System.Runtime.InteropServices;
 #endif
 
-namespace Samples.PolySpatial.SwiftUI.Scripts
+namespace Assets.Scripts.Scripts
 {
     // This is a driver MonoBehaviour that connects to SwiftUISamplePlugin.swift via
     // C# DllImport. See SwiftUISamplePlugin.swift for more information.
     public class SwiftUIDriver : MonoBehaviour
     {
-        [SerializeField]
-        SpatialUIButton m_Button;
-
-        [SerializeField]
-        List<GameObject> m_ObjectsToSpawn;
-
-        [SerializeField]
-        Transform m_SpawnPosition;
-
-        [SerializeField]
-        SwiftFPSCounter m_FPSCounter;
-
         bool m_SwiftUIWindowOpen = false;
-        int m_CubeCount= 0;
-        int m_SphereCount = 0;
 
         void OnEnable()
         {
-            m_Button.WasPressed += WasPressed;
             SetNativeCallback(CallbackFromNative);
 
             OpenSwiftUIWindow("HomeView");
             m_SwiftUIWindowOpen = true;
-            m_FPSCounter.enabled = m_SwiftUIWindowOpen;
         }
 
         void OnDisable()
         {
             SetNativeCallback(null);
             CloseSwiftUIWindow("HomeView");
-        }
-
-        void WasPressed(string buttonText, MeshRenderer _)
-        {
-            if (m_SwiftUIWindowOpen)
-            {
-                CloseSwiftUIWindow("HomeView");
-                m_SwiftUIWindowOpen = false;
-            }
-            else
-            {
-                OpenSwiftUIWindow("HomeView");
-                m_SwiftUIWindowOpen = true;
-            }
-
-            m_FPSCounter.enabled = m_SwiftUIWindowOpen;
         }
 
         public void ForceCloseWindow()
@@ -97,31 +65,12 @@ namespace Samples.PolySpatial.SwiftUI.Scripts
                 if(command == "TriggerImmersiveScene")
                 {
                     self.TriggerImmersiveScene();
+                    CloseSwiftUIWindow("HomeView");
                 }
             }
             catch (Exception exception)
             {
                 Debug.LogException(exception);
-            }
-        }
-
-        void Spawn(Color color)
-        {
-            var randomObject = Random.Range(0, m_ObjectsToSpawn.Count);
-            var thing = Instantiate(m_ObjectsToSpawn[randomObject], m_SpawnPosition.position, Quaternion.identity);
-            thing.GetComponent<MeshRenderer>().material.color = color;
-
-            SetLastObjectInstanceID(thing.GetInstanceID());
-
-            if (randomObject == 0)
-            {
-                m_CubeCount++;
-                SetCubeCount(m_CubeCount);
-            }
-            else
-            {
-                m_SphereCount++;
-                SetSphereCount(m_SphereCount);
             }
         }
 
@@ -137,15 +86,6 @@ namespace Samples.PolySpatial.SwiftUI.Scripts
 
         [DllImport("__Internal")]
         static extern void CloseSwiftUIWindow(string name);
-
-        [DllImport("__Internal")]
-        static extern void SetCubeCount(int count);
-
-        [DllImport("__Internal")]
-        static extern void SetSphereCount(int count);
-
-        [DllImport("__Internal")]
-        static extern void SetLastObjectInstanceID(int instanceId);
         
         [DllImport("__Internal")]
         static extern void GoToImmersiveScene();
@@ -156,13 +96,6 @@ namespace Samples.PolySpatial.SwiftUI.Scripts
 
         static void OpenSwiftUIWindow(string name) {}
         static void CloseSwiftUIWindow(string name) {}
-
-        static void SetCubeCount(int count) {}
-
-        static void SetSphereCount(int count) {}
-
-        static void SetLastObjectInstanceID(int instanceId) {}
-        
         static void GoToImmersiveScene() {}
 #endif
         public void LoadObj(string path)
@@ -174,7 +107,7 @@ namespace Samples.PolySpatial.SwiftUI.Scripts
         {
             Debug.Log("TriggerImmersiveScene called from Swift!");
             // switch to immersive scene
-            SceneManager.LoadScene("OsteotomyPlanScene");
+            SceneManager.LoadScene("FullImmersiveScene");
         }
     }
 }
