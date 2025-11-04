@@ -104,6 +104,7 @@ namespace Assets.Scripts.Scripts
         }
         
         public void TriggerImmersiveScene()
+        
         {
             Debug.Log("TriggerImmersiveScene called from Swift!");
             // switch to immersive scene

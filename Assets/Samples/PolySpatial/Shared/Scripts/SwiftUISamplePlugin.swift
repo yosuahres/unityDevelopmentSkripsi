@@ -48,6 +48,7 @@ public typealias SetFPSDelegateType = (Float) -> Void
 
 var callbackDelegate: CallbackDelegateType? = nil
 var setFPSDelegate: SetFPSDelegateType? = nil
+var pendingCommand: String? = nil   // <- new: buffer last command when Unity callback not registered
 
 // Declared in C# as: static extern void SetNativeCallback(CallbackDelegate callback);
 @_cdecl("SetNativeCallback")
@@ -55,19 +56,31 @@ func setNativeCallback(_ delegate: CallbackDelegateType)
 {
     print("############ SET NATIVE CALLBACK")
     callbackDelegate = delegate
+
+    // If we have a pending command that was sent before Unity registered the callback,
+    // flush it now so Unity can handle it.
+    if let pending = pendingCommand {
+        pending.withCString { cstr in
+            delegate(cstr, 0)
+        }
+        pendingCommand = nil
+    }
 }
 
 // This is a function for your own use from the enclosing Unity-VisionOS app, to call the delegate
 // from your own windows/views (HelloWorldContentView uses this)
 public func CallCSharpCallback(_ str: String, _ value: Int32 = 0)
 {
+    // If Unity hasn't registered the native callback yet, buffer this command.
     if (callbackDelegate == nil) {
+        pendingCommand = str
         return
     }
 
     str.withCString {
         callbackDelegate!($0, value)
     }
+    pendingCommand = nil
 }
 
 // Declared in C# as: static extern void OpenSwiftUIWindow(string name);

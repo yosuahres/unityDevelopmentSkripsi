@@ -151,7 +151,7 @@ MonoBehaviour:
   m_Dimensions: {x: 1, y: 1, z: 1}
   m_ScaleWithWindow: 1
   m_IsUniformScale: 0
-  m_OutputConfiguration: {fileID: 11400000, guid: c141c6d819fe54420b1c524360b3915b, type: 2}
+  m_OutputConfiguration: {fileID: 11400000, guid: 724776171a2184c16b69358d20ac9b90, type: 2}
   m_CullingMask:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -334,6 +334,7 @@ GameObject:
   - component: {fileID: 424541894}
   - component: {fileID: 424541893}
   - component: {fileID: 424541896}
+  - component: {fileID: 424541897}
   m_Layer: 0
   m_Name: ScriptManager
   m_TagString: Untagged
@@ -396,6 +397,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3f7ca08519a48455682b2f2bcd8e8f2e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Scripts.Scripts.ControlsUIDriver
+--- !u!114 &424541897
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 424541892}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5da9da1ac612d4b5db9f952c28e06ed0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Assets.Scripts.Scripts.OsteotomyPlanLogic
+  modelScale: {x: 0.001, y: 0.001, z: 0.001}
+  spawnDistance: 2
 --- !u!1001 &1676097988
 PrefabInstance:
   m_ObjectHideFlags: 0

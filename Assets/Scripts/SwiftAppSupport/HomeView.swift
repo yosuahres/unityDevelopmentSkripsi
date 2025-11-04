@@ -12,7 +12,11 @@ struct HomeView: View {
     @State private var loadedModel: ModelEntity? = nil
     @State private var errorMessage: String? = nil
     @State private var searchText: String = ""
-    
+    @ObservedObject var appState: AppState   
+
+    init(appState: AppState = AppState.shared) {
+        _appState = ObservedObject(wrappedValue: appState)
+    }
     
     var filteredCaseGroups: [String] {
         if searchText.isEmpty  {
@@ -39,6 +43,10 @@ struct HomeView: View {
             .navigationTitle("Session")
             .onAppear(perform: loadModelList)
             .searchable(text: $searchText, prompt: "Search groups")
+            .onChange(of: selection) { newSelection in
+                // update shared AppState so other SwiftUI views can observe the selection
+                appState.selectedModel = newSelection
+            }
             
         } detail: {
             VStack {

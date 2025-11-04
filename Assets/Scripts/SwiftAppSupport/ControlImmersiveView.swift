@@ -8,15 +8,19 @@ import PolySpatialRealityKit
 struct ControlImmersiveView: View {
 
     @State private var isRulerVisible: Bool = true
-    
-    // We removed the 'let rulers: [Entity]' property
+    @ObservedObject var appState: AppState   
+
+    init(appState: AppState = AppState.shared) {
+        _appState = ObservedObject(wrappedValue: appState)
+    }
 
     var body: some View {
         ZStack {
             HStack {
                 Spacer()
                 VStack( alignment: .trailing, spacing: 4) {
-                    Text("should be model name")
+                    // Display the selected model name from AppState
+                    Text(appState.selectedModel ?? "No model selected")
                         .font(.extraLargeTitle2)
                 }
             }
@@ -34,7 +38,7 @@ struct ControlImmersiveView: View {
                             toggleRulerVisibility()
                         }) {
                             // This will still toggle the icon
-                            Image(systemName: isRulerVisible ? "eye.fill" : "eye.slash.fill") 
+                            Image(systemName: isRulerVisible ? "eye.fill" : "eye.slash.fill")
                                 .font(.system(size: 80))
                                 .foregroundColor(isRulerVisible ? .green : .red)
                         }
@@ -46,8 +50,22 @@ struct ControlImmersiveView: View {
             }
 
         }
+        .onAppear {
+            // If a model is already selected when this view appears, tell Unity to load it
+            if let name = appState.selectedModel {
+                let base = (name as NSString).deletingPathExtension
+                CallCSharpCallback("LoadModel:\(base)")
+            }
+        }
+        .onChange(of: appState.selectedModel) { newName in
+            // send the new selection to Unity (strip extension)
+            if let name = newName {
+                let base = (name as NSString).deletingPathExtension
+                CallCSharpCallback("LoadModel:\(base)")
+            }
+        }
     }
-    
+
 
     func setRulersVisibility(_ visible: Bool) {
         // --- We commented out the part that needs the real rulers ---
@@ -61,7 +79,6 @@ struct ControlImmersiveView: View {
         isRulerVisible.toggle()
         setRulersVisibility(isRulerVisible)
         
-        // call event to unity
-        
+        // call event to unity if needed
     }
 }
