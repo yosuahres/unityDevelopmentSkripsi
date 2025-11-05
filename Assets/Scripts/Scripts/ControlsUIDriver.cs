@@ -50,7 +50,6 @@ namespace Assets.Scripts.Scripts
 
                 var self = FindFirstObjectByType<ControlsUIDriver>();
 
-                // handle load model command from Swift (format: "LoadModel:ModelName")
                 if (!string.IsNullOrEmpty(command) && command.StartsWith("LoadModel:")) {
                     var modelName = command.Substring("LoadModel:".Length);
                     if (!string.IsNullOrEmpty(modelName)) {

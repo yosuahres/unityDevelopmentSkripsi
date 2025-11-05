@@ -1,3 +1,5 @@
+//handinput.cs
+//handle moving the target object by dragging
 using UnityEngine;
 using Unity.PolySpatial.InputDevices;
 using UnityEngine.InputSystem.EnhancedTouch;
@@ -6,7 +8,7 @@ using TouchPhase = UnityEngine.InputSystem.TouchPhase;
 using UnityEngine.InputSystem.LowLevel;
 // using System.Numerics;
 
-public class HandInput : MonoBehaviour
+public class GestureInput : MonoBehaviour
 {
     private GameObject selectedObject;
     private Vector3 lastPosition;

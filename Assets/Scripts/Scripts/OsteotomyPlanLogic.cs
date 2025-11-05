@@ -1,14 +1,21 @@
+//osteotomyplanlogic.cs
+//mark 3 november (with 6 november modifications)
 using System.IO;
 using UnityEngine;
 using Unity.PolySpatial; 
 
 namespace Assets.Scripts.Scripts
 {
-    public class OsteotomyPlanLogic : MonoBehaviour
+    public class OsteotomyPlanLogic : MonoBehaviour, ISpatialTouchable
     {
+        [Header("Model Settings")]
         public Vector3 modelScale = new Vector3(0.001f, 0.001f, 0.001f);
         public float spawnDistance = 2.0f;
+        
+        [Header("Osteotomy Settings")]
+        public GameObject planeFragmentPrefab;
 
+        
         public void LoadModelByName(string modelName)
         {
             if (string.IsNullOrEmpty(modelName))
@@ -77,7 +84,8 @@ namespace Assets.Scripts.Scripts
         {
             if (modelInstance == null) return;
 
-            // MeshCollider
+            // MeshCollider for mandibular models
+
             MeshCollider collider = modelInstance.GetComponent<MeshCollider>();
             if (collider == null)
             {
@@ -92,6 +100,17 @@ namespace Assets.Scripts.Scripts
             }
             rb.useGravity = false;
             rb.isKinematic = true; 
+        }
+
+        // spawn plane based on TouchIInput.cs data
+        public void OnSpatialTouch(Vector3 touchPosition, Vector3 touchNormal)
+        {
+            Vector3 spawnPosition = touchPosition;
+
+            Quaternion spawnRotation = Quaternion.FromToRotation(Vector3.up, touchNormal);
+
+            Instantiate(planeFragmentPrefab, spawnPosition, spawnRotation);
+            Debug.Log($"Spawned plane at {spawnPosition}");
         }
     }
 }
