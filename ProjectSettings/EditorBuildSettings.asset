@@ -6,13 +6,14 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/SwiftUI.unity
+    path: Assets/Scenes/WindowedListScene.unity
     guid: 727a10c1c46544e3a8066e0487821ef3
   - enabled: 1
     path: Assets/Scenes/FullImmersiveScene.unity
     guid: 52a47c6fb52f3472591f69f0be161343
   m_configObjects:
     UnityEditor.XR.VisionOS.VisionOSSettings: {fileID: 11400000, guid: 347959d6825954bffa7ef382a7eb8c4b, type: 2}
+    com.unity.input.settings: {fileID: 11400000, guid: 490f30f928a9e48ca9b90e447524da8e, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
     com.unity.polyspatial.xr.xr_settings: {fileID: 11400000, guid: 0b3c580f85a67415eb4ba4f2a8be54ed, type: 2}
     com.unity.xr.arfoundation.simulation_settings: {fileID: 11400000, guid: 1db74c037f9074703a8138c2ed58139e, type: 2}

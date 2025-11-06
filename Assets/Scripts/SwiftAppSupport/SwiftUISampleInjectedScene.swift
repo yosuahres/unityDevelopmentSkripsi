@@ -18,7 +18,9 @@ struct SwiftUISampleInjectedScene {
             // The sample defines a custom view, but you can also put your entire window's
             // structure here as you can with SwiftUI.
             ControlImmersiveView()
-        }.defaultSize(width: 400.0, height: 600.0)
+        }
+        // .immersionStyle(selection: .constant(.full), in: .full)
+        .defaultSize(width: 400.0, height: 600.0)
 
         // You can create multiple WindowGroups here for different wnidows;
         // they need a distinct id. If you include multiple items,

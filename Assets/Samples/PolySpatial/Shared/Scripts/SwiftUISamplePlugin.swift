@@ -48,7 +48,7 @@ public typealias SetFPSDelegateType = (Float) -> Void
 
 var callbackDelegate: CallbackDelegateType? = nil
 var setFPSDelegate: SetFPSDelegateType? = nil
-var pendingCommand: String? = nil   // <- new: buffer last command when Unity callback not registered
+var pendingCommand: String? = nil   
 
 // Declared in C# as: static extern void SetNativeCallback(CallbackDelegate callback);
 @_cdecl("SetNativeCallback")

@@ -16,39 +16,75 @@ struct ControlImmersiveView: View {
 
     var body: some View {
         ZStack {
-            HStack {
-                Spacer()
-                VStack( alignment: .trailing, spacing: 4) {
-                    // Display the selected model name from AppState
-                    Text(appState.selectedModel ?? "No model selected")
-                        .font(.extraLargeTitle2)
+            // Top-right model name
+            VStack (spacing: 20){
+                HStack {
+                    Spacer()
+                    VStack(alignment: .trailing, spacing: 4) {
+                        Text(appState.selectedModel ?? "No model selected")
+                            .font(.extraLargeTitle2)
+                    }
+                    .padding(.horizontal)
                 }
+                Spacer()
             }
-            .padding(.horizontal)
 
-            //controls button
-            HStack{
-                VStack(alignment: .leading, spacing: 40) {
+            // Centered controls (ruler + eye toggle)
+            HStack {
+                VStack (alignment: .leading, spacing: 40) {
+                    Spacer()
+                    HStack {
+                        Spacer()
 
-                    HStack(spacing: 40) {
-                        Image(systemName: "ruler.fill")
-                            .font(.system(size: 80))
-
-                        Button(action: {
-                            toggleRulerVisibility()
-                        }) {
-                            // This will still toggle the icon
-                            Image(systemName: isRulerVisible ? "eye.fill" : "eye.slash.fill")
+                        HStack(spacing: 40) {
+                            Image(systemName: "ruler.fill")
                                 .font(.system(size: 80))
-                                .foregroundColor(isRulerVisible ? .green : .red)
+
+                            Button(action: {
+                                toggleRulerVisibility()
+                            }) {
+                                Image(systemName: isRulerVisible ? "eye.fill" : "eye.slash.fill")
+                                    .font(.system(size: 80))
+                                    .foregroundColor(isRulerVisible ? .green : .red)
+                            }
+                        }
+                        Spacer()
+
+                        HStack(spacing:40) {
+                            //toggle
                         }
 
+
+                    }
+                    Spacer()
+                    .padding(.horizontal)
+                    Spacer()
+
+                    HStack{
+                        Button("Close") {
+                            CallCSharpCallback("TriggerHomeScene")
+                        }
+                        .font(.system(size: 80))
+                        .fontWeight(.bold)
+                        .padding(50)
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.extraLarge)
+                        .hoverEffect()
                         Spacer()
-                            .frame(width: 85)
+
+                        Button("Slice") {
+                            CallCSharpCallback("SliceModel")
+                        }
+                        .font(.system(size: 80))
+                        .fontWeight(.bold)
+                        .padding(50)
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.extraLarge)
+                        .hoverEffect()
+                        Spacer()
                     }
                 }
             }
-
         }
         .onAppear {
             // If a model is already selected when this view appears, tell Unity to load it

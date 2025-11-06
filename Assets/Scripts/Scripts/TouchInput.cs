@@ -8,6 +8,7 @@ using UnityEngine.InputSystem.EnhancedTouch;
 using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 using TouchPhase = UnityEngine.InputSystem.TouchPhase;
 using UnityEngine.InputSystem.LowLevel;
+using System.Numerics;
 
 public class TouchInput : MonoBehaviour {
     void OnEnable()
@@ -25,12 +26,12 @@ public class TouchInput : MonoBehaviour {
                 {
                     SpatialPointerState touchData = EnhancedSpatialPointerSupport.GetPointerState(touch);
                     
-                    if (touchData.targetObject != null && touchData.Kind == SpatialPointerKind.Direct)
+                    if (touchData.targetObject != null && touchData.Kind == SpatialPointerKind.Touch)
                     {
                         ISpatialTouchable touchable = touchData.targetObject.GetComponent<ISpatialTouchable>();
                         if (touchable != null)
                         {
-                            touchable.OnSpatialTouch(touchData.interactionPosition, touchData.interactionNormal);
+                            touchable.OnSpatialTouch(touchData.interactionPosition, touchData.inputDeviceRotation * UnityEngine.Vector3.forward);
                         }
                         break;
                     }

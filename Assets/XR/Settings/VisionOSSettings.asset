@@ -22,6 +22,6 @@ MonoBehaviour:
   m_MetalImmersionStyle: 0
   m_RealityKitImmersionStyle: 1
   m_MetalImmersiveOverlays: 0
-  m_RealityKitImmersiveOverlays: 0
+  m_RealityKitImmersiveOverlays: 1
   m_IL2CPPLargeExeWorkaround: 0
   m_UseACTool: 0
