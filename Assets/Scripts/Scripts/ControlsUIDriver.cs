@@ -65,14 +65,14 @@ namespace Assets.Scripts.Scripts
 
                 // list command from swift sided
 
-                if (command == "slice")
+                if (command == "TriggerSliceModel")
                 {
                     
                 }
 
-                if (command == "CloseControlView")
+                if (command == "TriggerHomeScene")
                 {
-                    TriggerHomeScene();
+                   self.TriggerHomeScene();
                 }
 
                 
@@ -96,9 +96,6 @@ namespace Assets.Scripts.Scripts
         [DllImport("__Internal")]
         static extern void CloseControlsUIWindow(string name);
 
-        [DllImport("__Internal")]
-        static extern void TriggerHomeScene();
-
 #else
         static void SetNativeCallback(CallbackDelegate callback) { }
 
@@ -107,8 +104,6 @@ namespace Assets.Scripts.Scripts
         static void OpenControlsUIWindow(string name) { }
 
         static void CloseControlsUIWindow(string name) { }
-
-        static void TriggerHomeScene() { }
 
 #endif
         public void TriggerHomeScene()

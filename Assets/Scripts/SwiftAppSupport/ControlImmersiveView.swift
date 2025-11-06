@@ -73,7 +73,7 @@ struct ControlImmersiveView: View {
                         Spacer()
 
                         Button("Slice") {
-                            CallCSharpCallback("SliceModel")
+                            CallCSharpCallback("TriggerSliceModel")
                         }
                         .font(.system(size: 80))
                         .fontWeight(.bold)

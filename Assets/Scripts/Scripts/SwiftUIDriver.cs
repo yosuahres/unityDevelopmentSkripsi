@@ -86,9 +86,6 @@ namespace Assets.Scripts.Scripts
 
         [DllImport("__Internal")]
         static extern void CloseSwiftUIWindow(string name);
-        
-        [DllImport("__Internal")]
-        static extern void GoToImmersiveScene();
 
 #else
         static void SetNativeCallback(CallbackDelegate callback) {}
@@ -96,7 +93,6 @@ namespace Assets.Scripts.Scripts
 
         static void OpenSwiftUIWindow(string name) {}
         static void CloseSwiftUIWindow(string name) {}
-        static void GoToImmersiveScene() {}
 #endif
         public void LoadObj(string path)
         {
