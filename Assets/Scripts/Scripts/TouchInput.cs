@@ -9,13 +9,21 @@ using UnityEngine.InputSystem.EnhancedTouch;
 using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 using TouchPhase = UnityEngine.InputSystem.TouchPhase;
 using UnityEngine.InputSystem.LowLevel;
+using System.Collections.Generic; 
 
 public class TouchInput : MonoBehaviour {
-    // assign this in the inspector
     public GameObject planeFragmentPrefab;
+
+    public static List<GameObject> currentCuttingPlanes { get; private set; } = new List<GameObject>();
+
     void OnEnable()
     {
         EnhancedTouchSupport.Enable();
+    }
+
+    public static void ClearPlaneList()
+    {
+        currentCuttingPlanes.Clear();
     }
 
     void Update()
@@ -39,11 +47,13 @@ public class TouchInput : MonoBehaviour {
 
                             if (planeFragmentPrefab != null)
                             {
-                                Instantiate(planeFragmentPrefab, spawnPosition, spawnRotation);
-                                Debug.Log($"Spawned plane at {spawnPosition}");
+                                GameObject spawnedPlane = Instantiate(planeFragmentPrefab, spawnPosition, spawnRotation);
+                                
+                                currentCuttingPlanes.Add(spawnedPlane);
+
+                                Debug.Log($"Spawned new plane ({currentCuttingPlanes.Count} total) at {spawnPosition}");
                             }
 
-                            // notify the touched component if it needs the event for other purposes
                             touchable.OnSpatialTouch(spawnPosition, touchNormal);
                         }
                         break;

@@ -7,7 +7,7 @@ import PolySpatialRealityKit
 
 struct HomeView: View {
     
-    @State private var models: [String] = []
+    @State private var models: [CaseGroup] = []
     @State private var selection: String? = nil
     @State private var loadedModel: ModelEntity? = nil
     @State private var errorMessage: String? = nil
@@ -18,25 +18,37 @@ struct HomeView: View {
         _appState = ObservedObject(wrappedValue: appState)
     }
     
-    var filteredCaseGroups: [String] {
-        if searchText.isEmpty  {
+    var filteredCaseGroups: [CaseGroup] {
+        if searchText.isEmpty {
             return models
         } else {
-            return models.filter{$0.localizedCaseInsensitiveContains(searchText)}
+            return models.filter { group in
+                group.name.localizedCaseInsensitiveContains(searchText)
+                || group.description.localizedCaseInsensitiveContains(searchText)
+                || group.usdzModelNames.contains { $0.localizedCaseInsensitiveContains(searchText) }
+            }
         }
     }
 
     var body: some View {
         NavigationSplitView {
-            List(filteredCaseGroups, id: \.self, selection: $selection) { modelName in
-                HStack(spacing: 8){
+            List(filteredCaseGroups, id: \.primaryModel, selection: $selection) { group in
+                HStack(spacing: 8) {
                     Image("glyph")
                         .resizable()
                         .frame(width: 50, height: 50)
                     VStack(alignment: .leading) {
-                        Text(modelName)
+                        Text(group.name)
                             .lineLimit(1)
-                            .foregroundStyle(.secondary)
+                        if !group.description.isEmpty {
+                            Text(group.description)
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                                .lineLimit(2)
+                        }
+                        Text(group.primaryModel)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
                     }
                 }
             }
@@ -44,7 +56,6 @@ struct HomeView: View {
             .onAppear(perform: loadModelList)
             .searchable(text: $searchText, prompt: "Search groups")
             .onChange(of: selection) { newSelection in
-                // update shared AppState so other SwiftUI views can observe the selection
                 appState.selectedModel = newSelection
             }
             
@@ -114,14 +125,21 @@ struct HomeView: View {
     }
     
     func loadModelList() {
-        var found: [String] = []
+        var groups = DummyFragmentData.caseGroups
+
         if let urls = Bundle.main.urls(forResourcesWithExtension: "usdz", subdirectory: "Data/Raw") {
-            found.append(contentsOf: urls.map { $0.lastPathComponent })
+            let filenames = urls.map { $0.lastPathComponent }
+            for fname in filenames {
+                let alreadyIncluded = groups.contains { $0.usdzModelNames.contains(fname) }
+                if !alreadyIncluded {
+                    groups.append(CaseGroup(usdzModelNames: [fname], name: fname, description: ""))
+                }
+            }
         }
-        
-        self.models = Array(Set(found)).sorted()
+
+        self.models = groups.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
     }
-    
+     
     func loadModel(named modelName: String) async {
         do {
             guard let resourceRoot = Bundle.main.resourceURL,

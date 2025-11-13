@@ -351,6 +351,7 @@ GameObject:
   - component: {fileID: 424541897}
   - component: {fileID: 424541899}
   - component: {fileID: 424541898}
+  - component: {fileID: 424541900}
   m_Layer: 0
   m_Name: ScriptManager
   m_TagString: Untagged
@@ -380,7 +381,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 424541892}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b75659ca994f6498faf629f5af310336, type: 3}
   m_Name: 
@@ -427,7 +428,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Scripts.Scripts.OsteotomyPlanLogic
   modelScale: {x: 0.001, y: 0.001, z: 0.001}
   spawnDistance: 1.5
-  spawnHeight: 2.2
 --- !u!114 &424541898
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -440,7 +440,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 666c5e7c4aa6e40b68dc1967d703abfa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TouchInput
-  planeFragmentPrefab: {fileID: 0}
+  planeFragmentPrefab: {fileID: 1593688726762680407, guid: 5fe7aa6209fc24128806f474b9b23467, type: 3}
 --- !u!114 &424541899
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -453,6 +453,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6e8306a98f30f421696c3bece4482a38, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GestureInput
+--- !u!114 &424541900
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 424541892}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 97727ff55f60d48258fd1797acd6ffc9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CSGManager
 --- !u!1 &1252617236
 GameObject:
   m_ObjectHideFlags: 0
@@ -605,63 +617,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: cef99035c800c4eceb2ea0971f087e83, type: 3}
---- !u!1001 &1420229562143216697
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 4811973533321272721, guid: 315e7e614d3e646839c621bd5d5318da, type: 3}
-      propertyPath: m_Name
-      value: CATALUNYA-mandibula
-      objectReference: {fileID: 0}
-    - target: {fileID: 5299682070329706283, guid: 315e7e614d3e646839c621bd5d5318da, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 974.05634
-      objectReference: {fileID: 0}
-    - target: {fileID: 5299682070329706283, guid: 315e7e614d3e646839c621bd5d5318da, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5299682070329706283, guid: 315e7e614d3e646839c621bd5d5318da, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -1157.833
-      objectReference: {fileID: 0}
-    - target: {fileID: 5299682070329706283, guid: 315e7e614d3e646839c621bd5d5318da, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5299682070329706283, guid: 315e7e614d3e646839c621bd5d5318da, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5299682070329706283, guid: 315e7e614d3e646839c621bd5d5318da, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5299682070329706283, guid: 315e7e614d3e646839c621bd5d5318da, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5299682070329706283, guid: 315e7e614d3e646839c621bd5d5318da, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5299682070329706283, guid: 315e7e614d3e646839c621bd5d5318da, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5299682070329706283, guid: 315e7e614d3e646839c621bd5d5318da, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 315e7e614d3e646839c621bd5d5318da, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -671,4 +626,3 @@ SceneRoots:
   - {fileID: 409778642}
   - {fileID: 1676097988}
   - {fileID: 1252617239}
-  - {fileID: 1420229562143216697}

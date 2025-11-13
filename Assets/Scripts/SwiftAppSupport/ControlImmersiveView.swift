@@ -87,14 +87,12 @@ struct ControlImmersiveView: View {
             }
         }
         .onAppear {
-            // If a model is already selected when this view appears, tell Unity to load it
             if let name = appState.selectedModel {
                 let base = (name as NSString).deletingPathExtension
                 CallCSharpCallback("LoadModel:\(base)")
             }
         }
         .onChange(of: appState.selectedModel) { newName in
-            // send the new selection to Unity (strip extension)
             if let name = newName {
                 let base = (name as NSString).deletingPathExtension
                 CallCSharpCallback("LoadModel:\(base)")
@@ -104,10 +102,6 @@ struct ControlImmersiveView: View {
 
 
     func setRulersVisibility(_ visible: Bool) {
-        // --- We commented out the part that needs the real rulers ---
-        // for ruler in rulers {
-        //     ruler.isEnabled = visible
-        // }
         isRulerVisible = visible
     }
 
@@ -115,6 +109,5 @@ struct ControlImmersiveView: View {
         isRulerVisible.toggle()
         setRulersVisibility(isRulerVisible)
         
-        // call event to unity if needed
     }
 }

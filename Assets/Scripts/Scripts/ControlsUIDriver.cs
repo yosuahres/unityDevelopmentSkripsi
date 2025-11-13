@@ -1,4 +1,4 @@
-//ImmersiveSpaceDriver.cs 
+//ControlsUIDriver.cs
 //mark 4 november
 
 using System;
@@ -67,15 +67,31 @@ namespace Assets.Scripts.Scripts
 
                 if (command == "TriggerSliceModel")
                 {
-                    
+                    List<GameObject> planesToCut = TouchInput.currentCuttingPlanes;
+
+                    if (planesToCut != null && planesToCut.Count > 0)
+                    {
+                        foreach (GameObject plane in new List<GameObject>(planesToCut))
+                        {
+                            if (plane != null)
+                            {
+                                CSGManager.Instance.RegisterAndCut(plane);
+                            }
+                        }
+
+                        TouchInput.ClearPlaneList();
+                    }
+                    else
+                    {
+                        Debug.LogWarning("Slice triggered, but no cutting planes were found. Touch the model to place planes first.");
+                    }
                 }
 
                 if (command == "TriggerHomeScene")
                 {
-                   self.TriggerHomeScene();
+                    self.TriggerHomeScene();
                 }
 
-                
             }
             catch (Exception e)
             {
@@ -110,7 +126,7 @@ namespace Assets.Scripts.Scripts
         {
             Debug.Log("Triggering Home Scene called from swift!");
 
-            SceneManager.LoadScene("SwiftUI");
+            SceneManager.LoadScene("WindowedListScene");
         }
     }
 }
