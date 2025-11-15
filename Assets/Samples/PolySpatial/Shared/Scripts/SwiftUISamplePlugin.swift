@@ -105,6 +105,15 @@ func closeSwiftUIWindow(_ cname: UnsafePointer<CChar>)
     dismissWindow(id: name)
 }
 
+// Declared in C# as: static extern void SendCommandToSwift(string command, int value);
+@_cdecl("SendCommandToSwift")
+func sendCommandToSwift(_ ccommand: UnsafePointer<CChar>, _ value: Int32)
+{
+    let command = String(cString: ccommand)
+    print("############ SEND COMMAND TO SWIFT: \(command) \(value)")
+    CallCSharpCallback(command, value)
+}
+
 // immersive space scene controls
 @_cdecl("OpenControlsUIWindow")  
 func openControlsUIWindow(_ cname: UnsafePointer<CChar>)
@@ -124,6 +133,14 @@ func closeControlsUIWindow(_ cname: UnsafePointer<CChar>)
     let name = String(cString: cname)
     print("############ CLOSE WINDOW \(name)")
     dismissWindow(id: name)
+}
+
+// Declared in C# as: static extern void SetFPS(float fps);
+@_cdecl("SetFPS")
+func setFPS(_ fps: Float)
+{
+    print("############ SET FPS: \(fps)")
+    setFPSDelegate?(fps)
 }
 
 // ContentView should call this on appear, setting up a callback for when SwiftFPSCounter pushes new FPS values

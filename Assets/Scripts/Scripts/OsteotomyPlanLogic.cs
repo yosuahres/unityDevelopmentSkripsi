@@ -1,4 +1,7 @@
 // OsteotomyPlanLogic.cs
+
+//current collider not working tho
+using System.Collections; 
 using System.IO;
 using UnityEngine;
 using Unity.PolySpatial; 
@@ -9,6 +12,7 @@ namespace Assets.Scripts.Scripts
     {
         public Vector3 modelScale = new Vector3(0.001f, 0.001f, 0.001f);
         public float spawnDistance = 2.0f;
+        public float spawnHeight = 1.5f; 
 
         public void LoadModelByName(string modelName)
         {
@@ -31,10 +35,10 @@ namespace Assets.Scripts.Scripts
                 {
                     GameObject instance = Instantiate(prefab, Vector3.zero, Quaternion.identity);
                     
-                    SetupModelCollider(instance);
+                    StartCoroutine(SetupColliderTwice(instance));
                     
                     instance.transform.SetParent(volumeCamera.transform, false); 
-                    instance.transform.localPosition = Vector3.forward * spawnDistance;
+                    instance.transform.localPosition = new Vector3(0, spawnHeight, spawnDistance); 
                     instance.transform.localScale = modelScale;
 
                     if (mainCamera != null)
@@ -42,25 +46,24 @@ namespace Assets.Scripts.Scripts
                         instance.transform.LookAt(mainCamera.transform, mainCamera.transform.up);
                     }
                     Debug.Log($"OsteotomyPlanLogic: Instantiated '{cleanName}' as child of VolumeCamera.");
-
-                    // added to CSG model
-                    CSGManager.Instance.RegisterMandible(instance);
                 }
                 else
                 {
                     Vector3 spawnPosition = Vector3.zero;
                     if (mainCamera != null)
                     {
-                        spawnPosition = mainCamera.transform.TransformPoint(Vector3.forward * spawnDistance);
+                        Vector3 localSpawnOffset = new Vector3(0, spawnHeight, spawnDistance);
+                        spawnPosition = mainCamera.transform.TransformPoint(localSpawnOffset);
                     }
                     else
                     {
-                        Debug.LogWarning("Main Camera not found. Spawning at origin.");
+                        Debug.LogWarning("Main Camera not found. Spawning at world origin + offset.");
+                        spawnPosition = new Vector3(0, spawnHeight, spawnDistance);
                     }
 
                     GameObject instance = Instantiate(prefab, spawnPosition, Quaternion.identity);
 
-                    SetupModelCollider(instance);
+                    StartCoroutine(SetupColliderTwice(instance));
 
                     instance.transform.localScale = modelScale;
 
@@ -76,6 +79,13 @@ namespace Assets.Scripts.Scripts
                 Debug.LogError($"OsteotomyPlanLogic: Could not find resource '{cleanName}' in Resources.");
             }
         }
+
+        private IEnumerator SetupColliderTwice(GameObject modelInstance)
+        {
+            SetupModelCollider(modelInstance);
+            yield return new WaitForEndOfFrame();
+            SetupModelCollider(modelInstance);
+        }
         
         private void SetupModelCollider(GameObject modelInstance)
         {
@@ -87,15 +97,7 @@ namespace Assets.Scripts.Scripts
             {
                 collider = modelInstance.AddComponent<MeshCollider>();
             }
-            collider.convex = false; 
-
-            Rigidbody rb = modelInstance.GetComponent<Rigidbody>();
-            if (rb == null)
-            {
-                rb = modelInstance.AddComponent<Rigidbody>();
-            }
-            rb.useGravity = false;
-            rb.isKinematic = true; 
+            collider.convex = true;  
         }
     }
 }

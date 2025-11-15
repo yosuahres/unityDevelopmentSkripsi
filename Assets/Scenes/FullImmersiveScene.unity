@@ -381,7 +381,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 424541892}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b75659ca994f6498faf629f5af310336, type: 3}
   m_Name: 
@@ -427,7 +427,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Scripts.Scripts.OsteotomyPlanLogic
   modelScale: {x: 0.001, y: 0.001, z: 0.001}
-  spawnDistance: 1.5
+  spawnDistance: 1.1
+  spawnHeight: 1.5
 --- !u!114 &424541898
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -465,6 +466,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 97727ff55f60d48258fd1797acd6ffc9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CSGManager
+  <MandibleModel>k__BackingField: {fileID: 0}
 --- !u!1 &1252617236
 GameObject:
   m_ObjectHideFlags: 0

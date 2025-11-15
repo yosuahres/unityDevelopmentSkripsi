@@ -115,7 +115,7 @@ struct HomeView: View {
                 VStack {
                     if selection != nil {
                         Button("Go to Immersive Space") {
-                            CallCSharpCallback("TriggerImmersiveScene")
+                            CallCSharpCallback("TriggerConfigurationScene")
                         }
                         .disabled(selection == nil)
                     }

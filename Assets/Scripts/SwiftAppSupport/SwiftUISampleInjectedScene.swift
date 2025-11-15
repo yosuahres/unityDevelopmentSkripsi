@@ -9,25 +9,16 @@ struct SwiftUISampleInjectedScene {
     @SceneBuilder
     static var scene: some Scene {
         WindowGroup(id: "HomeView") {
-            // The sample defines a custom view, but you can also put your entire window's
-            // structure here as you can with SwiftUI.
             HomeView()
         }.defaultSize(width: 1600.0, height: 900.0)
 
+        WindowGroup(id: "Configuration") {
+            GUIConfigurationView()
+        }
+
         WindowGroup(id: "ControlView") {
-            // The sample defines a custom view, but you can also put your entire window's
-            // structure here as you can with SwiftUI.
             ControlImmersiveView()
         }
-        // .immersionStyle(selection: .constant(.full), in: .full)
-        .defaultSize(width: 400.0, height: 600.0)
-
-        // You can create multiple WindowGroups here for different wnidows;
-        // they need a distinct id. If you include multiple items,
-        // the scene property must be decorated with "@SceneBuilder" as above.
-        // WindowGroup(id: "SimpleText") {
-        //     Text("Hello World")
-        // }
     }
 }
 

@@ -1,5 +1,4 @@
-//handinput.cs
-//handle moving the target object by dragging
+//gestureinput.cs
 using UnityEngine;
 using Unity.PolySpatial.InputDevices;
 using UnityEngine.InputSystem.EnhancedTouch;
@@ -11,9 +10,9 @@ using UnityEngine.InputSystem.LowLevel;
 public class GestureInput : MonoBehaviour
 {
     private GameObject selectedObject;
-    private Vector3 lastPosition;
+    private UnityEngine.Vector3 lastPosition;
 
-    void OnEnable()
+    void OnEnable() 
     {
         EnhancedTouchSupport.Enable();
     }
@@ -35,7 +34,7 @@ public class GestureInput : MonoBehaviour
                     }
                     else if (touch.phase == TouchPhase.Moved && selectedObject != null)
                     {
-                        Vector3 deltaPosition = touchData.interactionPosition - lastPosition;
+                        UnityEngine.Vector3 deltaPosition = touchData.interactionPosition - lastPosition;
                         selectedObject.transform.position += deltaPosition;
                         lastPosition = touchData.interactionPosition;
                     }
