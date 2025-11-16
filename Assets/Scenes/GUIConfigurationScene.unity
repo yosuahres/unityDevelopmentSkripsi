@@ -130,7 +130,7 @@ GameObject:
   - component: {fileID: 1044491208}
   - component: {fileID: 1044491207}
   - component: {fileID: 1044491206}
-  - component: {fileID: 1044491205}
+  - component: {fileID: 1044491209}
   m_Layer: 0
   m_Name: ScriptManager
   m_TagString: Untagged
@@ -138,18 +138,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1044491205
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1044491204}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e90dabf72cf994961a0383c3e04c88c6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Samples.PolySpatial.SwiftUI.Scripts.SwiftUIDriver
 --- !u!114 &1044491206
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -193,6 +181,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1044491209
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1044491204}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 118dbb35a2767446baeac0338a2eac55, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Assets.Scripts.Scripts.GUIDriver
 --- !u!1001 &1672792159
 PrefabInstance:
   m_ObjectHideFlags: 0

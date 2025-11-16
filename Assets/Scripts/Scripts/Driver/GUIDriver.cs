@@ -7,6 +7,7 @@ using Unity.PolySpatial;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Random = UnityEngine.Random;
+using Assets.Scripts.Scripts;
 
 #if UNITY_VISIONOS && !UNITY_EDITOR
 using System.Runtime.InteropServices;
@@ -56,11 +57,41 @@ namespace Assets.Scripts.Scripts
                 // If you need to deal with multiple windows and need to distinguish between them,
                 // you could add an ID to this callback and use that to distinguish windows.
                 var self = FindFirstObjectByType<GUIDriver>();
+                var slicer = FindFirstObjectByType<GUISlicing>();
 
                 // if (command == "return") {
                 //     self.m_SwiftUIWindowOpen = false;
                 //     return;
                 // }
+
+
+                if(command == "TriggerRight")
+                {
+                    GameObject rightFrag = slicer.GetRightFragment();
+                    GameObject leftFrag = slicer.GetLeftFragment();
+
+                    if (rightFrag != null)
+                        rightFrag.SetActive(true);
+                    
+                    if (leftFrag != null)
+                        leftFrag.SetActive(false);
+
+                    Debug.Log("GUIDriver: Showing Right Fragment");
+                }
+                
+                if(command == "TriggerLeft")
+                {
+                    GameObject rightFrag = slicer.GetRightFragment();
+                    GameObject leftFrag = slicer.GetLeftFragment();
+
+                    if (rightFrag != null)
+                        rightFrag.SetActive(false);
+                    
+                    if (leftFrag != null)
+                        leftFrag.SetActive(true);
+
+                    Debug.Log("GUIDriver: Showing Left Fragment");
+                }
 
                 if(command == "TriggerImmersiveScene")
                 {
