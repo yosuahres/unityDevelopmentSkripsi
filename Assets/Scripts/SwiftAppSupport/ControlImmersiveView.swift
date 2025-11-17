@@ -1,4 +1,3 @@
-//ControlImmersiveViw.swift
 //mark 4 november
 import SwiftUI
 import RealityKit
@@ -16,13 +15,24 @@ struct ControlImmersiveView: View {
 
     var body: some View {
         ZStack {
-            // Top-right model name
             VStack (spacing: 20){
                 HStack {
                     Spacer()
                     VStack(alignment: .trailing, spacing: 4) {
                         Text(appState.selectedModel ?? "No model selected")
                             .font(.extraLargeTitle2)
+                        
+                        if let side = appState.selectedSide {
+                            
+                            Text("\(side) Fragment")
+                                .font(.title)
+                                .foregroundColor(.secondary)
+                            
+                            Text("Side: \(side)")
+                                .font(.title2)
+                                .foregroundColor(.secondary)
+                        }
+                        
                     }
                     .padding(.horizontal)
                 }
@@ -84,18 +94,6 @@ struct ControlImmersiveView: View {
                         Spacer()
                     }
                 }
-            }
-        }
-        .onAppear {
-            if let name = appState.selectedModel {
-                let base = (name as NSString).deletingPathExtension
-                CallCSharpCallback("LoadModel:\(base)")
-            }
-        }
-        .onChange(of: appState.selectedModel) { newName in
-            if let name = newName {
-                let base = (name as NSString).deletingPathExtension
-                CallCSharpCallback("LoadModel:\(base)")
             }
         }
     }

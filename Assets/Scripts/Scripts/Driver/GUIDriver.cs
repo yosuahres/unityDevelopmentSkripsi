@@ -64,39 +64,45 @@ namespace Assets.Scripts.Scripts
                 //     return;
                 // }
 
+                if (command.StartsWith("LoadModel:"))
+                {
+                    string modelName = command.Substring("LoadModel:".Length);
+                    slicer.LoadModelByName(modelName);
+                    return; 
+                }
 
-                if(command == "TriggerRight")
+                if (command == "TriggerRight")
                 {
                     GameObject rightFrag = slicer.GetRightFragment();
-                    GameObject leftFrag = slicer.GetLeftFragment();
-
                     if (rightFrag != null)
-                        rightFrag.SetActive(true);
-                    
-                    if (leftFrag != null)
-                        leftFrag.SetActive(false);
+                    {
+                        DataManager.Instance.SelectedFragment = rightFrag;
+                        
+                        DontDestroyOnLoad(rightFrag);
+                        
+                        if (slicer.GetLeftFragment() != null) Destroy(slicer.GetLeftFragment());
+                        if (slicer.loadedInstance != null) Destroy(slicer.loadedInstance);
+                    }
 
-                    Debug.Log("GUIDriver: Showing Right Fragment");
+                    Debug.Log("GUIDriver: Stored Right Fragment. Loading immersive scene.");
+                    self.TriggerImmersiveScene();
                 }
                 
-                if(command == "TriggerLeft")
+                if (command == "TriggerLeft")
                 {
-                    GameObject rightFrag = slicer.GetRightFragment();
                     GameObject leftFrag = slicer.GetLeftFragment();
-
-                    if (rightFrag != null)
-                        rightFrag.SetActive(false);
-                    
                     if (leftFrag != null)
-                        leftFrag.SetActive(true);
+                    {
+                        DataManager.Instance.SelectedFragment = leftFrag;
+                        
+                        DontDestroyOnLoad(leftFrag);
 
-                    Debug.Log("GUIDriver: Showing Left Fragment");
-                }
+                        if (slicer.GetRightFragment() != null) Destroy(slicer.GetRightFragment());
+                        if (slicer.loadedInstance != null) Destroy(slicer.loadedInstance);
+                    }
 
-                if(command == "TriggerImmersiveScene")
-                {
+                    Debug.Log("GUIDriver: Stored Left Fragment. Loading immersive scene.");
                     self.TriggerImmersiveScene();
-                    CloseSwiftUIWindow("Configuration");
                 }
 
             }

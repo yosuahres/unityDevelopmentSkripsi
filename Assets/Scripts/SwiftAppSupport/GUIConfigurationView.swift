@@ -1,17 +1,18 @@
-//GUIConfigurationView.swift
-//mark 15 november
 import SwiftUI
 import RealityKit
 import UnityFramework
 import PolySpatialRealityKit
 
+enum SideSelection {
+    case left, right
+}
+
 struct GUIConfigurationView: View {
     
-    @State private var models: [CaseGroup] = [] 
-    @State private var selection: String? = nil 
     @State private var loadedModel: ModelEntity? = nil
     @State private var errorMessage: String? = nil
-    @ObservedObject var appState: AppState   
+    @State private var sideSelection: SideSelection? = nil
+    @ObservedObject var appState: AppState
 
     init(appState: AppState = AppState.shared) {
         _appState = ObservedObject(wrappedValue: appState)
@@ -46,70 +47,63 @@ struct GUIConfigurationView: View {
                     .foregroundColor(.red)
                     .padding()
                 
-            } else if selection != nil {
-                ProgressView("Loading \(selection!)...")
-                
             } else {
-                ProgressView("Finding model to load...")
+                ProgressView("Loading \(appState.selectedModel ?? "model")...")
             }
         }
-        .task(id: selection) {
+        .task(id: appState.selectedModel) {
             await MainActor.run {
                 loadedModel = nil
                 errorMessage = nil
             }
 
-            if let modelName = selection {
+            if let modelName = appState.selectedModel {
+                CallCSharpCallback("LoadModel:\(modelName)")
                 await loadModel(named: modelName)
-            }
-        }
-        .onAppear {
-            loadModelList()
-            if let firstModelName = models.first?.primaryModel {
-                self.selection = firstModelName
-                appState.selectedModel = firstModelName 
             } else {
-                self.errorMessage = "No models found to load."
+                self.errorMessage = "No model was selected from the Home screen."
             }
         }
         .toolbar {
             ToolbarItem(placement: .bottomOrnament) {
-                VStack {
+                VStack(spacing: 12) {
                     HStack {
-                        Button("right") {
-                        CallCSharpCallback("TriggerRight")
-                            print("Right button tapped")
+                        Button("Left") {
+                            sideSelection = .left 
+                            print("Left side selected")
                         }
+                        .glassBackgroundEffect(
+                            in: .rect(cornerRadius: 10),
+                            displayMode: sideSelection == .left ? .highlight : .normal
+                        )
                         
-                        Button("left") {
-                        CallCSharpCallback("TriggerLeft")
-                            print("Left button tapped")
+                        Button("Right") {
+                            sideSelection = .right 
+                            print("Right side selected")
                         }
+                        .glassBackgroundEffect(
+                            in: .rect(cornerRadius: 10),
+                            displayMode: sideSelection == .right ? .highlight : .normal
+                        )
                     }
                     
-                    Button("continue") {
-                        CallCSharpCallback("TriggerImmersiveScene")
-                        print("Continue button tapped")
+                    Button("Continue") {
+                        if sideSelection == .left {
+                            appState.selectedSide = "Left"
+
+                            CallCSharpCallback("TriggerLeft")
+                            print("Continue tapped: Triggering Left")
+                        } else if sideSelection == .right {
+                            appState.selectedSide = "Right"
+                            
+                            CallCSharpCallback("TriggerRight")
+                            print("Continue tapped: Triggering Right")
+                        }
                     }
+                    .disabled(sideSelection == nil)
                 }
             }
         }
-    }
-    
-    func loadModelList() {
-        var groups = DummyFragmentData.caseGroups
-
-        if let urls = Bundle.main.urls(forResourcesWithExtension: "usdz", subdirectory: "Data/Raw") {
-            let filenames = urls.map { $0.lastPathComponent }
-            for fname in filenames {
-                let alreadyIncluded = groups.contains { $0.usdzModelNames.contains(fname) }
-                if !alreadyIncluded {
-                    groups.append(CaseGroup(usdzModelNames: [fname], name: fname, description: ""))
-                }
-            }
-        }
-
-        self.models = groups.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
     }
      
     func loadModel(named modelName: String) async {
