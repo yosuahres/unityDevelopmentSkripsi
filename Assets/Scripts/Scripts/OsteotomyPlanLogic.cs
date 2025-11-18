@@ -46,7 +46,15 @@ namespace Assets.Scripts.Scripts
                 {
                     fragment.transform.LookAt(mainCamera.transform, mainCamera.transform.up);
                 }
-                Debug.Log($"OsteotomyPlanLogic: Positioned '{fragment.name}' as child of VolumeCamera.");
+                
+                if (fragment.name.Contains("Left"))
+                {
+                    fragment.transform.Rotate(0, 90, 0, Space.Self);
+                }
+                else if (fragment.name.Contains("Right"))
+                {
+                    fragment.transform.Rotate(0, -90, 0, Space.Self);
+                }
             }
             else
             {
@@ -70,7 +78,15 @@ namespace Assets.Scripts.Scripts
                 {
                     fragment.transform.LookAt(mainCamera.transform, mainCamera.transform.up);
                 }
-                Debug.Log($"OsteotomyPlanLogic: Positioned '{fragment.name}' at {spawnPosition}.");
+
+                if (fragment.name.Contains("Left"))
+                {
+                    fragment.transform.Rotate(0, 90, 0, Space.Self);
+                }
+                else if (fragment.name.Contains("Right"))
+                {
+                    fragment.transform.Rotate(0, -90, 0, Space.Self);
+                }
             }
         }
 

@@ -71,7 +71,7 @@ struct ControlImmersiveView: View {
                     Spacer()
 
                     HStack{
-                        Button("Close") {
+                        Button("Return") {
                             CallCSharpCallback("TriggerHomeScene")
                         }
                         .font(.system(size: 80))

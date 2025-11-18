@@ -69,18 +69,26 @@ struct GUIConfigurationView: View {
                 VStack(spacing: 12) {
                     HStack {
                         Button("Left") {
-                            sideSelection = .left 
+                            sideSelection = .left
                             print("Left side selected")
                         }
+                        .font(.title2)
+                        .controlSize(.large)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 10)
                         .glassBackgroundEffect(
                             in: .rect(cornerRadius: 10),
                             displayMode: sideSelection == .left ? .always : .implicit
                         )
                         
                         Button("Right") {
-                            sideSelection = .right 
+                            sideSelection = .right
                             print("Right side selected")
                         }
+                        .font(.title2)
+                        .controlSize(.large)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 10)
                         .glassBackgroundEffect(
                             in: .rect(cornerRadius: 10),
                             displayMode: sideSelection == .right ? .always : .implicit
@@ -100,6 +108,10 @@ struct GUIConfigurationView: View {
                             print("Continue tapped: Triggering Right")
                         }
                     }
+                    .font(.title)
+                    .controlSize(.large)
+                    .padding(.horizontal, 30)
+                    .padding(.vertical, 15)
                     .disabled(sideSelection == nil)
                 }
             }
