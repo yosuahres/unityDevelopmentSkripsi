@@ -14,7 +14,7 @@ public static class Fragmenter
     /// Generates the mesh fragments based on the provided options. The generated fragment objects are
     /// stored as children of `fragmentParent`
     /// </summary>
-    /// <param name="sourceObject">The source object to fragment. This object must have a MeshFilter, a RigidBody and a Collider.</param>
+    /// <param name="sourceObject">The source object to fragment. This object must have a MeshFilter and a Collider.</param>
     /// <param name="options">Options for the fragmenter</param>
     /// <param name="fragmentTemplate">The template GameObject that each fragment will clone</param>
     /// <param name="parent">The parent transform for the fragment objects</param>
@@ -91,11 +91,8 @@ public static class Fragmenter
                                             Transform parent,
                                             Action onCompletion)
     {
-        // Define our source mesh data for the fracturing
         FragmentData sourceMesh = new FragmentData(sourceObject.GetComponent<MeshFilter>().sharedMesh);
  
-        // We begin by fragmenting the source mesh, then process each fragment in a FIFO queue
-        // until we achieve the target fragment count.
         var fragments = new Queue<FragmentData>();
         fragments.Enqueue(sourceMesh);
 
@@ -121,7 +118,6 @@ public static class Fragmenter
                              out topSlice,
                              out bottomSlice);
 
-            // Perform next slice on the next frame
             yield return null;
 
             fragments.Enqueue(topSlice);
@@ -148,7 +144,7 @@ public static class Fragmenter
     /// Generates the mesh fragments based on the provided options. The generated fragment objects are
     /// stored as children of `fragmentParent`
     /// </summary>
-    /// <param name="sourceObject">The source object to slice. This object must have a MeshFilter, a RigidBody and a Collider.</param>
+    /// <param name="sourceObject">The source object to slice. This object must have a MeshFilter and a Collider.</param>
     /// <param name="sliceNormal">The normal of the cut plane in the local frame of sourceObject.</param>
     /// <param name="sliceOrigin">The origin of the cut plane in the local frame of sourceObject.</param>
     /// <param name="options">Options for the slicer</param>
@@ -217,7 +213,6 @@ public static class Fragmenter
                                        bool detectFloatingFragments,
                                        ref int i)
     {
-        // If there is no mesh data, don't create an object
         if (fragmentMeshData.Triangles.Length == 0)
         {
             return null;
@@ -226,9 +221,6 @@ public static class Fragmenter
         Mesh[] meshes;
         Mesh fragmentMesh = fragmentMeshData.ToMesh();
 
-        // If the "Detect Floating Fragments" option is enabled, take the fragment mesh and
-        // identify disconnected sets of geometry within it, treating each of these as a
-        // separate physical object
         if (detectFloatingFragments)
         {
             meshes = MeshUtils.FindDisconnectedMeshes(fragmentMesh);
@@ -237,9 +229,6 @@ public static class Fragmenter
         {
             meshes = new Mesh[] { fragmentMesh };
         }
-
-        var parentSize = sourceObject.GetComponent<MeshFilter>().sharedMesh.bounds.size;
-        var parentMass = sourceObject.GetComponent<Rigidbody>().mass;
 
         GameObject fragment = null;
 
@@ -253,26 +242,23 @@ public static class Fragmenter
 
             meshes[k].name = System.Guid.NewGuid().ToString();
 
-            // Update mesh to the new sliced mesh
             var meshFilter = fragment.GetComponent<MeshFilter>();
             meshFilter.sharedMesh = meshes[k];
 
-            var collider = fragment.GetComponent<MeshCollider>();
+            var collider = fragment.GetComponent<BoxCollider>();
 
-            // If fragment collisions are disabled, collider will be null
-            collider.sharedMesh = meshes[k];
-            collider.convex = true;
-            collider.sharedMaterial = fragment.GetComponent<Collider>().sharedMaterial;
-
-            // Compute mass of the sliced object by dividing mesh bounds by density
-            var parentRigidBody = sourceObject.GetComponent<Rigidbody>();
-            var rigidBody = fragment.GetComponent<Rigidbody>();
-
-            var size = fragmentMesh.bounds.size;
-            float density = (parentSize.x * parentSize.y * parentSize.z) / parentMass;
-            rigidBody.mass = (size.x * size.y * size.z) / density;
+            if (collider != null)
+            {
+                collider.center = meshes[k].bounds.center;
+                collider.size = meshes[k].bounds.size;
+                
+                var existingCollider = sourceObject.GetComponent<Collider>();
+                if (existingCollider != null)
+                {
+                    collider.sharedMaterial = existingCollider.sharedMaterial;
+                }
+            }
             
-            // This code only compiles for the editor
             #if UNITY_EDITOR
             if (saveToDisk)
             {

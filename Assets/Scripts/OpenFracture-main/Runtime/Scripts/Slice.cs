@@ -1,19 +1,12 @@
 // Slice.cs
 using UnityEngine;
 using UnityEngine.Events;
-using System; // <-- Make sure this is present
+using System; 
 
-[RequireComponent(typeof(MeshFilter))]
-[RequireComponent(typeof(MeshRenderer))]
 public class Slice : MonoBehaviour
 {
     public SliceOptions sliceOptions;
     public CallbackOptions callbackOptions;
-
-    /// <summary>
-    /// Callback that returns the two new fragments created by the slice.
-    /// GameObject 1: Fragment A, GameObject 2: Fragment B
-    /// </summary>
     public Action<GameObject, GameObject> OnSliceFinished;
 
     private int currentSliceCount;
@@ -41,20 +34,17 @@ public class Slice : MonoBehaviour
             var sliceNormalLocal = this.transform.InverseTransformDirection(sliceNormalWorld);
             var sliceOriginLocal = this.transform.InverseTransformPoint(sliceOriginWorld);
 
-            // --- THIS NOW WORKS ---
             GameObject[] fragments = Fragmenter.Slice(this.gameObject,
                                      sliceNormalLocal,
                                      sliceOriginLocal,
                                      this.sliceOptions,
                                      sliceTemplate,
                                      this.transform.parent); 
-            // --- --- ---
                     
             GameObject.Destroy(sliceTemplate);
 
-            this.gameObject.SetActive(false); // Disable the original object
+            this.gameObject.SetActive(false); 
 
-            // --- Invoke our custom action ---
             if (fragments != null && fragments.Length >= 2)
             {
                 OnSliceFinished?.Invoke(fragments[0], fragments[1]);
@@ -68,7 +58,6 @@ public class Slice : MonoBehaviour
             {
                 Debug.LogError("Fragmenter.Slice did not return any fragments.");
             }
-            // --- --- ---
 
             if (callbackOptions.onCompleted != null)
             {
@@ -92,10 +81,13 @@ public class Slice : MonoBehaviour
         };
 
         var thisCollider = this.GetComponent<Collider>();
-        var fragmentCollider = obj.AddComponent<MeshCollider>();
-        fragmentCollider.convex = true;
-        fragmentCollider.sharedMaterial = thisCollider.sharedMaterial;
-        fragmentCollider.isTrigger = thisCollider.isTrigger;
+        var fragmentCollider = obj.AddComponent<BoxCollider>();
+        
+        if (thisCollider != null)
+        {
+            fragmentCollider.sharedMaterial = thisCollider.sharedMaterial;
+            fragmentCollider.isTrigger = thisCollider.isTrigger;
+        }
     
         if (this.sliceOptions.enableReslicing &&
            (this.currentSliceCount < this.sliceOptions.maxResliceCount))

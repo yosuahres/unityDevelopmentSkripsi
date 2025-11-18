@@ -2,9 +2,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-[RequireComponent(typeof(MeshFilter))]
-[RequireComponent(typeof(MeshRenderer))]
-[RequireComponent(typeof(Rigidbody))]
 public class Fracture : MonoBehaviour
 {
     public TriggerOptions triggerOptions;
@@ -219,8 +216,12 @@ public class Fracture : MonoBehaviour
 
         // Copy collider properties to fragment
         var thisCollider = this.GetComponent<Collider>();
-        var fragmentCollider = obj.AddComponent<MeshCollider>();
-        fragmentCollider.convex = true;
+        
+        // --- CHANGED TO BOX COLLIDER ---
+        var fragmentCollider = obj.AddComponent<BoxCollider>();
+        // fragmentCollider.convex = true; // Not needed for BoxCollider
+        // -------------------------------
+
         fragmentCollider.sharedMaterial = thisCollider.sharedMaterial;
         fragmentCollider.isTrigger = thisCollider.isTrigger;
 

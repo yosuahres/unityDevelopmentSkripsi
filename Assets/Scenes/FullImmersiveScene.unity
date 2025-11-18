@@ -351,7 +351,6 @@ GameObject:
   - component: {fileID: 424541897}
   - component: {fileID: 424541899}
   - component: {fileID: 424541898}
-  - component: {fileID: 424541900}
   m_Layer: 0
   m_Name: ScriptManager
   m_TagString: Untagged
@@ -454,19 +453,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6e8306a98f30f421696c3bece4482a38, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GestureInput
---- !u!114 &424541900
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 424541892}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 97727ff55f60d48258fd1797acd6ffc9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CSGManager
-  <MandibleModel>k__BackingField: {fileID: 0}
 --- !u!1 &1252617236
 GameObject:
   m_ObjectHideFlags: 0

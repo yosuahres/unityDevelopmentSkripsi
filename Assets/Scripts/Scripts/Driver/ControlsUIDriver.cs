@@ -50,19 +50,6 @@ namespace Assets.Scripts.Scripts
 
                 var self = FindFirstObjectByType<ControlsUIDriver>();
 
-                if (!string.IsNullOrEmpty(command) && command.StartsWith("LoadModel:")) {
-                    var modelName = command.Substring("LoadModel:".Length);
-                    if (!string.IsNullOrEmpty(modelName)) {
-                        var opl = UnityEngine.Object.FindObjectOfType<OsteotomyPlanLogic>();
-                        if (opl != null) {
-                            opl.LoadModelByName(modelName);
-                        } else {
-                            Debug.LogWarning($"OsteotomyPlanLogic not found to load model '{modelName}'");
-                        }
-                    }
-                    return;
-                }
-
                 // list command from swift sided
 
                 if (command == "TriggerSliceModel")

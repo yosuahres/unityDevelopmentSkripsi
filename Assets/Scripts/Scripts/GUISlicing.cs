@@ -1,4 +1,3 @@
-// GUISlicing.cs
 using System.Collections;
 using System.IO;
 using UnityEngine;
@@ -9,9 +8,10 @@ namespace Assets.Scripts.Scripts
 {
     public class GUISlicing : MonoBehaviour
     {
+        public Material sliceCapMaterial;
+
         public GameObject loadedInstance; 
 
-        [Header("Slice Results")]
         public GameObject leftFragment;
         public GameObject rightFragment;
         
@@ -35,37 +35,26 @@ namespace Assets.Scripts.Scripts
             loadedInstance = Instantiate(prefab);
             Debug.Log($"GUISlicing: Successfully instantiated '{prefab.name}'.");
 
-            yield return StartCoroutine(SetupComponents(loadedInstance));
-            
+            AddRequiredComponents(loadedInstance);
             yield return StartCoroutine(SliceModelAtCenter(loadedInstance));
-            
-            Debug.Log($"GUISlicing: Model setup and slicing complete for '{loadedInstance.name}'.");
-        }
-
-        private IEnumerator SetupComponents(GameObject modelInstance)
-        {
-            AddRequiredComponents(modelInstance);
-            yield return new WaitForEndOfFrame();
-            AddRequiredComponents(modelInstance);
-            
-            Debug.Log($"GUISlicing: Components successfully added to '{modelInstance.name}'.");
+            Debug.Log($"GUISlicing: Model setup and slicing coroutine complete for '{loadedInstance.name}'.");
         }
 
         private IEnumerator SliceModelAtCenter(GameObject modelInstance)
         {
             yield return new WaitForEndOfFrame();
-
             Slice sliceComponent = modelInstance.GetComponent<Slice>();
-            if (sliceComponent != null)
+            MeshRenderer renderer = modelInstance.GetComponent<MeshRenderer>();
+
+            try
             {
                 Vector3 sliceNormal = modelInstance.transform.right;
-                Vector3 sliceOrigin = modelInstance.GetComponent<MeshRenderer>().bounds.center;
+                Vector3 sliceOrigin = renderer.bounds.center;
 
                 sliceComponent.OnSliceFinished = (fragA, fragB) =>
                 {
                     if (fragA == null || fragB == null)
                     {
-                        Debug.LogError("Slice event did not return two fragments.");
                         return;
                     }
 
@@ -84,39 +73,60 @@ namespace Assets.Scripts.Scripts
 
                     leftFragment.name = $"{modelInstance.name}_Left";
                     rightFragment.name = $"{modelInstance.name}_Right";
-                    
-                    Debug.Log($"GUISlicing: Captured fragments. Left: {leftFragment.name}, Right: {rightFragment.name}");
                 };
                 
                 sliceComponent.SliceAtCenter(sliceNormal);
-                Debug.Log($"GUISlicing: Model slice initiated at center for '{modelInstance.name}'.");
             }
-            else
+            catch (System.Exception e)
             {
-                Debug.LogError($"GUISlicing: Could not find Slice component on '{modelInstance.name}'! Slicing failed.");
+                Debug.LogError($"Exception: {e.Message}");
+                Debug.LogException(e);
             }
         }
 
         private void AddRequiredComponents(GameObject modelInstance)
         {
             if (modelInstance == null) return;
+            
             if (modelInstance.GetComponent<MeshFilter>() == null)
                 modelInstance.AddComponent<MeshFilter>();
-            if (modelInstance.GetComponent<MeshRenderer>() == null)
-                modelInstance.AddComponent<MeshRenderer>();
-            MeshCollider collider = modelInstance.GetComponent<MeshCollider>();
+            
+            MeshRenderer renderer = modelInstance.GetComponent<MeshRenderer>();
+            if (renderer == null)
+                renderer = modelInstance.AddComponent<MeshRenderer>();
+            
+            if (renderer.sharedMaterial == null)
+            {
+                renderer.sharedMaterial = sliceCapMaterial; 
+            }
+
+            BoxCollider collider = modelInstance.GetComponent<BoxCollider>();
             if (collider == null)
-                collider = modelInstance.AddComponent<MeshCollider>();
-            collider.convex = false;  
-            if (modelInstance.GetComponent<Slice>() == null)
-                modelInstance.AddComponent<Slice>();
+                collider = modelInstance.AddComponent<BoxCollider>();
+            
+            Slice sliceComponent = modelInstance.GetComponent<Slice>();
+            if (sliceComponent == null)
+                sliceComponent = modelInstance.AddComponent<Slice>();
+
+            if (sliceComponent.sliceOptions == null)
+            {
+                sliceComponent.sliceOptions = new SliceOptions();
+                sliceComponent.sliceOptions.detectFloatingFragments = false; 
+            }
+            
+            if (sliceCapMaterial == null)
+            {
+                return;
+            }
+
+            sliceComponent.sliceOptions.insideMaterial = sliceCapMaterial; 
         }
 
         public GameObject GetRightFragment()
         {
             if (rightFragment == null)
             {
-                Debug.LogWarning("GetRightFragment() was called, but rightFragment is null.");
+                Debug.LogWarning("RightFragment is null.");
             }
             return rightFragment;
         }
@@ -125,7 +135,7 @@ namespace Assets.Scripts.Scripts
         {
             if (leftFragment == null)
             {
-                Debug.LogWarning("GetLeftFragment() was called, but leftFragment is null.");
+                Debug.LogWarning("LeftFragment is null.");
             }
             return leftFragment;
         }

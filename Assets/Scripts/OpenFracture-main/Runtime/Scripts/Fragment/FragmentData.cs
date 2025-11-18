@@ -108,15 +108,36 @@ public class FragmentData
         this.Constraints = new List<EdgeConstraint>();
         this.IndexMap = new int[positions.Length];
 
+        // --- FIX START: Safety Check for Missing Attributes ---
+        // Many meshes (ProBuilder, generated, etc.) might lack normals or UVs.
+        // We check if the arrays exist and match the vertex count.
+        bool hasNormals = (normals != null && normals.Length == positions.Length);
+        bool hasUVs = (uv != null && uv.Length == positions.Length);
+        // --- FIX END ---
+
         // Add mesh vertices
         for (int i = 0; i < positions.Length; i++)
         {
-            this.Vertices.Add(new MeshVertex(positions[i], normals[i], uv[i]));
+            // Safe retrieval of normal and uv
+            Vector3 safeNormal = hasNormals ? normals[i] : Vector3.up;
+            Vector2 safeUV = hasUVs ? uv[i] : Vector2.zero;
+
+            this.Vertices.Add(new MeshVertex(positions[i], safeNormal, safeUV));
         }
 
-        // Only meshes with one submesh are currently supported
+        // Only meshes with one submesh are currently supported for the main body,
+        // but we prep the structure for the CutFace (index 1)
         this.Triangles = new List<int>[2];
-        this.Triangles[0] = new List<int>(mesh.GetTriangles(0));
+        
+        // Safety check for submeshes
+        if (mesh.subMeshCount > 0)
+        {
+            this.Triangles[0] = new List<int>(mesh.GetTriangles(0));
+        }
+        else
+        {
+             this.Triangles[0] = new List<int>();
+        }
         
         if (mesh.subMeshCount >= 2)
         {
@@ -124,7 +145,9 @@ public class FragmentData
         }
         else
         {
-            this.Triangles[1] = new List<int>(mesh.triangles.Length / 10);
+            // If no second submesh exists, we estimate size for the cut faces
+            int estimatedCutTris = (mesh.triangles.Length > 0) ? mesh.triangles.Length / 10 : 0;
+            this.Triangles[1] = new List<int>(estimatedCutTris);
         }
 
         this.CalculateBounds();
@@ -136,7 +159,6 @@ public class FragmentData
     /// <param name="position">The vertex position</param>
     /// <param name="normal">The vertex normal</param>
     /// <param name="uv">The vertex UV coordinates</param>
-    /// <returns>Returns the index of the vertex in the cutVertices array</returns>
     public void AddCutFaceVertex(Vector3 position, Vector3 normal, Vector2 uv)
     {
         var vertex = new MeshVertex(position, normal, uv);

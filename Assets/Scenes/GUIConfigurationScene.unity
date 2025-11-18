@@ -132,7 +132,6 @@ GameObject:
   - component: {fileID: 1044491206}
   - component: {fileID: 1044491209}
   - component: {fileID: 1044491210}
-  - component: {fileID: 1044491211}
   m_Layer: 0
   m_Name: ScriptManager
   m_TagString: Untagged
@@ -207,21 +206,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3d9b40b2520114a65a780af1f8805a3c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Scripts.Scripts.GUISlicing
+  sliceCapMaterial: {fileID: 2100000, guid: 640e991031a388c40903ba589de8d2df, type: 2}
   loadedInstance: {fileID: 0}
   leftFragment: {fileID: 0}
   rightFragment: {fileID: 0}
---- !u!114 &1044491211
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1044491204}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a69ca111644964878a39d9b4c4f54bca, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DataManager
 --- !u!1001 &1672792159
 PrefabInstance:
   m_ObjectHideFlags: 0

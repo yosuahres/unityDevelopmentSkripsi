@@ -74,7 +74,7 @@ struct GUIConfigurationView: View {
                         }
                         .glassBackgroundEffect(
                             in: .rect(cornerRadius: 10),
-                            displayMode: sideSelection == .left ? .highlight : .normal
+                            displayMode: sideSelection == .left ? .always : .implicit
                         )
                         
                         Button("Right") {
@@ -83,7 +83,7 @@ struct GUIConfigurationView: View {
                         }
                         .glassBackgroundEffect(
                             in: .rect(cornerRadius: 10),
-                            displayMode: sideSelection == .right ? .highlight : .normal
+                            displayMode: sideSelection == .right ? .always : .implicit
                         )
                     }
                     

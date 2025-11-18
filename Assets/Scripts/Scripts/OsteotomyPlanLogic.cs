@@ -85,13 +85,11 @@ namespace Assets.Scripts.Scripts
         {
             if (modelInstance == null) return;
 
-            MeshCollider collider = modelInstance.GetComponent<MeshCollider>();
+            BoxCollider collider = modelInstance.GetComponent<BoxCollider>();
             if (collider == null)
             {
-                collider = modelInstance.AddComponent<MeshCollider>();
+                collider = modelInstance.AddComponent<BoxCollider>();
             }
-            
-            collider.convex = true;  
             Debug.Log($"OsteotomyPlanLogic: Set convex mesh collider on '{modelInstance.name}'.");
         }
     }
