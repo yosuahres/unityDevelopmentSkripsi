@@ -441,6 +441,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TouchInput
   planeFragmentPrefab: {fileID: 1593688726762680407, guid: 5fe7aa6209fc24128806f474b9b23467, type: 3}
+  rulerPrefab: {fileID: 1100098469447799450, guid: 70f1f525725da46c79f443807a7cc298, type: 3}
 --- !u!114 &424541899
 MonoBehaviour:
   m_ObjectHideFlags: 0

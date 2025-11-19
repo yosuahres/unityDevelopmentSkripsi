@@ -13,8 +13,16 @@ using System.Collections.Generic;
 
 public class TouchInput : MonoBehaviour {
     public GameObject planeFragmentPrefab;
+    public GameObject rulerPrefab;
 
     public static List<GameObject> currentCuttingPlanes { get; private set; } = new List<GameObject>();
+    private List<GameObject> activeRulers = new List<GameObject>();
+
+    private static TouchInput instance;
+    void Awake()
+    {
+        instance = this;
+    }
 
     void OnEnable()
     {
@@ -23,7 +31,20 @@ public class TouchInput : MonoBehaviour {
 
     public static void ClearPlaneList()
     {
+        foreach (var plane in currentCuttingPlanes)
+        {
+            Destroy(plane);
+        }
         currentCuttingPlanes.Clear();
+        
+        if (instance != null)
+        {
+            foreach (var ruler in instance.activeRulers)
+            {
+                Destroy(ruler);
+            }
+            instance.activeRulers.Clear();
+        }
     }
 
     void Update()
@@ -81,6 +102,34 @@ public class TouchInput : MonoBehaviour {
             GameObject spawnedPlane = Instantiate(planeFragmentPrefab, position, rotation);
             currentCuttingPlanes.Add(spawnedPlane);
             Debug.Log($"TouchInput: Spawned new plane ({currentCuttingPlanes.Count} total) at {position}");
+
+            if (currentCuttingPlanes.Count >= 2)
+            {
+                if (rulerPrefab != null)
+                {
+                    Transform p1 = currentCuttingPlanes[currentCuttingPlanes.Count - 2].transform;
+                    Transform p2 = currentCuttingPlanes[currentCuttingPlanes.Count - 1].transform;
+
+                    Vector3 rulerPosition = (p1.position + p2.position) / 2f;
+                    Quaternion rulerRotation = Quaternion.identity; 
+                    GameObject newRuler = Instantiate(rulerPrefab, rulerPosition, rulerRotation);
+                    activeRulers.Add(newRuler);
+
+                    RulerVisualizer rulerVisualizer = newRuler.GetComponent<RulerVisualizer>();
+                    if (rulerVisualizer != null)
+                    {
+                        rulerVisualizer.SetPoints(p1, p2);
+                    }
+                    else
+                    {
+                        Debug.LogWarning("TouchInput: RulerPrefab does not have a RulerVisualizer component.");
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning("TouchInput: rulerPrefab is not assigned. Cannot spawn ruler.");
+                }
+            }
         }
         else
         {
