@@ -426,7 +426,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Scripts.Scripts.OsteotomyPlanLogic
   modelScale: {x: 0.001, y: 0.001, z: 0.001}
-  spawnDistance: 1.1
+  spawnDistance: 0
   spawnHeight: 1.5
 --- !u!114 &424541898
 MonoBehaviour:

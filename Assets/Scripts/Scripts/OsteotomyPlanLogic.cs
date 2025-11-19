@@ -26,6 +26,12 @@ namespace Assets.Scripts.Scripts
             Debug.Log($"OsteotomyPlanLogic: Successfully retrieved fragment '{m_LoadedFragment.name}'.");
 
             PositionFragment(m_LoadedFragment);
+            
+            if (m_LoadedFragment.GetComponent<TouchableObject>() == null)
+            {
+                m_LoadedFragment.AddComponent<TouchableObject>();
+                Debug.Log($"OsteotomyPlanLogic: Added TouchableObject component to '{m_LoadedFragment.name}'.");
+            }
 
             StartCoroutine(SetupColliderTwice(m_LoadedFragment));
             m_LoadedFragment.SetActive(true);
@@ -106,7 +112,7 @@ namespace Assets.Scripts.Scripts
             {
                 collider = modelInstance.AddComponent<BoxCollider>();
             }
-            Debug.Log($"OsteotomyPlanLogic: Set convex mesh collider on '{modelInstance.name}'.");
+            Debug.Log($"OsteotomyPlanLogic: Set Box Collider on '{modelInstance.name}'.");
         }
     }
 }
