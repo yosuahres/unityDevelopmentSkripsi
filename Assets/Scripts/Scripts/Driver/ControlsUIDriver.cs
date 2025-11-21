@@ -54,7 +54,16 @@ namespace Assets.Scripts.Scripts
 
                 if (command == "TriggerSliceModel")
                 {
-                    
+                    var osteotomyPlanLogic = FindFirstObjectByType<OsteotomyPlanLogic>();
+                    if (osteotomyPlanLogic != null)
+                    {
+                        osteotomyPlanLogic.PerformOsteotomySlice();
+                        Debug.Log("TriggerSliceModel: Calling PerformOsteotomySlice.");
+                    }
+                    else
+                    {
+                        Debug.LogWarning("TriggerSliceModel: OsteotomyPlanLogic instance not found in scene.");
+                    }
                 }
 
                 if (command == "TriggerHomeScene")

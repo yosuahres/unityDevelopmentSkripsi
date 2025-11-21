@@ -9,6 +9,8 @@ enum SideSelection {
 
 struct GUIConfigurationView: View {
     
+    // @Environment(\.dismiss) var dismiss
+    
     @State private var loadedModel: ModelEntity? = nil
     @State private var errorMessage: String? = nil
     @State private var sideSelection: SideSelection? = nil
@@ -65,6 +67,17 @@ struct GUIConfigurationView: View {
             }
         }
         .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button {
+                    CallCSharpCallback("TriggerHomeScene")
+                    // dismiss()
+                } label: {
+                    Label("Return to Home", systemImage: "chevron.left")
+                        .labelStyle(.iconOnly)
+                }
+            }
+        }
+        .toolbar {
             ToolbarItem(placement: .bottomOrnament) {
                 VStack(spacing: 12) {
                     HStack {
@@ -99,12 +112,14 @@ struct GUIConfigurationView: View {
                         if sideSelection == .left {
                             appState.selectedSide = "Left"
 
-                            CallCSharpCallback("TriggerLeft")
+                            //swapped because flipped gameobject in GUISlicing.cs
+                            // malas ngubah coooookkkkkkkkk
+                            CallCSharpCallback("TriggerRight")
                             print("Continue tapped: Triggering Left")
                         } else if sideSelection == .right {
                             appState.selectedSide = "Right"
                             
-                            CallCSharpCallback("TriggerRight")
+                            CallCSharpCallback("TriggerLeft")
                             print("Continue tapped: Triggering Right")
                         }
                     }

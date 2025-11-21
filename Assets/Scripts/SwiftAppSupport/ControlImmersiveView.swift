@@ -6,7 +6,6 @@ import PolySpatialRealityKit
 
 struct ControlImmersiveView: View {
 
-    @State private var isRulerVisible: Bool = true
     @ObservedObject var appState: AppState   
 
     init(appState: AppState = AppState.shared) {
@@ -24,9 +23,9 @@ struct ControlImmersiveView: View {
                         
                         if let side = appState.selectedSide {
                             
-                            Text("\(side) Fragment")
-                                .font(.title)
-                                .foregroundColor(.secondary)
+                            // Text("\(side) Fragment")
+                            //     .font(.title)
+                            //     .foregroundColor(.secondary)
                             
                             Text("Side: \(side)")
                                 .font(.title2)
@@ -39,7 +38,6 @@ struct ControlImmersiveView: View {
                 Spacer()
             }
 
-            // Centered controls (ruler + eye toggle)
             HStack {
                 VStack (alignment: .leading, spacing: 40) {
                     Spacer()
@@ -51,11 +49,11 @@ struct ControlImmersiveView: View {
                                 .font(.system(size: 80))
 
                             Button(action: {
-                                toggleRulerVisibility()
+                                appState.isRulerVisible.toggle()
                             }) {
-                                Image(systemName: isRulerVisible ? "eye.fill" : "eye.slash.fill")
+                                Image(systemName: appState.isRulerVisible ? "eye.fill" : "eye.slash.fill")
                                     .font(.system(size: 80))
-                                    .foregroundColor(isRulerVisible ? .green : .red)
+                                    .foregroundColor(appState.isRulerVisible ? .green : .red)
                             }
                         }
                         Spacer()
@@ -99,13 +97,4 @@ struct ControlImmersiveView: View {
     }
 
 
-    func setRulersVisibility(_ visible: Bool) {
-        isRulerVisible = visible
-    }
-
-    func toggleRulerVisibility() {
-        isRulerVisible.toggle()
-        setRulersVisibility(isRulerVisible)
-        
-    }
 }
