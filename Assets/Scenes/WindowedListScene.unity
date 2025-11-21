@@ -479,7 +479,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b0e24161653434389cbc153211c7545, type: 3}
   m_Name: 
   m_EditorClassIdentifier: PolySpatial.Samples::PolySpatial.Samples.VolumeCameraResizeListener
-  Mode: 0
+  Mode: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

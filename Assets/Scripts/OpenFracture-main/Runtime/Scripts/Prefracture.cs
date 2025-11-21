@@ -92,7 +92,8 @@ public class Prefracture : MonoBehaviour
 
         var thisCollider = this.GetComponent<Collider>();
         
-        var fragmentCollider = obj.AddComponent<BoxCollider>();
+        var fragmentCollider = obj.AddComponent<MeshCollider>();
+        fragmentCollider.convex = true;
         
         fragmentCollider.sharedMaterial = thisCollider.sharedMaterial;
         fragmentCollider.isTrigger = thisCollider.isTrigger;

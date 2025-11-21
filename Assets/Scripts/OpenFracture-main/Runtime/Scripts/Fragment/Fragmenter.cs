@@ -245,18 +245,10 @@ public static class Fragmenter
             var meshFilter = fragment.GetComponent<MeshFilter>();
             meshFilter.sharedMesh = meshes[k];
 
-            var collider = fragment.GetComponent<BoxCollider>();
-
+            var collider = fragment.GetComponent<MeshCollider>();
             if (collider != null)
             {
-                collider.center = meshes[k].bounds.center;
-                collider.size = meshes[k].bounds.size;
-                
-                var existingCollider = sourceObject.GetComponent<Collider>();
-                if (existingCollider != null)
-                {
-                    collider.sharedMaterial = existingCollider.sharedMaterial;
-                }
+                collider.convex = true;
             }
             
             #if UNITY_EDITOR

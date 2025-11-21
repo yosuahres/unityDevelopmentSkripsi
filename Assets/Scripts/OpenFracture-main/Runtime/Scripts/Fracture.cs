@@ -207,25 +207,20 @@ public class Fracture : MonoBehaviour
         // Update mesh to the new sliced mesh
         obj.AddComponent<MeshFilter>();
 
-        // Add materials. Normal material goes in slot 1, cut material in slot 2
         var meshRenderer = obj.AddComponent<MeshRenderer>();
         meshRenderer.sharedMaterials = new Material[2] {
             this.GetComponent<MeshRenderer>().sharedMaterial,
             this.fractureOptions.insideMaterial
         };
 
-        // Copy collider properties to fragment
         var thisCollider = this.GetComponent<Collider>();
         
-        // --- CHANGED TO BOX COLLIDER ---
-        var fragmentCollider = obj.AddComponent<BoxCollider>();
-        // fragmentCollider.convex = true; // Not needed for BoxCollider
-        // -------------------------------
+        var fragmentCollider = obj.AddComponent<MeshCollider>();
+        fragmentCollider.convex = true;
 
         fragmentCollider.sharedMaterial = thisCollider.sharedMaterial;
         fragmentCollider.isTrigger = thisCollider.isTrigger;
 
-        // Copy rigid body properties to fragment
         var thisRigidBody = this.GetComponent<Rigidbody>();
         var fragmentRigidBody = obj.AddComponent<Rigidbody>();
         fragmentRigidBody.linearVelocity = thisRigidBody.linearVelocity;

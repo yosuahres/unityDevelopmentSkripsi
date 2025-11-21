@@ -4,6 +4,7 @@ import SwiftUI
 import RealityKit
 import UnityFramework
 import PolySpatialRealityKit
+import UIKit 
 
 struct HomeView: View {
     
@@ -34,9 +35,15 @@ struct HomeView: View {
         NavigationSplitView {
             List(filteredCaseGroups, id: \.primaryModel, selection: $selection) { group in
                 HStack(spacing: 8) {
-                    Image("glyph")
-                        .resizable()
-                        .frame(width: 50, height: 50)
+                    if let image = loadImageFromDataRaw(named: "glyph") { 
+                        image
+                            .resizable()
+                            .frame(width: 50, height: 50)
+                    } else {
+                        EmptyView() 
+                            .frame(width: 50, height: 50)
+                    }
+                    
                     VStack(alignment: .leading) {
                         Text(group.name)
                             .lineLimit(1)
@@ -69,7 +76,6 @@ struct HomeView: View {
                         
                         let bounds = model.visualBounds(relativeTo: model)
                         if bounds.extents == .zero {
-                            print("WARNING: Model bounds are zero. Model may be empty.")
                             model.position = [0, 0, 0]
                         } else {
                             let maxDimension = max(bounds.extents.x, max(bounds.extents.y, bounds.extents.z))
@@ -124,6 +130,21 @@ struct HomeView: View {
         }
     }
     
+    func loadImageFromDataRaw(named assetName: String) -> Image? {
+        guard let imagesetPath = Bundle.main.path(forResource: assetName, ofType: "imageset", inDirectory: "Data/Raw") else {
+            return nil
+        }
+        
+        guard let imagesetBundle = Bundle(path: imagesetPath) else {
+            return nil
+        }
+
+        guard let uiImage = UIImage(named: assetName, in: imagesetBundle, compatibleWith: nil) else {
+            return nil
+        }
+        return Image(uiImage: uiImage)
+    }
+    
     func loadModelList() {
         var groups = DummyFragmentData.caseGroups
 
@@ -160,7 +181,6 @@ struct HomeView: View {
         } catch {
             await MainActor.run {
                 self.errorMessage = error.localizedDescription
-                print("Error loading model '\(modelName)': \(error.localizedDescription)")
             }
         }
     }

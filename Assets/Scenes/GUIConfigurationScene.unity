@@ -206,7 +206,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3d9b40b2520114a65a780af1f8805a3c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Scripts.Scripts.GUISlicing
-  sliceCapMaterial: {fileID: 2100000, guid: 640e991031a388c40903ba589de8d2df, type: 2}
+  sliceCapMaterial: {fileID: -3033667219593020291, guid: 47bbdf297579740118235cfeed1abbcc, type: 3}
   loadedInstance: {fileID: 0}
   leftFragment: {fileID: 0}
   rightFragment: {fileID: 0}
@@ -325,7 +325,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b0e24161653434389cbc153211c7545, type: 3}
   m_Name: 
   m_EditorClassIdentifier: PolySpatial.Samples::PolySpatial.Samples.VolumeCameraResizeListener
-  Mode: 0
+  Mode: 1
 --- !u!4 &1925732758
 Transform:
   m_ObjectHideFlags: 0

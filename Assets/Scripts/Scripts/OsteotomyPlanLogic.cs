@@ -33,16 +33,13 @@ namespace Assets.Scripts.Scripts
             Debug.Log($"OsteotomyPlanLogic: Successfully retrieved fragment '{m_LoadedFragment.name}'.");
 
             PositionFragment(m_LoadedFragment);
-            
-            if (m_LoadedFragment.GetComponent<TouchableObject>() == null)
-            {
-                m_LoadedFragment.AddComponent<TouchableObject>();
-                Debug.Log($"OsteotomyPlanLogic: Added TouchableObject component to '{m_LoadedFragment.name}'.");
-            }
 
-            StartCoroutine(SetupColliderTwice(m_LoadedFragment));
-            m_LoadedFragment.SetActive(true);
+            if (m_LoadedFragment.GetComponent<TouchableObject>() == null)
+                m_LoadedFragment.AddComponent<TouchableObject>();
+
+            StartCoroutine(SafeSetupCollider(m_LoadedFragment));
             
+            m_LoadedFragment.SetActive(true);
             m_ActiveFragments.Add(m_LoadedFragment); 
         }
 
@@ -56,72 +53,86 @@ namespace Assets.Scripts.Scripts
                 fragment.transform.SetParent(volumeCamera.transform, false); 
                 fragment.transform.localPosition = new Vector3(0, spawnHeight, spawnDistance); 
                 fragment.transform.localScale = modelScale;
-                
+
                 if (mainCamera != null)
-                {
                     fragment.transform.LookAt(mainCamera.transform, mainCamera.transform.up);
-                }
-                
+
                 if (fragment.name.Contains("Left"))
-                {
                     fragment.transform.Rotate(0, 90, 0, Space.Self);
-                }
                 else if (fragment.name.Contains("Right"))
-                {
                     fragment.transform.Rotate(0, -90, 0, Space.Self);
-                }
             }
             else
             {
-                Vector3 spawnPosition = Vector3.zero;
+                Vector3 spawnPosition;
                 if (mainCamera != null)
                 {
-                    Vector3 localSpawnOffset = new Vector3(0, spawnHeight, spawnDistance);
-                    spawnPosition = mainCamera.transform.TransformPoint(localSpawnOffset);
+                    Vector3 offset = new Vector3(0, spawnHeight, spawnDistance);
+                    spawnPosition = mainCamera.transform.TransformPoint(offset);
                 }
                 else
                 {
-                    Debug.LogWarning("Main Camera not found. Spawning at world origin + offset.");
                     spawnPosition = new Vector3(0, spawnHeight, spawnDistance);
                 }
 
                 fragment.transform.SetParent(null); 
                 fragment.transform.position = spawnPosition;
                 fragment.transform.localScale = modelScale;
-                
+
                 if (mainCamera != null)
-                {
                     fragment.transform.LookAt(mainCamera.transform, mainCamera.transform.up);
-                }
 
                 if (fragment.name.Contains("Left"))
-                {
                     fragment.transform.Rotate(0, 90, 0, Space.Self);
-                }
                 else if (fragment.name.Contains("Right"))
-                {
                     fragment.transform.Rotate(0, -90, 0, Space.Self);
-                }
             }
         }
 
-        private IEnumerator SetupColliderTwice(GameObject modelInstance)
+
+        private IEnumerator SafeSetupCollider(GameObject model)
         {
-            SetupModelCollider(modelInstance);
+            yield return StartCoroutine(ForceConvexMeshCollider(model));
             yield return new WaitForEndOfFrame();
-            SetupModelCollider(modelInstance);
+            yield return StartCoroutine(ForceConvexMeshCollider(model));
         }
-        
-        private void SetupModelCollider(GameObject modelInstance)
-        {
-            if (modelInstance == null) return;
 
-            BoxCollider collider = modelInstance.GetComponent<BoxCollider>();
-            if (collider == null)
+        private IEnumerator ForceConvexMeshCollider(GameObject model)
+        {
+            if (model == null) yield break;
+
+            MeshFilter mf = model.GetComponent<MeshFilter>();
+            while (mf == null || mf.sharedMesh == null)
             {
-                collider = modelInstance.AddComponent<BoxCollider>();
+                yield return null;
+                mf = model.GetComponent<MeshFilter>();
             }
-            Debug.Log($"OsteotomyPlanLogic: Set Box Collider on '{modelInstance.name}'.");
+
+            MeshCollider col = model.GetComponent<MeshCollider>();
+            if (col == null)
+                col = model.AddComponent<MeshCollider>();
+
+            const int attempts = 5;
+
+            for (int i = 0; i < attempts; i++)
+            {
+                col.sharedMesh = null;
+                yield return null;
+
+                col.sharedMesh = mf.sharedMesh;
+                col.convex = true;
+
+                if (col.sharedMesh != null && col.convex)
+                {
+                    Debug.Log($"OsteotomyPlanLogic: Convex MeshCollider OK after {i + 1} tries.");
+                    yield break;
+                }
+
+                Debug.LogWarning($"OsteotomyPlanLogic: Convex retry {i + 1} failed.");
+                yield return null;
+            }
+
+            Debug.LogError("OsteotomyPlanLogic: Convex MeshCollider FAILED after all retries.");
         }
 
         [UnityEngine.Scripting.Preserve]
@@ -141,159 +152,113 @@ namespace Assets.Scripts.Scripts
             }
 
             List<GameObject> currentSetOfFragments = new List<GameObject>(m_ActiveFragments);
-            
+
             foreach (GameObject plane in currentPlanes)
             {
-                List<GameObject> nextSetOfFragments = new List<GameObject>();
-                foreach (GameObject fragmentToSlice in currentSetOfFragments)
+                List<GameObject> nextSet = new List<GameObject>();
+                foreach (GameObject frag in currentSetOfFragments)
                 {
-                    if (fragmentToSlice == null || !fragmentToSlice.activeSelf) continue;
+                    if (frag == null || !frag.activeSelf) continue;
 
-                    Debug.Log($"OsteotomyPlanLogic: Slicing fragment '{fragmentToSlice.name}' with plane from TouchInput.");
-                    
-                    GameObject[] results = new GameObject[2];
-                    
-                    AddSliceComponents(fragmentToSlice, plane.transform.position, plane.transform.right, (fragA, fragB) =>
+                    Vector3 sliceOrigin = plane.transform.position;
+                    Vector3 sliceNormal = plane.transform.right;
+
+                    AddSliceComponents(frag, sliceOrigin, sliceNormal, (fragA, fragB) =>
                     {
-                        Vector3 sliceOrigin = plane.transform.position; 
-                        Vector3 sliceNormal = plane.transform.right; 
-
-                        GameObject keptFragment = null;
-
-                        MeshRenderer rendererA = fragA?.GetComponent<MeshRenderer>();
-                        MeshRenderer rendererB = fragB?.GetComponent<MeshRenderer>();
-
-                        if (fragA != null && rendererA != null)
-                        {
-                            Vector3 dirToA = rendererA.bounds.center - sliceOrigin;
-                            if (Vector3.Dot(dirToA, sliceNormal) > 0) 
-                            {
-                                keptFragment = fragA;
-                            }
-                        }
-                        
-                        if (keptFragment == null && fragB != null && rendererB != null)
-                        {
-                            Vector3 dirToB = rendererB.bounds.center - sliceOrigin;
-                            if (Vector3.Dot(dirToB, sliceNormal) > 0) 
-                            {
-                                keptFragment = fragB;
-                            }
-                        }
-
-                        if (fragA != null) nextSetOfFragments.Add(fragA);
-                        if (fragB != null) nextSetOfFragments.Add(fragB);
+                        if (fragA != null) nextSet.Add(fragA);
+                        if (fragB != null) nextSet.Add(fragB);
                     });
                 }
-                currentSetOfFragments = new List<GameObject>(nextSetOfFragments);
+                currentSetOfFragments = nextSet;
             }
+
             m_ActiveFragments = currentSetOfFragments;
 
-            if (m_ActiveFragments.Count > 0 && currentPlanes.Count > 1) 
+            if (m_ActiveFragments.Count > 0 && currentPlanes.Count > 1)
             {
-                float minPlaneX = float.MaxValue;
-                float maxPlaneX = float.MinValue;
+                float minX = float.MaxValue;
+                float maxX = float.MinValue;
+
                 foreach (GameObject plane in currentPlanes)
                 {
-                    minPlaneX = Mathf.Min(minPlaneX, plane.transform.position.x);
-                    maxPlaneX = Mathf.Max(maxPlaneX, plane.transform.position.x);
+                    minX = Mathf.Min(minX, plane.transform.position.x);
+                    maxX = Mathf.Max(maxX, plane.transform.position.x);
                 }
 
-                List<GameObject> finalKeptFragments = new List<GameObject>();
-                foreach (GameObject fragment in m_ActiveFragments)
+                List<GameObject> kept = new List<GameObject>();
+                foreach (GameObject frag in m_ActiveFragments)
                 {
-                    if (fragment == null) continue;
+                    if (frag == null) continue;
+                    MeshRenderer mr = frag.GetComponent<MeshRenderer>();
 
-                    MeshRenderer fragmentRenderer = fragment.GetComponent<MeshRenderer>();
-                    if (fragmentRenderer == null)
-                    {
-                        Debug.LogWarning($"OsteotomyPlanLogic: Fragment '{fragment.name}' has no MeshRenderer. Cannot determine bounds for filtering.");
-                        finalKeptFragments.Add(fragment); 
-                        continue;
-                    }
+                    if (mr == null) { kept.Add(frag); continue; }
 
-                    if (fragmentRenderer.bounds.center.x < minPlaneX || fragmentRenderer.bounds.center.x > maxPlaneX)
+                    float x = mr.bounds.center.x;
+
+                    if (x < minX || x > maxX)
                     {
-                        finalKeptFragments.Add(fragment);
-                        fragment.SetActive(true);
+                        kept.Add(frag);
+                        frag.SetActive(true);
                     }
                     else
                     {
-                        fragment.SetActive(false);
-                        Debug.Log($"OsteotomyPlanLogic: Deactivating fragment '{fragment.name}' (between planes).");
+                        frag.SetActive(false);
                     }
                 }
-                m_ActiveFragments = finalKeptFragments;
-            } else {
-                foreach (GameObject fragment in m_ActiveFragments)
-                {
-                    if (fragment != null) fragment.SetActive(true);
-                }
+
+                m_ActiveFragments = kept;
+            }
+            else
+            {
+                foreach (GameObject frag in m_ActiveFragments)
+                    if (frag != null) frag.SetActive(true);
             }
 
-            Debug.Log($"OsteotomyPlanLogic: Slicing complete. Total fragments remaining: {m_ActiveFragments.Count}");
             TouchInput.ClearPlaneList();
         }
 
-        private void AddSliceComponents(GameObject targetModel, Vector3 sliceOriginWorld, Vector3 sliceNormalWorld, System.Action<GameObject, GameObject> onSliceFinishedCallback)
+        private void AddSliceComponents(GameObject target, Vector3 sliceOriginWorld, Vector3 sliceNormalWorld, System.Action<GameObject, GameObject> onFinished)
         {
-            if (targetModel == null) return;
-            
-            if (targetModel.GetComponent<MeshFilter>() == null)
-                targetModel.AddComponent<MeshFilter>();
-            
-            MeshRenderer renderer = targetModel.GetComponent<MeshRenderer>();
-            if (renderer == null)
-                renderer = targetModel.AddComponent<MeshRenderer>();
-            
-            if (renderer.sharedMaterial == null)
-            {
-                renderer.sharedMaterial = osteotomySliceCapMaterial; 
-            }
+            if (target == null) return;
 
-            BoxCollider collider = targetModel.GetComponent<BoxCollider>();
-            if (collider == null)
-                collider = targetModel.AddComponent<BoxCollider>();
-            
-            Slice sliceComponent = targetModel.GetComponent<Slice>();
-            if (sliceComponent != null) 
-            {
-                Destroy(sliceComponent);
-            }
-            sliceComponent = targetModel.AddComponent<Slice>(); 
+            if (target.GetComponent<MeshFilter>() == null)
+                target.AddComponent<MeshFilter>();
+
+            MeshRenderer rend = target.GetComponent<MeshRenderer>();
+            if (rend == null)
+                rend = target.AddComponent<MeshRenderer>();
+
+            if (rend.sharedMaterial == null)
+                rend.sharedMaterial = osteotomySliceCapMaterial;
+
+            StartCoroutine(ForceConvexMeshCollider(target));
+
+            Slice slice = target.GetComponent<Slice>();
+            if (slice != null) Destroy(slice);
+            slice = target.AddComponent<Slice>();
+
             if (osteotomySliceOptions == null)
-            {
                 osteotomySliceOptions = new SliceOptions();
-                Debug.LogWarning("OsteotomyPlanLogic: osteotomySliceOptions was null, creating default.");
-            }
-            sliceComponent.sliceOptions = osteotomySliceOptions;
-            
-            if (osteotomySliceCapMaterial == null)
-            {
-                Debug.LogWarning("OsteotomyPlanLogic: osteotomySliceCapMaterial is not assigned. Slice cap will be default.");
-            }
-            sliceComponent.sliceOptions.insideMaterial = osteotomySliceCapMaterial; 
-            
-            if (osteotomyCallbackOptions == null)
-            {
-                osteotomyCallbackOptions = new CallbackOptions();
-                Debug.LogWarning("OsteotomyPlanLogic: osteotomyCallbackOptions was null, creating default.");
-            }
-            sliceComponent.callbackOptions = osteotomyCallbackOptions;
 
-            sliceComponent.OnSliceFinished = (fragA, fragB) =>
+            slice.sliceOptions = osteotomySliceOptions;
+            slice.sliceOptions.insideMaterial = osteotomySliceCapMaterial;
+
+            if (osteotomyCallbackOptions == null)
+                osteotomyCallbackOptions = new CallbackOptions();
+
+            slice.callbackOptions = osteotomyCallbackOptions;
+
+            slice.OnSliceFinished = (fragA, fragB) =>
             {
-                Debug.Log($"OsteotomyPlanLogic: Slice finished for '{targetModel.name}'. Fragments A: {(fragA != null ? fragA.name : "null")}, B: {(fragB != null ? fragB.name : "null")}");
-                
-                HandleNewFragment(fragA, targetModel.name + "_Ost_A");
-                HandleNewFragment(fragB, targetModel.name + "_Ost_B");
-                
-                onSliceFinishedCallback?.Invoke(fragA, fragB);
+                HandleNewFragment(fragA, target.name + "_A");
+                HandleNewFragment(fragB, target.name + "_B");
+                onFinished?.Invoke(fragA, fragB);
+
+                if (fragA != null || fragB != null)
+                    target.SetActive(false);
             };
-            
-            // Perform the slice
-            sliceComponent.ComputeSlice(sliceNormalWorld, sliceOriginWorld);
-            targetModel.SetActive(false); 
+
+            slice.ComputeSlice(sliceNormalWorld, sliceOriginWorld);
         }
 
         private void HandleNewFragment(GameObject fragment, string name)
@@ -301,18 +266,12 @@ namespace Assets.Scripts.Scripts
             if (fragment == null) return;
 
             fragment.name = name;
-            
+
             if (fragment.GetComponent<TouchableObject>() == null)
-            {
                 fragment.AddComponent<TouchableObject>();
-            }
-            
-            BoxCollider collider = fragment.GetComponent<BoxCollider>();
-            if (collider == null)
-            {
-                collider = fragment.AddComponent<BoxCollider>();
-            }
-            
+
+            StartCoroutine(ForceConvexMeshCollider(fragment));
+
             fragment.SetActive(true);
         }
     }

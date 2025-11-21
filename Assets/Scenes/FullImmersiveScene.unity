@@ -428,6 +428,22 @@ MonoBehaviour:
   modelScale: {x: 0.001, y: 0.001, z: 0.001}
   spawnDistance: 0
   spawnHeight: 1.5
+  osteotomySliceCapMaterial: {fileID: -3033667219593020291, guid: 47bbdf297579740118235cfeed1abbcc, type: 3}
+  osteotomySliceOptions:
+    enableReslicing: 0
+    maxResliceCount: 1
+    detectFloatingFragments: 0
+    insideMaterial: {fileID: 0}
+    textureScale: {x: 1, y: 1}
+    textureOffset: {x: 0, y: 0}
+    invokeCallbacks: 0
+  osteotomyCallbackOptions:
+    onFracture:
+      m_PersistentCalls:
+        m_Calls: []
+    onCompleted:
+      m_PersistentCalls:
+        m_Calls: []
 --- !u!114 &424541898
 MonoBehaviour:
   m_ObjectHideFlags: 0

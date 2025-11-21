@@ -8,9 +8,6 @@ enum SideSelection {
 }
 
 struct GUIConfigurationView: View {
-    
-    // @Environment(\.dismiss) var dismiss
-    
     @State private var loadedModel: ModelEntity? = nil
     @State private var errorMessage: String? = nil
     @State private var sideSelection: SideSelection? = nil
@@ -70,7 +67,6 @@ struct GUIConfigurationView: View {
             ToolbarItem(placement: .topBarLeading) {
                 Button {
                     CallCSharpCallback("TriggerHomeScene")
-                    // dismiss()
                 } label: {
                     Label("Return to Home", systemImage: "chevron.left")
                         .labelStyle(.iconOnly)
