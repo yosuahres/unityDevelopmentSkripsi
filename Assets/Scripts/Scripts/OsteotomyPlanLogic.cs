@@ -58,9 +58,9 @@ namespace Assets.Scripts.Scripts
                     fragment.transform.LookAt(mainCamera.transform, mainCamera.transform.up);
 
                 if (fragment.name.Contains("Left"))
-                    fragment.transform.Rotate(0, 90, 0, Space.Self);
+                    fragment.transform.Rotate(0, 90, -60, Space.Self);
                 else if (fragment.name.Contains("Right"))
-                    fragment.transform.Rotate(0, -90, 0, Space.Self);
+                    fragment.transform.Rotate(0, -90, 60, Space.Self);
             }
             else
             {
@@ -83,9 +83,9 @@ namespace Assets.Scripts.Scripts
                     fragment.transform.LookAt(mainCamera.transform, mainCamera.transform.up);
 
                 if (fragment.name.Contains("Left"))
-                    fragment.transform.Rotate(0, 90, 0, Space.Self);
+                    fragment.transform.Rotate(0, 90, -60, Space.Self);
                 else if (fragment.name.Contains("Right"))
-                    fragment.transform.Rotate(0, -90, 0, Space.Self);
+                    fragment.transform.Rotate(0, -90, 60, Space.Self);
             }
         }
 
@@ -161,7 +161,7 @@ namespace Assets.Scripts.Scripts
                     if (frag == null || !frag.activeSelf) continue;
 
                     Vector3 sliceOrigin = plane.transform.position;
-                    Vector3 sliceNormal = plane.transform.right;
+                    Vector3 sliceNormal = plane.transform.up;
 
                     AddSliceComponents(frag, sliceOrigin, sliceNormal, (fragA, fragB) =>
                     {
@@ -202,7 +202,7 @@ namespace Assets.Scripts.Scripts
                     }
                     else
                     {
-                        frag.SetActive(false);
+                        frag.SetActive(true);
                     }
                 }
 
@@ -266,6 +266,9 @@ namespace Assets.Scripts.Scripts
             if (fragment == null) return;
 
             fragment.name = name;
+
+            // --- MODIFICATION: Call PositionFragment to reset the new fragment's coordinates ---
+            PositionFragment(fragment);
 
             if (fragment.GetComponent<TouchableObject>() == null)
                 fragment.AddComponent<TouchableObject>();

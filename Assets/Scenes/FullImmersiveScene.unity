@@ -426,7 +426,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Scripts.Scripts.OsteotomyPlanLogic
   modelScale: {x: 0.001, y: 0.001, z: 0.001}
-  spawnDistance: 0
+  spawnDistance: 0.8
   spawnHeight: 1.5
   osteotomySliceCapMaterial: {fileID: -3033667219593020291, guid: 47bbdf297579740118235cfeed1abbcc, type: 3}
   osteotomySliceOptions:
