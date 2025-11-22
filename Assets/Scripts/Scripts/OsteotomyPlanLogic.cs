@@ -202,7 +202,7 @@ namespace Assets.Scripts.Scripts
                     }
                     else
                     {
-                        frag.SetActive(true);
+                        frag.SetActive(false);
                     }
                 }
 
