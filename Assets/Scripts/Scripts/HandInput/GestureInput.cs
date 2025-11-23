@@ -14,7 +14,7 @@ public class GestureInput : MonoBehaviour
     [SerializeField]
     private float rotationSpeed = 5f;
     
-    private const string ROTATION_ONLY_TAG = "Rotatable";
+    private const string ROTATION_ONLY_TAG = "ROTATEONLY";
 
     void OnEnable() 
     {

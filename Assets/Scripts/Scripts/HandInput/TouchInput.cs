@@ -12,6 +12,7 @@ using UnityEngine.InputSystem.LowLevel;
 using System.Collections.Generic; 
 
 public class TouchInput : MonoBehaviour {
+    public static readonly string SPAWNABLE_TAG = "SPAWNABLE";
     public GameObject planeFragmentPrefab;
     public GameObject rulerPrefab;
 
@@ -66,12 +67,12 @@ public class TouchInput : MonoBehaviour {
         SpatialPointerState touchData = EnhancedSpatialPointerSupport.GetPointerState(touch);
 
         if (touchData.targetObject != null && 
-        // if on physical device use SpatialPointerKind.Touch only
             (touchData.Kind == SpatialPointerKind.Touch || touchData.Kind == SpatialPointerKind.IndirectPinch))
         {
             ISpatialTouchable touchable = touchData.targetObject.GetComponent<ISpatialTouchable>();
+            bool isSpawnable = touchData.targetObject.CompareTag(SPAWNABLE_TAG);
 
-            if (touchable != null)
+            if (touchable != null && isSpawnable)
             {
                 Vector3 spawnPosition = touchData.interactionPosition;
                 Vector3 touchNormal = touchData.inputDeviceRotation * UnityEngine.Vector3.forward;
@@ -80,6 +81,10 @@ public class TouchInput : MonoBehaviour {
                 SpawnPlaneFragment(spawnPosition, spawnRotation);
 
                 touchable.OnSpatialTouch(spawnPosition, touchNormal);
+            }
+            else if (touchable != null && !isSpawnable)
+            {
+                Debug.Log($"TouchInput: Touched object '{touchData.targetObject.name}' is touchable but does not have the required '{SPAWNABLE_TAG}' tag. Plane spawn skipped.");
             }
             else
             {
