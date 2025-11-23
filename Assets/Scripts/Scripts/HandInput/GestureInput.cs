@@ -1,16 +1,20 @@
-//gestureinput.cs
 using UnityEngine;
 using Unity.PolySpatial.InputDevices;
 using UnityEngine.InputSystem.EnhancedTouch;
 using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 using TouchPhase = UnityEngine.InputSystem.TouchPhase;
 using UnityEngine.InputSystem.LowLevel;
-// using System.Numerics;
 
 public class GestureInput : MonoBehaviour
 {
     private GameObject selectedObject;
     private UnityEngine.Vector3 lastPosition;
+    private float lastTwoFingerAngle; 
+
+    [SerializeField]
+    private float rotationSpeed = 5f;
+    
+    private const string ROTATION_ONLY_TAG = "Rotatable";
 
     void OnEnable() 
     {
@@ -19,32 +23,62 @@ public class GestureInput : MonoBehaviour
 
     void Update()
     {
-        if (Touch.activeTouches.Count > 0)
+        if (Touch.activeTouches.Count == 1)
         {
-            foreach (var touch in Touch.activeTouches)
-            {
-                SpatialPointerState touchData = EnhancedSpatialPointerSupport.GetPointerState(touch);
+            var touch = Touch.activeTouches[0];
+            SpatialPointerState touchData = EnhancedSpatialPointerSupport.GetPointerState(touch);
 
-                if (touchData.targetObject != null && touchData.Kind != SpatialPointerKind.Touch)
+            if (touchData.targetObject != null && touchData.Kind != SpatialPointerKind.Touch)
+            {
+                if (touch.phase == TouchPhase.Began)
                 {
-                    if (touch.phase == TouchPhase.Began)
-                    {
-                        selectedObject = touchData.targetObject;
-                        lastPosition = touchData.interactionPosition;
-                    }
-                    else if (touch.phase == TouchPhase.Moved && selectedObject != null)
+                    selectedObject = touchData.targetObject;
+                    lastPosition = touchData.interactionPosition;
+                }
+                else if (touch.phase == TouchPhase.Moved && selectedObject != null)
+                {
+                    if (!selectedObject.CompareTag(ROTATION_ONLY_TAG)) 
                     {
                         UnityEngine.Vector3 deltaPosition = touchData.interactionPosition - lastPosition;
                         selectedObject.transform.position += deltaPosition;
-                        lastPosition = touchData.interactionPosition;
                     }
+                    lastPosition = touchData.interactionPosition;
                 }
             }
         }
         
-        if (Touch.activeTouches.Count == 0)
+        else if (Touch.activeTouches.Count == 2)
+        {
+            var touch1 = Touch.activeTouches[0];
+            var touch2 = Touch.activeTouches[1];
+
+            SpatialPointerState touchData1 = EnhancedSpatialPointerSupport.GetPointerState(touch1);
+            if (touchData1.targetObject != null && touchData1.Kind != SpatialPointerKind.Touch)
+            {
+                UnityEngine.Vector2 currentVector = touch2.screenPosition - touch1.screenPosition;
+                float currentAngle = Mathf.Atan2(currentVector.y, currentVector.x) * Mathf.Rad2Deg;
+
+                if (touch1.phase == TouchPhase.Began || touch2.phase == TouchPhase.Began)
+                {
+                    selectedObject = touchData1.targetObject;
+                    lastTwoFingerAngle = currentAngle;
+                }
+                else if ((touch1.phase == TouchPhase.Moved || touch2.phase == TouchPhase.Moved) && selectedObject != null)
+                {
+                    float deltaAngle = Mathf.DeltaAngle(lastTwoFingerAngle, currentAngle);
+                    selectedObject.transform.Rotate(UnityEngine.Vector3.up, -deltaAngle * rotationSpeed, Space.World);
+                    lastTwoFingerAngle = currentAngle;
+                }
+            }
+        }
+        else
         {
             selectedObject = null;
-        }   
+        }
+    }
+
+    void OnDisable()
+    {
+        EnhancedTouchSupport.Disable();
     }
 }

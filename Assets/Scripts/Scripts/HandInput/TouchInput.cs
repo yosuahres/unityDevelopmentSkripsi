@@ -66,6 +66,7 @@ public class TouchInput : MonoBehaviour {
         SpatialPointerState touchData = EnhancedSpatialPointerSupport.GetPointerState(touch);
 
         if (touchData.targetObject != null && 
+        // if on physical device use SpatialPointerKind.Touch only
             (touchData.Kind == SpatialPointerKind.Touch || touchData.Kind == SpatialPointerKind.IndirectPinch))
         {
             ISpatialTouchable touchable = touchData.targetObject.GetComponent<ISpatialTouchable>();
