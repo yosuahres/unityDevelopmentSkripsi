@@ -8,7 +8,8 @@ namespace Assets.Scripts.Scripts
     public class OsteotomyPlanLogic : MonoBehaviour
     {
         [Header("Model Setup")]
-        public Vector3 modelScale = new Vector3(0.001f, 0.001f, 0.001f);
+        public Vector3 fragmentModelScale = new Vector3(0.001f, 0.001f, 0.001f); 
+        public Vector3 wholeModelScale = new Vector3(0.01f, 0.01f, 0.01f); 
         public float spawnDistance = 2.0f;
         public float spawnHeight = 1.5f; 
 
@@ -18,29 +19,59 @@ namespace Assets.Scripts.Scripts
         public CallbackOptions osteotomyCallbackOptions; 
 
         private GameObject m_LoadedFragment;
+        private GameObject m_WholeModel; 
         private List<GameObject> m_ActiveFragments = new List<GameObject>();
 
         void Start()
         {
-            if (DataManager.Instance == null || DataManager.Instance.SelectedFragment == null)
+            if (DataManager.Instance == null)
             {
-                Debug.LogError("OsteotomyPlanLogic: DataManager or SelectedFragment not found! Cannot load model.");
+                Debug.LogError("OsteotomyPlanLogic: DataManager.Instance is null! Cannot load models.");
+                return;
+            }
+
+            if (DataManager.Instance.SelectedFragment == null)
+            {
+                Debug.LogError("OsteotomyPlanLogic: DataManager.Instance.SelectedFragment is null! Cannot load models.");
                 return;
             }
 
             m_LoadedFragment = DataManager.Instance.SelectedFragment;
-            DataManager.Instance.SelectedFragment = null;
+            DataManager.Instance.SelectedFragment = null; 
             Debug.Log($"OsteotomyPlanLogic: Successfully retrieved fragment '{m_LoadedFragment.name}'.");
 
-            PositionFragment(m_LoadedFragment);
+            string originalModelName = m_LoadedFragment.name.Replace("(Clone)", "").Replace("_Left", "").Replace("_Right", "");
+            var wholeModelPrefab = Resources.Load<GameObject>(originalModelName);
 
+            if (wholeModelPrefab != null)
+            {
+                m_WholeModel = Instantiate(wholeModelPrefab);
+                DontDestroyOnLoad(m_WholeModel); 
+                Debug.Log($"OsteotomyPlanLogic: Successfully loaded whole model '{m_WholeModel.name}' from Resources.");
+                if (m_WholeModel != null)
+                {
+                    Debug.Log($"OsteotomyPlanLogic: Whole Model has MeshFilter: {m_WholeModel.GetComponent<MeshFilter>() != null}");
+                    Debug.Log($"OsteotomyPlanLogic: Whole Model has MeshRenderer: {m_WholeModel.GetComponent<MeshRenderer>() != null}");
+                }
+            }
+            else
+            {
+                Debug.LogError($"OsteotomyPlanLogic: Could not find original model '{originalModelName}' in Resources to load whole model.");
+                return;
+            }
+
+            PositionFragment(m_LoadedFragment);
             if (m_LoadedFragment.GetComponent<TouchableObject>() == null)
                 m_LoadedFragment.AddComponent<TouchableObject>();
-
             StartCoroutine(SafeSetupCollider(m_LoadedFragment));
-            
             m_LoadedFragment.SetActive(true);
-            m_ActiveFragments.Add(m_LoadedFragment); 
+            m_ActiveFragments.Add(m_LoadedFragment);
+
+            PositionWholeModel(m_WholeModel, m_LoadedFragment.transform.position);
+            if (m_WholeModel.GetComponent<TouchableObject>() == null)
+                m_WholeModel.AddComponent<TouchableObject>();
+            StartCoroutine(SafeSetupCollider(m_WholeModel));
+            m_WholeModel.SetActive(true);
         }
 
         private void PositionFragment(GameObject fragment)
@@ -48,11 +79,9 @@ namespace Assets.Scripts.Scripts
             Camera mainCamera = Camera.main;
             var volumeCamera = Object.FindObjectOfType<VolumeCamera>();
 
-            if (volumeCamera != null)
-            {
                 fragment.transform.SetParent(volumeCamera.transform, false); 
                 fragment.transform.localPosition = new Vector3(0, spawnHeight, spawnDistance); 
-                fragment.transform.localScale = modelScale;
+                fragment.transform.localScale = fragmentModelScale;
 
                 if (mainCamera != null)
                     fragment.transform.LookAt(mainCamera.transform, mainCamera.transform.up);
@@ -62,32 +91,21 @@ namespace Assets.Scripts.Scripts
                 else if (fragment.name.Contains("Right"))
                     fragment.transform.Rotate(0, -90, 60, Space.Self);
             }
-            else
+
+            private void PositionWholeModel(GameObject wholeModel, Vector3 referencePosition)
             {
-                Vector3 spawnPosition;
-                if (mainCamera != null)
-                {
-                    Vector3 offset = new Vector3(0, spawnHeight, spawnDistance);
-                    spawnPosition = mainCamera.transform.TransformPoint(offset);
-                }
-                else
-                {
-                    spawnPosition = new Vector3(0, spawnHeight, spawnDistance);
-                }
+                Camera mainCamera = Camera.main;
+                var volumeCamera = Object.FindObjectOfType<VolumeCamera>();
 
-                fragment.transform.SetParent(null); 
-                fragment.transform.position = spawnPosition;
-                fragment.transform.localScale = modelScale;
+                wholeModel.transform.SetParent(volumeCamera.transform, false);
+
+                wholeModel.transform.localPosition = referencePosition + new Vector3(1, 0, 0); 
+                wholeModel.transform.localScale = wholeModelScale; 
+                Debug.Log($"OsteotomyPlanLogic: Whole model final position: {wholeModel.transform.localPosition}, final scale: {wholeModel.transform.localScale}");
 
                 if (mainCamera != null)
-                    fragment.transform.LookAt(mainCamera.transform, mainCamera.transform.up);
-
-                if (fragment.name.Contains("Left"))
-                    fragment.transform.Rotate(0, 90, -60, Space.Self);
-                else if (fragment.name.Contains("Right"))
-                    fragment.transform.Rotate(0, -90, 60, Space.Self);
+                    wholeModel.transform.LookAt(mainCamera.transform, mainCamera.transform.up);
             }
-        }
 
 
         private IEnumerator SafeSetupCollider(GameObject model)
@@ -267,7 +285,6 @@ namespace Assets.Scripts.Scripts
 
             fragment.name = name;
 
-            // --- MODIFICATION: Call PositionFragment to reset the new fragment's coordinates ---
             PositionFragment(fragment);
 
             if (fragment.GetComponent<TouchableObject>() == null)

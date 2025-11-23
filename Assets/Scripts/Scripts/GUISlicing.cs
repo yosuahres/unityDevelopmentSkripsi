@@ -13,10 +13,6 @@ namespace Assets.Scripts.Scripts
         public GameObject leftFragment;
         public GameObject rightFragment;
 
-        // -----------------------------
-        // PUBLIC API
-        // -----------------------------
-        
         public void LoadModelByName(string modelName)
         {
             string cleanName = Path.GetFileNameWithoutExtension(modelName);
@@ -36,6 +32,14 @@ namespace Assets.Scripts.Scripts
         {
             loadedInstance = Instantiate(prefab);
             Debug.Log($"GUISlicing: Instantiated '{prefab.name}'.");
+            DontDestroyOnLoad(loadedInstance); 
+            Debug.Log($"GUISlicing: Called DontDestroyOnLoad for '{loadedInstance.name}'.");
+
+            if (DataManager.Instance != null)
+            {
+                DataManager.Instance.WholeModel = loadedInstance;
+                Debug.Log($"GUISlicing: Set DataManager.Instance.WholeModel to '{loadedInstance.name}'.");
+            }
 
             yield return StartCoroutine(AddRequiredComponents(loadedInstance));
             yield return StartCoroutine(ForceConvexMeshCollider(loadedInstance));
@@ -44,15 +48,10 @@ namespace Assets.Scripts.Scripts
             Debug.Log($"GUISlicing: Model ready and sliced.");
         }
 
-        // -----------------------------
-        // MESH COLLIDER FIX (Main Issue)
-        // -----------------------------
-
         private IEnumerator ForceConvexMeshCollider(GameObject model)
         {
             MeshFilter mf = model.GetComponent<MeshFilter>();
 
-            // Wait until Unity finishes loading mesh
             while (mf == null || mf.sharedMesh == null)
             {
                 yield return null;
@@ -86,10 +85,6 @@ namespace Assets.Scripts.Scripts
             Debug.LogError("Convex MeshCollider FAILED after all retries.");
         }
 
-        // -----------------------------
-        // COMPONENT SETUP
-        // -----------------------------
-
         private IEnumerator AddRequiredComponents(GameObject modelInstance)
         {
             if (modelInstance == null) yield break;
@@ -117,13 +112,8 @@ namespace Assets.Scripts.Scripts
             if (sliceCapMaterial != null)
                 slice.sliceOptions.insideMaterial = sliceCapMaterial;
 
-            // wait a frame to ensure materials/components stabilize
             yield return null;
         }
-
-        // -----------------------------
-        // SLICING
-        // -----------------------------
 
         private IEnumerator SliceModelAtCenter(GameObject modelInstance)
         {
@@ -159,10 +149,6 @@ namespace Assets.Scripts.Scripts
 
             sliceComponent.SliceAtCenter(sliceNormal);
         }
-
-        // -----------------------------
-        // GETTERS
-        // -----------------------------
 
         public GameObject GetRightFragment()
         {

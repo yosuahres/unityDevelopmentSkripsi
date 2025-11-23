@@ -5,6 +5,7 @@ public class DataManager : MonoBehaviour
     public static DataManager Instance { get; private set; }
     
     public GameObject SelectedFragment { get; set; }
+    public GameObject WholeModel { get; set; }
 
     private void Awake()
     {

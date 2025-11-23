@@ -84,7 +84,8 @@ namespace Assets.Scripts.Scripts
                         if (slicer.loadedInstance != null) Destroy(slicer.loadedInstance);
                     }
 
-                    Debug.Log("GUIDriver: Stored Right Fragment. Loading immersive scene.");
+                    Debug.Log("GUIDriver: Stored Right Fragment in DataManager. Loading immersive scene.");
+                    Destroy(slicer.gameObject); // Destroy the slicer object before loading the new scene
                     self.TriggerImmersiveScene();
                 }
                 
@@ -101,7 +102,8 @@ namespace Assets.Scripts.Scripts
                         if (slicer.loadedInstance != null) Destroy(slicer.loadedInstance);
                     }
 
-                    Debug.Log("GUIDriver: Stored Left Fragment. Loading immersive scene.");
+                    Debug.Log("GUIDriver: Stored Left Fragment in DataManager. Loading immersive scene.");
+                    Destroy(slicer.gameObject); // Destroy the slicer object before loading the new scene
                     self.TriggerImmersiveScene();
                 }
 

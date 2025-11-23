@@ -11,14 +11,14 @@ struct CaseGroup: Identifiable, Hashable {
 struct DummyFragmentData {
     static let caseGroups: [CaseGroup] = [
         CaseGroup(
-            usdzModelNames: ["CATALUNYA-mandibula.usdz"],
-            name: "Case 1 Tabrakan",
-            description: "Kasus Tabrakan"
-        ),
-        CaseGroup(
             usdzModelNames: ["CHARIS-mandibula.usdz"],
             name: "Case 2 Tumor",
             description: "Kasus Tumor"
+        ),
+        CaseGroup(
+            usdzModelNames: ["CATALUNYA-mandibula.usdz"],
+            name: "Case 1 Tabrakan",
+            description: "Kasus Tabrakan"
         ),
     ]
 }
