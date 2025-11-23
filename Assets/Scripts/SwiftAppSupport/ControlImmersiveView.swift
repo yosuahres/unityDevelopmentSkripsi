@@ -1,4 +1,3 @@
-//mark 4 november
 import SwiftUI
 import RealityKit
 import UnityFramework
@@ -41,29 +40,42 @@ struct ControlImmersiveView: View {
             HStack {
                 VStack (alignment: .leading, spacing: 40) {
                     Spacer()
-                    HStack {
-                        Spacer()
-
-                        HStack(spacing: 40) {
-                            Image(systemName: "ruler.fill")
-                                .font(.system(size: 80))
-
-                            Button(action: {
-                                appState.isRulerVisible.toggle()
-                            }) {
-                                Image(systemName: appState.isRulerVisible ? "eye.fill" : "eye.slash.fill")
+                    VStack(spacing: 40) { 
+                        HStack {
+                            Spacer() 
+                            HStack(spacing: 40) {
+                                Image(systemName: "ruler.fill")
                                     .font(.system(size: 80))
-                                    .foregroundColor(appState.isRulerVisible ? .green : .red)
+
+                                Button(action: {
+                                    appState.isRulerVisible.toggle()
+                                }) {
+                                    Image(systemName: appState.isRulerVisible ? "eye.fill" : "eye.slash.fill")
+                                        .font(.system(size: 80))
+                                        .foregroundColor(appState.isRulerVisible ? .green : .red)
+                                }
                             }
-                        }
-                        Spacer()
-
-                        HStack(spacing:40) {
-                            //toggle
+                            Spacer()
                         }
 
+                        HStack {
+                            Spacer() 
+                            HStack(spacing: 40) {
+                                Image(systemName: "heart.fill")
+                                    .font(.system(size: 80))
+
+                                Button(action: {
+                                }) {
+                                    Image(systemName: appState.isRulerVisible ? "eye.fill" : "eye.slash.fill")
+                                        .font(.system(size: 80))
+                                        .foregroundColor(appState.isRulerVisible ? .green : .red)
+                                }
+                            }
+                            Spacer()
+                        }
 
                     }
+                    
                     Spacer()
                     .padding(.horizontal)
                     Spacer()
@@ -95,6 +107,4 @@ struct ControlImmersiveView: View {
             }
         }
     }
-
-
 }

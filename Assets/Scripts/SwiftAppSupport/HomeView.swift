@@ -2,7 +2,7 @@
 //mark 1 november
 import SwiftUI
 import RealityKit
-import UnityFramework
+import UnityFramework 
 import PolySpatialRealityKit
 import UIKit 
 
@@ -10,8 +10,6 @@ struct HomeView: View {
     
     @State private var models: [CaseGroup] = []
     @State private var selection: String? = nil
-    @State private var loadedModel: ModelEntity? = nil
-    @State private var errorMessage: String? = nil
     @State private var searchText: String = ""
     @ObservedObject var appState: AppState   
 
@@ -68,48 +66,28 @@ struct HomeView: View {
             
         } detail: {
             VStack {
-                if let model = self.loadedModel {
-                    RealityView { content in
-                        let root = Entity()
-                        root.addChild(model)
-                        content.add(root)
-                        
-                        let bounds = model.visualBounds(relativeTo: model)
-                        if bounds.extents == .zero {
-                            model.position = [0, 0, 0]
-                        } else {
-                            let maxDimension = max(bounds.extents.x, max(bounds.extents.y, bounds.extents.z))
-                            let targetSize: Float = 0.5
-                            let scale = targetSize / maxDimension
-                            
-                            model.scale = [scale, scale, scale]
-                            model.position = -bounds.center * scale
+                if let modelName = selection {
+                    if let resourceRoot = Bundle.main.resourceURL,
+                       let url = URL(string: "Data/Raw/\(modelName)", relativeTo: resourceRoot) {
+                        Model3D(url: url) { model in
+                            model
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .scaleEffect(0.5) 
+                                .offset(y: -50)  
+                        } placeholder: {
+                            ProgressView("Loading \(modelName)...")
                         }
                         
-                        root.position = [0, 0, -0.75]
+                    } else {
+                        Text("Error: Could not find or access model file: \(modelName)")
+                            .foregroundColor(.red)
+                            .padding()
                     }
-                    
-                } else if let errorMessage = self.errorMessage {
-                    Text("Error loading model: \(errorMessage)")
-                        .foregroundColor(.red)
-                        .padding()
-                    
-                } else if selection != nil {
-                    ProgressView("Loading \(selection!)...")
                     
                 } else {
                     Text("No Object Selected")
                         .foregroundColor(.secondary)
-                }
-            }
-            .task(id: selection) {
-                await MainActor.run {
-                    loadedModel = nil
-                    errorMessage = nil
-                }
-
-                if let modelName = selection {
-                    await loadModel(named: modelName)
                 }
             }
         }
@@ -159,29 +137,5 @@ struct HomeView: View {
         }
 
         self.models = groups.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
-    }
-     
-    func loadModel(named modelName: String) async {
-        do {
-            guard let resourceRoot = Bundle.main.resourceURL,
-                  let url = URL(string: "Data/Raw/\(modelName)", relativeTo: resourceRoot)
-            else {
-                throw URLError(.fileDoesNotExist, userInfo: [NSLocalizedDescriptionKey: "Could not find \(modelName) in Data/Raw."])
-            }
-            
-            guard FileManager.default.fileExists(atPath: url.path) else {
-                throw URLError(.fileDoesNotExist, userInfo: [NSLocalizedDescriptionKey: "\(modelName) not found at \(url.path)"])
-            }
-
-            let loadedEntity = try await ModelEntity.loadModel(contentsOf: url)
-
-            await MainActor.run {
-                self.loadedModel = loadedEntity
-            }
-        } catch {
-            await MainActor.run {
-                self.errorMessage = error.localizedDescription
-            }
-        }
     }
 }

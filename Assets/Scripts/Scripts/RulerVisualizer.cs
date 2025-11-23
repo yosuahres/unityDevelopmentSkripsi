@@ -11,9 +11,6 @@ public class RulerVisualizer : MonoBehaviour
 
     public float rulerWidth = 0.001f; 
     public Material lineMaterial; 
-    public GameObject tickMarkPrefab; 
-
-    private List<GameObject> tickMarks = new List<GameObject>();
     private float updateThreshold = 0.001f; 
     private float lastMeasuredDistance = -1f;
 
@@ -84,7 +81,6 @@ public class RulerVisualizer : MonoBehaviour
         {
             lineRenderer.enabled = false;
             textMeshPro.enabled = false;
-            ClearTickMarks();
             return;
         }
 
@@ -103,7 +99,6 @@ public class RulerVisualizer : MonoBehaviour
         {
             lastMeasuredDistance = currentDistance;
             UpdateMeasurementText(currentDistance);
-            GenerateTickMarks(p1Pos, p2Pos, currentDistance);
         }
     }
 
@@ -117,48 +112,8 @@ public class RulerVisualizer : MonoBehaviour
         textMeshPro.rectTransform.Rotate(0, 90, 0); 
     }
 
-    void GenerateTickMarks(Vector3 p1, Vector3 p2, float distance)
-    {
-        ClearTickMarks();
-
-        Vector3 direction = (p2 - p1).normalized;
-        float tickSpacing = 0.001f; 
-        
-        Quaternion tickRotation = Quaternion.LookRotation(direction);
-        tickRotation *= Quaternion.Euler(0, 90, 0); 
-
-        for (float d = tickSpacing; d < distance; d += tickSpacing)
-        {
-            Vector3 tickPosition = p1 + direction * d;
-            GameObject tick;
-
-            if (tickMarkPrefab != null)
-            {
-                tick = Instantiate(tickMarkPrefab, tickPosition, tickRotation, this.transform);
-            }
-            else
-            {
-                tick = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                tick.transform.SetParent(this.transform);
-                tick.transform.position = tickPosition;
-                tick.transform.rotation = tickRotation;
-            }
-            tick.transform.localScale = new Vector3(0.0005f, 0.002f, 0.0005f); 
-            tickMarks.Add(tick);
-        }
-    }
-
-    void ClearTickMarks()
-    {
-        foreach (GameObject tick in tickMarks)
-        {
-            Destroy(tick);
-        }
-        tickMarks.Clear();
-    }
-
     void OnDestroy()
     {
-        ClearTickMarks();
+        // No tick marks to clear
     }
 }
