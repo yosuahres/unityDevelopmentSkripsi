@@ -1,6 +1,6 @@
 import SwiftUI
 import RealityKit
-import UnityFramework
+import UnityFramework 
 import PolySpatialRealityKit
 
 enum SideSelection {
@@ -8,8 +8,6 @@ enum SideSelection {
 }
 
 struct GUIConfigurationView: View {
-    @State private var loadedModel: ModelEntity? = nil
-    @State private var errorMessage: String? = nil
     @State private var sideSelection: SideSelection? = nil
     @ObservedObject var appState: AppState
 
@@ -19,48 +17,36 @@ struct GUIConfigurationView: View {
     
     var body: some View {
         VStack {
-            if let model = self.loadedModel {
-                RealityView { content in
-                    let root = Entity()
-                    root.addChild(model)
-                    content.add(root)
+            if let modelName = appState.selectedModel {
+                
+                if let resourceRoot = Bundle.main.resourceURL,
+                   let url = URL(string: "Data/Raw/\(modelName)", relativeTo: resourceRoot) {
                     
-                    let bounds = model.visualBounds(relativeTo: model)
-                    if bounds.extents == .zero {
-                        print("WARNING: Model bounds are zero. Model may be empty.")
-                        model.position = [0, 0, 0]
-                    } else {
-                        let maxDimension = max(bounds.extents.x, max(bounds.extents.y, bounds.extents.z))
-                        let targetSize: Float = 0.5
-                        let scale = targetSize / maxDimension
-                        
-                        model.scale = [scale, scale, scale]
-                        model.position = -bounds.center * scale
+                    Model3D(url: url) { model in
+                        model
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .scaleEffect(0.5) 
+                            .offset(y: -50)  
+                    } placeholder: {
+                        ProgressView("Loading \(modelName)...")
                     }
                     
-                    root.position = [0, 0, -0.75]
+                } else {
+                    Text("Error: Could not find or access model file: \(modelName)")
+                        .foregroundColor(.red)
+                        .padding()
                 }
                 
-            } else if let errorMessage = self.errorMessage {
-                Text("Error loading model: \(errorMessage)")
-                    .foregroundColor(.red)
-                    .padding()
-                
             } else {
-                ProgressView("Loading \(appState.selectedModel ?? "model")...")
+                Text("No model was selected from the Home screen.")
+                    .foregroundColor(.secondary)
+                    .padding()
             }
         }
-        .task(id: appState.selectedModel) {
-            await MainActor.run {
-                loadedModel = nil
-                errorMessage = nil
-            }
-
+        .onAppear {
             if let modelName = appState.selectedModel {
                 CallCSharpCallback("LoadModel:\(modelName)")
-                await loadModel(named: modelName)
-            } else {
-                self.errorMessage = "No model was selected from the Home screen."
             }
         }
         .toolbar {
@@ -108,8 +94,7 @@ struct GUIConfigurationView: View {
                         if sideSelection == .left {
                             appState.selectedSide = "Left"
 
-                            //swapped because flipped gameobject in GUISlicing.cs
-                            // malas ngubah coooookkkkkkkkk
+                            // swapped because flipped gameobject in GUISlicing.cs
                             CallCSharpCallback("TriggerRight")
                             print("Continue tapped: Triggering Left")
                         } else if sideSelection == .right {
@@ -125,31 +110,6 @@ struct GUIConfigurationView: View {
                     .padding(.vertical, 15)
                     .disabled(sideSelection == nil)
                 }
-            }
-        }
-    }
-     
-    func loadModel(named modelName: String) async {
-        do {
-            guard let resourceRoot = Bundle.main.resourceURL,
-                  let url = URL(string: "Data/Raw/\(modelName)", relativeTo: resourceRoot)
-            else {
-                throw URLError(.fileDoesNotExist, userInfo: [NSLocalizedDescriptionKey: "Could not find \(modelName) in Data/Raw."])
-            }
-            
-            guard FileManager.default.fileExists(atPath: url.path) else {
-                throw URLError(.fileDoesNotExist, userInfo: [NSLocalizedDescriptionKey: "\(modelName) not found at \(url.path)"])
-            }
-
-            let loadedEntity = try await ModelEntity.loadModel(contentsOf: url)
-
-            await MainActor.run {
-                self.loadedModel = loadedEntity
-            }
-        } catch {
-            await MainActor.run {
-                self.errorMessage = error.localizedDescription
-                print("Error loading model '\(modelName)': \(error.localizedDescription)")
             }
         }
     }

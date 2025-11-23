@@ -99,7 +99,7 @@ namespace Assets.Scripts.Scripts
 
                 wholeModel.transform.SetParent(volumeCamera.transform, false);
 
-                wholeModel.transform.localPosition = referencePosition + new Vector3(1, 0, 0); 
+                wholeModel.transform.localPosition = referencePosition + new Vector3(0.5, 0, 0); 
                 wholeModel.transform.localScale = wholeModelScale; 
                 Debug.Log($"OsteotomyPlanLogic: Whole model final position: {wholeModel.transform.localPosition}, final scale: {wholeModel.transform.localScale}");
 
