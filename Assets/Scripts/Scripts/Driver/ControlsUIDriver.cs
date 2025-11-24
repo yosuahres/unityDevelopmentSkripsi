@@ -68,6 +68,13 @@ namespace Assets.Scripts.Scripts
                     DataManager.Instance.IsPositionLocked = (value == 1);
                     Debug.Log($"[ControlsUIDriver] Received command 'SetLockPosition' with value: {value}. IsPositionLocked set to: {DataManager.Instance.IsPositionLocked}");
                 }
+                else if (command == "SetPlaneScale")
+                {
+                    // Convert the integer value back to float (e.g., 20 -> 0.2, 50 -> 0.5)
+                    float planeScale = value / 100.0f;
+                    TouchInput.SetPlaneScale(planeScale);
+                    Debug.Log($"[ControlsUIDriver] Received command 'SetPlaneScale' with converted float value: {planeScale}");
+                }
 
             }
             catch (Exception e)

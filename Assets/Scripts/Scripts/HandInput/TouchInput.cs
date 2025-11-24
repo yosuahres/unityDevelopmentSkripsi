@@ -16,6 +16,10 @@ public class TouchInput : MonoBehaviour {
     public GameObject planeFragmentPrefab;
     public GameObject rulerPrefab;
 
+    public static float currentPlaneScale = 0.2f; // Initial plane scale
+    public static readonly float minPlaneScale = 0.2f;
+    public static readonly float maxPlaneScale = 0.5f;
+
     public static List<GameObject> currentCuttingPlanes { get; private set; } = new List<GameObject>();
     private List<GameObject> activeRulers = new List<GameObject>();
 
@@ -45,6 +49,18 @@ public class TouchInput : MonoBehaviour {
                 Destroy(ruler);
             }
             instance.activeRulers.Clear();
+        }
+    }
+
+    // This method can be called from Swift to set the plane scale
+    public static void SetPlaneScale(float scale)
+    {
+        currentPlaneScale = Mathf.Clamp(scale, minPlaneScale, maxPlaneScale);
+        Debug.Log($"TouchInput: Setting plane scale to {currentPlaneScale}");
+
+        foreach (var plane in currentCuttingPlanes)
+        {
+            plane.transform.localScale = new Vector3(currentPlaneScale, 0.0002f, currentPlaneScale);
         }
     }
 
@@ -107,7 +123,7 @@ public class TouchInput : MonoBehaviour {
         {
             GameObject spawnedPlane = Instantiate(planeFragmentPrefab, position, rotation);
             //planescale
-            spawnedPlane.transform.localScale = new Vector3(0.2f, 0.0002f, 0.2f); 
+            spawnedPlane.transform.localScale = new Vector3(currentPlaneScale, 0.0002f, currentPlaneScale); 
             currentCuttingPlanes.Add(spawnedPlane);
             Debug.Log($"TouchInput: Spawned new plane ({currentCuttingPlanes.Count} total) at {position}");
 

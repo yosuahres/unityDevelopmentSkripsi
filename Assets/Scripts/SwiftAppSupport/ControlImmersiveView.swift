@@ -6,7 +6,7 @@ import PolySpatialRealityKit
 struct ControlImmersiveView: View {
 
     @ObservedObject var appState: AppState
-    @State private var currentValue: Int = 50
+    @State private var currentPlaneValue: Float = 0.2 
 
     init(appState: AppState = AppState.shared) {
         _appState = ObservedObject(wrappedValue: appState)
@@ -104,24 +104,26 @@ struct ControlImmersiveView: View {
                                 .padding(.bottom, 30)
 
                                 Button(action: {
-                                    if currentValue > 0 {
-                                        currentValue -= 1
-                                    }
+                                    currentPlaneValue = max(0.2, currentPlaneValue - 0.05)
+                                    CallCSharpCallback("SetPlaneScale", Int32(currentPlaneValue * 100))
                                 }) {
                                     Image(systemName: "minus.circle.fill")
                                         .font(.system(size: 80))
                                 }
                                 .buttonStyle(.plain)
+                                .simultaneousGesture(LongPressGesture().onEnded { _ in
+                                    currentPlaneValue = 0.2
+                                    CallCSharpCallback("SetPlaneScale", Int32(currentPlaneValue * 100))
+                                })
 
-                                Text("\(currentValue)")
+                                Text(String(format: "%.3f", currentPlaneValue))
                                     .font(.system(size: 80, weight: .bold))
                                     .frame(minWidth: 100)
 
                                 // Plus button
                                 Button(action: {
-                                    if currentValue < 100 {
-                                        currentValue += 1
-                                    }
+                                    currentPlaneValue = min(0.5, currentPlaneValue + 0.05)
+                                    CallCSharpCallback("SetPlaneScale", Int32(currentPlaneValue * 100))
                                 }) {
                                     Image(systemName: "plus.circle.fill")
                                         .font(.system(size: 80))
