@@ -145,6 +145,8 @@ namespace Assets.Scripts.Scripts
 
                 leftFragment.name = $"{modelInstance.name}_Left";
                 rightFragment.name = $"{modelInstance.name}_Right";
+                leftFragment.tag = "SPAWNABLE";
+                rightFragment.tag = "SPAWNABLE";
             };
 
             sliceComponent.SliceAtCenter(sliceNormal);

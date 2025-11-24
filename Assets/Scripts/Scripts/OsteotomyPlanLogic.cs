@@ -47,6 +47,7 @@ namespace Assets.Scripts.Scripts
             {
                 m_WholeModel = Instantiate(wholeModelPrefab);
                 DontDestroyOnLoad(m_WholeModel); 
+                m_WholeModel.tag = "ROTATEONLY"; 
                 Debug.Log($"OsteotomyPlanLogic: Successfully loaded whole model '{m_WholeModel.name}' from Resources.");
                 if (m_WholeModel != null)
                 {
