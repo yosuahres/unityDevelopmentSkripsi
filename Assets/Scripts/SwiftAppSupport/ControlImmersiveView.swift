@@ -5,7 +5,7 @@ import PolySpatialRealityKit
 
 struct ControlImmersiveView: View {
 
-    @ObservedObject var appState: AppState   
+    @ObservedObject var appState: AppState
     @State private var currentValue: Int = 50
 
     init(appState: AppState = AppState.shared) {
@@ -20,18 +20,13 @@ struct ControlImmersiveView: View {
                     VStack(alignment: .trailing, spacing: 4) {
                         Text(appState.selectedModel ?? "No model selected")
                             .font(.extraLargeTitle2)
-                        
+
                         if let side = appState.selectedSide {
-                            
-                            // Text("\(side) Fragment")
-                            //     .font(.title)
-                            //     .foregroundColor(.secondary)
-                            
                             Text("Side: \(side)")
                                 .font(.title2)
                                 .foregroundColor(.secondary)
                         }
-                        
+
                     }
                     .padding(.horizontal)
                 }
@@ -41,9 +36,9 @@ struct ControlImmersiveView: View {
             HStack {
                 VStack (alignment: .leading, spacing: 40) {
                     Spacer()
-                    
-                    HStack(alignment: .top, spacing: 80) { 
-                        
+
+                    HStack(alignment: .top, spacing: 80) {
+
                         VStack(alignment: .leading, spacing: 60) {
                             HStack(spacing: 40) {
                                 Image(systemName: "ruler.fill")
@@ -63,7 +58,6 @@ struct ControlImmersiveView: View {
                                     .font(.system(size: 80))
 
                                 Button(action: {
-                                    // Placeholder action for square/rectangle visibility toggle
                                 }) {
                                     Image(systemName: appState.isRulerVisible ? "eye.fill" : "eye.slash.fill")
                                         .font(.system(size: 80))
@@ -71,10 +65,44 @@ struct ControlImmersiveView: View {
                                 }
                             }
                         }
-                        
+
                         // RIGHT COLUMN
                         VStack(alignment: .leading, spacing: 60) {
                             HStack(spacing: 20) {
+                                VStack(spacing: 30) { 
+                                    
+                                    // slice Button
+                                    Button("Slice") {
+                                        CallCSharpCallback("TriggerSliceModel")
+                                    }
+                                    .font(.system(size: 80))
+                                    .fontWeight(.bold)
+                                    .padding(30)
+                                    .buttonStyle(.borderedProminent)
+                                    .controlSize(.extraLarge)
+                                    .hoverEffect()
+
+                                    //lock position
+                                    HStack(spacing: 40) {
+                                        Image(systemName: appState.isLocked ? "lock.fill" : "lock.open.fill")
+                                            .font(.system(size: 60))
+                                            .foregroundColor(appState.isLocked ? .yellow : .blue)
+
+                                        Button(action: {
+                                            appState.isLocked.toggle()
+                                            print("appState.isLocked: \(appState.isLocked)")
+                                            CallCSharpCallback("SetLockPosition", appState.isLocked ? 1 : 0)
+                                        }) {
+                                            Text(appState.isLocked ? "Position Locked" : "Position Unlocked")
+                                                .font(.system(size: 40))
+                                                .padding(20)
+                                        }
+                                        .buttonStyle(.bordered)
+                                        .hoverEffect()
+                                    }
+                                }
+                                .padding(.bottom, 30)
+
                                 Button(action: {
                                     if currentValue > 0 {
                                         currentValue -= 1
@@ -88,9 +116,10 @@ struct ControlImmersiveView: View {
                                 Text("\(currentValue)")
                                     .font(.system(size: 80, weight: .bold))
                                     .frame(minWidth: 100)
-                                
+
+                                // Plus button
                                 Button(action: {
-                                    if currentValue < 100 { 
+                                    if currentValue < 100 {
                                         currentValue += 1
                                     }
                                 }) {
@@ -99,21 +128,13 @@ struct ControlImmersiveView: View {
                                 }
                                 .buttonStyle(.plain)
                             }
-                            
-                            Button("Slice") {
-                                CallCSharpCallback("TriggerSliceModel")
-                            }
-                            .font(.system(size: 80))
-                            .fontWeight(.bold)
-                            .padding(50)
-                            .buttonStyle(.borderedProminent)
-                            .controlSize(.extraLarge)
-                            .hoverEffect()
+
                         }
+
+                        Spacer()
                         
-                        Spacer() 
-                    } 
-                    
+                    }
+
                     Spacer()
                     .padding(.horizontal)
                     Spacer()
@@ -128,7 +149,7 @@ struct ControlImmersiveView: View {
                         .buttonStyle(.borderedProminent)
                         .controlSize(.extraLarge)
                         .hoverEffect()
-                        
+
                         Spacer()
                     }
                 }

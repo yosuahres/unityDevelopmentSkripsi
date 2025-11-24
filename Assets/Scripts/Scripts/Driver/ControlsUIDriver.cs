@@ -56,13 +56,17 @@ namespace Assets.Scripts.Scripts
                 {
                     var osteotomyPlanLogic = FindFirstObjectByType<OsteotomyPlanLogic>();
                     osteotomyPlanLogic.PerformOsteotomySlice();
-                    // Debug.Log("TriggerSliceModel: Calling PerformOsteotomySlice.");
 
                 }
 
                 if (command == "TriggerHomeScene")
                 {
                     self.TriggerHomeScene();
+                }
+                else if (command == "SetLockPosition")
+                {
+                    DataManager.Instance.IsPositionLocked = (value == 1);
+                    Debug.Log($"[ControlsUIDriver] Received command 'SetLockPosition' with value: {value}. IsPositionLocked set to: {DataManager.Instance.IsPositionLocked}");
                 }
 
             }

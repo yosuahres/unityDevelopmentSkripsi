@@ -37,8 +37,10 @@ namespace Assets.Scripts.Scripts
             }
 
             m_LoadedFragment = DataManager.Instance.SelectedFragment;
+            Debug.Log($"OsteotomyPlanLogic: Retrieved fragment '{m_LoadedFragment.name}'. Tag: '{m_LoadedFragment.tag}'");
+            
             DataManager.Instance.SelectedFragment = null; 
-            Debug.Log($"OsteotomyPlanLogic: Successfully retrieved fragment '{m_LoadedFragment.name}'.");
+            Debug.Log($"OsteotomyPlanLogic: DataManager.Instance.SelectedFragment cleared.");
 
             string originalModelName = m_LoadedFragment.name.Replace("(Clone)", "").Replace("_Left", "").Replace("_Right", "");
             var wholeModelPrefab = Resources.Load<GameObject>(originalModelName);
@@ -100,7 +102,7 @@ namespace Assets.Scripts.Scripts
 
                 wholeModel.transform.SetParent(volumeCamera.transform, false);
 
-                wholeModel.transform.localPosition = referencePosition + new Vector3(1.0f, 0f, 0f); 
+                wholeModel.transform.localPosition = referencePosition + new Vector3(1.0f, 1.0f, 0f); 
                 wholeModel.transform.localScale = wholeModelScale; 
                 Debug.Log($"OsteotomyPlanLogic: Whole model final position: {wholeModel.transform.localPosition}, final scale: {wholeModel.transform.localScale}");
 
@@ -181,6 +183,7 @@ namespace Assets.Scripts.Scripts
 
                     Vector3 sliceOrigin = plane.transform.position;
                     Vector3 sliceNormal = plane.transform.up;
+                    // Vector3 sliceNormal = plane.transform.forward;
 
                     AddSliceComponents(frag, sliceOrigin, sliceNormal, (fragA, fragB) =>
                     {

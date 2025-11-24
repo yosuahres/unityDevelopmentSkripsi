@@ -147,6 +147,8 @@ namespace Assets.Scripts.Scripts
                 rightFragment.name = $"{modelInstance.name}_Right";
                 leftFragment.tag = "SPAWNABLE";
                 rightFragment.tag = "SPAWNABLE";
+                Debug.Log($"GUISlicing: Tagged Left Fragment '{leftFragment.name}' as '{leftFragment.tag}'");
+                Debug.Log($"GUISlicing: Tagged Right Fragment '{rightFragment.name}' as '{rightFragment.tag}'");
             };
 
             sliceComponent.SliceAtCenter(sliceNormal);

@@ -6,6 +6,7 @@ public class DataManager : MonoBehaviour
     
     public GameObject SelectedFragment { get; set; }
     public GameObject WholeModel { get; set; }
+    public bool IsPositionLocked { get; set; } = false;
 
     private void Awake()
     {

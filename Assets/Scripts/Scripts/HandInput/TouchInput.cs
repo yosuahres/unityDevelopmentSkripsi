@@ -75,7 +75,7 @@ public class TouchInput : MonoBehaviour {
             if (touchable != null && isSpawnable)
             {
                 Vector3 spawnPosition = touchData.interactionPosition;
-                Vector3 touchNormal = touchData.inputDeviceRotation * UnityEngine.Vector3.forward;
+                Vector3 touchNormal = touchData.inputDeviceRotation * UnityEngine.Vector3.forward; 
                 Quaternion spawnRotation = Quaternion.FromToRotation(Vector3.up, touchNormal);
 
                 SpawnPlaneFragment(spawnPosition, spawnRotation);
@@ -106,6 +106,8 @@ public class TouchInput : MonoBehaviour {
         if (planeFragmentPrefab != null)
         {
             GameObject spawnedPlane = Instantiate(planeFragmentPrefab, position, rotation);
+            //planescale
+            spawnedPlane.transform.localScale = new Vector3(0.2f, 0.0002f, 0.2f); 
             currentCuttingPlanes.Add(spawnedPlane);
             Debug.Log($"TouchInput: Spawned new plane ({currentCuttingPlanes.Count} total) at {position}");
 

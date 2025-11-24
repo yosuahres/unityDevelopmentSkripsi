@@ -77,9 +77,11 @@ namespace Assets.Scripts.Scripts
                     if (rightFrag != null)
                     {
                         DataManager.Instance.SelectedFragment = rightFrag;
-                        
+                        rightFrag.tag = TouchInput.SPAWNABLE_TAG; // Ensure tag is set
+                        Debug.Log($"GUIDriver: SelectedFragment '{rightFrag.name}' tag set to '{rightFrag.tag}' before DontDestroyOnLoad.");
+
                         DontDestroyOnLoad(rightFrag);
-                        
+
                         if (slicer.GetLeftFragment() != null) Destroy(slicer.GetLeftFragment());
                         if (slicer.loadedInstance != null) Destroy(slicer.loadedInstance);
                     }
@@ -95,7 +97,9 @@ namespace Assets.Scripts.Scripts
                     if (leftFrag != null)
                     {
                         DataManager.Instance.SelectedFragment = leftFrag;
-                        
+                        leftFrag.tag = TouchInput.SPAWNABLE_TAG; // Ensure tag is set
+                        Debug.Log($"GUIDriver: SelectedFragment '{leftFrag.name}' tag set to '{leftFrag.tag}' before DontDestroyOnLoad.");
+
                         DontDestroyOnLoad(leftFrag);
 
                         if (slicer.GetRightFragment() != null) Destroy(slicer.GetRightFragment());

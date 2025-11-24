@@ -37,10 +37,15 @@ public class GestureInput : MonoBehaviour
                 }
                 else if (touch.phase == TouchPhase.Moved && selectedObject != null)
                 {
-                    if (!selectedObject.CompareTag(ROTATION_ONLY_TAG)) 
+                    if (!selectedObject.CompareTag(ROTATION_ONLY_TAG) && !DataManager.Instance.IsPositionLocked)
                     {
                         UnityEngine.Vector3 deltaPosition = touchData.interactionPosition - lastPosition;
                         selectedObject.transform.position += deltaPosition;
+                        Debug.Log($"[GestureInput] Object moved: {selectedObject.name}, New Position: {selectedObject.transform.position}");
+                    }
+                    else if (DataManager.Instance.IsPositionLocked)
+                    {
+                        Debug.Log($"[GestureInput] Object movement blocked for {selectedObject.name} because IsPositionLocked is true.");
                     }
                     lastPosition = touchData.interactionPosition;
                 }

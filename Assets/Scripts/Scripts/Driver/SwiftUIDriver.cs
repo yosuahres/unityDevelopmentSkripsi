@@ -16,9 +16,9 @@ namespace Assets.Scripts.Scripts
 {
     // This is a driver MonoBehaviour that connects to SwiftUISamplePlugin.swift via
     // C# DllImport. See SwiftUISamplePlugin.swift for more information.
-    public class SwiftUIDriver : MonoBehaviour
-    {
-        bool m_SwiftUIWindowOpen = false;
+        public class SwiftUIDriver : MonoBehaviour
+        {
+            bool m_SwiftUIWindowOpen = false;
 
         void OnEnable()
         {

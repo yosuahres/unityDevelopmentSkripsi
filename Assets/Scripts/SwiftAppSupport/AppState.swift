@@ -11,6 +11,7 @@ final class AppState: ObservableObject {
     
     @Published var selectedSide: String? = nil
     @Published var isRulerVisible: Bool = true
+    @Published var isLocked: Bool = false
 
     static let shared = AppState()
     private init() {}
