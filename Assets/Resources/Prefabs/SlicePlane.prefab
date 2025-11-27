@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 1145279530502370431}
   - component: {fileID: 1012924330798243819}
   - component: {fileID: 4617565085443562443}
-  m_Layer: 8
+  m_Layer: 0
   m_Name: SlicePlane
   m_TagString: Untagged
   m_Icon: {fileID: 0}

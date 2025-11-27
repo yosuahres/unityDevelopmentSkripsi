@@ -103,6 +103,8 @@ public class TouchInput : MonoBehaviour {
                 Vector3 touchNormal = touchData.inputDeviceRotation * UnityEngine.Vector3.forward; 
                 Quaternion spawnRotation = Quaternion.FromToRotation(Vector3.up, touchNormal);
 
+                spawnRotation *= Quaternion.Euler(0, 90f, 0); 
+
                 SpawnPlaneFragment(spawnPosition, spawnRotation);
 
                 touchable.OnSpatialTouch(spawnPosition, touchNormal);
