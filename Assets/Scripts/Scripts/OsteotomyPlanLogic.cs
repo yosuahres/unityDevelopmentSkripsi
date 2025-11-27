@@ -1,3 +1,4 @@
+//osteotomyplanlogic.cs
 using System.Collections;
 using System.Collections.Generic; 
 using UnityEngine;
@@ -7,6 +8,9 @@ namespace Assets.Scripts.Scripts
 {
     public class OsteotomyPlanLogic : MonoBehaviour
     {
+        // ⭐ NEW: Static flag to prevent further plane spawning after slicing.
+        public static bool HasPerformedSlice { get; private set; } = false;
+
         [Header("Model Setup")]
         public Vector3 fragmentModelScale = new Vector3(0.001f, 0.001f, 0.001f); 
         public Vector3 wholeModelScale = new Vector3(0.01f, 0.01f, 0.01f); 
@@ -24,6 +28,9 @@ namespace Assets.Scripts.Scripts
 
         void Start()
         {
+            // ⭐ RESET THE FLAG on scene start
+            HasPerformedSlice = false;
+            
             if (DataManager.Instance == null)
             {
                 Debug.LogError("OsteotomyPlanLogic: DataManager.Instance is null! Cannot load models.");
@@ -171,6 +178,10 @@ namespace Assets.Scripts.Scripts
                 Debug.LogWarning("OsteotomyPlanLogic: No cutting planes found in TouchInput.");
                 return;
             }
+            
+            // ⭐ LOCK PLANE SPAWNING
+            HasPerformedSlice = true; 
+            Debug.Log("OsteotomyPlanLogic: Slice performed. Plane spawning is now disabled.");
 
             List<GameObject> currentSetOfFragments = new List<GameObject>(m_ActiveFragments);
 

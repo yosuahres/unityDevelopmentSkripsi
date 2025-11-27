@@ -10,6 +10,8 @@ using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 using TouchPhase = UnityEngine.InputSystem.TouchPhase;
 using UnityEngine.InputSystem.LowLevel;
 using System.Collections.Generic; 
+// ⭐ NEW: Import namespace to access OsteotomyPlanLogic static flag
+using Assets.Scripts.Scripts; 
 
 public class TouchInput : MonoBehaviour {
     public static readonly string SPAWNABLE_TAG = "SPAWNABLE";
@@ -80,6 +82,13 @@ public class TouchInput : MonoBehaviour {
 
     private void HandleTouchBegan(Touch touch)
     {
+        // ⭐ NEW: Check if slicing has been performed before allowing plane spawn
+        if (OsteotomyPlanLogic.HasPerformedSlice)
+        {
+            Debug.Log("TouchInput: Slice has already been performed. Skipping plane spawn.");
+            return; 
+        }
+
         SpatialPointerState touchData = EnhancedSpatialPointerSupport.GetPointerState(touch);
 
         if (touchData.targetObject != null && 
