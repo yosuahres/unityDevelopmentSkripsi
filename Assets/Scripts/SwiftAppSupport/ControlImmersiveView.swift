@@ -46,6 +46,7 @@ struct ControlImmersiveView: View {
 
                                 Button(action: {
                                     appState.isRulerVisible.toggle()
+                                    CallCSharpCallback("SetRulerVisibility", appState.isRulerVisible ? 1 : 0)
                                 }) {
                                     Image(systemName: appState.isRulerVisible ? "eye.fill" : "eye.slash.fill")
                                         .font(.system(size: 80))
@@ -58,10 +59,12 @@ struct ControlImmersiveView: View {
                                     .font(.system(size: 80))
 
                                 Button(action: {
+                                    appState.isPlaneVisible.toggle()
+                                    CallCSharpCallback("SetPlaneVisibility", appState.isPlaneVisible ? 1 : 0)
                                 }) {
-                                    Image(systemName: appState.isRulerVisible ? "eye.fill" : "eye.slash.fill")
+                                    Image(systemName: appState.isPlaneVisible ? "eye.fill" : "eye.slash.fill")
                                         .font(.system(size: 80))
-                                        .foregroundColor(appState.isRulerVisible ? .green : .red)
+                                        .foregroundColor(appState.isPlaneVisible ? .green : .red)
                                 }
                             }
                         }

@@ -8,7 +8,6 @@ namespace Assets.Scripts.Scripts
 {
     public class OsteotomyPlanLogic : MonoBehaviour
     {
-        // ⭐ NEW: Static flag to prevent further plane spawning after slicing.
         public static bool HasPerformedSlice { get; private set; } = false;
 
         [Header("Model Setup")]
@@ -28,7 +27,6 @@ namespace Assets.Scripts.Scripts
 
         void Start()
         {
-            // ⭐ RESET THE FLAG on scene start
             HasPerformedSlice = false;
             
             if (DataManager.Instance == null)
@@ -179,7 +177,6 @@ namespace Assets.Scripts.Scripts
                 return;
             }
             
-            // ⭐ LOCK PLANE SPAWNING
             HasPerformedSlice = true; 
             Debug.Log("OsteotomyPlanLogic: Slice performed. Plane spawning is now disabled.");
 

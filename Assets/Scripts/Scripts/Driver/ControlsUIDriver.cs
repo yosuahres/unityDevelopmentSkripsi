@@ -75,6 +75,18 @@ namespace Assets.Scripts.Scripts
                     TouchInput.SetPlaneScale(planeScale);
                     Debug.Log($"[ControlsUIDriver] Received command 'SetPlaneScale' with converted float value: {planeScale}");
                 }
+                else if (command == "SetPlaneVisibility")
+                {
+                    bool isVisible = (value == 1);
+                    TouchInput.SetPlaneVisibility(isVisible);
+                    Debug.Log($"[ControlsUIDriver] Received command 'SetPlaneVisibility' with value: {value}. Planes visibility set to: {isVisible}");
+                }
+                else if (command == "SetRulerVisibility")
+                {
+                    bool isVisible = (value == 1);
+                    TouchInput.SetRulerVisibility(isVisible);
+                    Debug.Log($"[ControlsUIDriver] Received command 'SetRulerVisibility' with value: {value}. Rulers visibility set to: {isVisible}");
+                }
 
             }
             catch (Exception e)

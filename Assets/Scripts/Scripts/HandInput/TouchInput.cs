@@ -35,6 +35,31 @@ public class TouchInput : MonoBehaviour {
     {
         EnhancedTouchSupport.Enable();
     }
+    
+    public static void SetPlaneVisibility(bool isVisible)
+    {
+        foreach (var plane in currentCuttingPlanes)
+        {
+            if (plane != null)
+            {
+                plane.SetActive(isVisible);
+            }
+        }
+    }   
+
+    public static void SetRulerVisibility(bool isVisible)
+    {
+        if (instance != null)
+        {
+            foreach (var ruler in instance.activeRulers)
+            {
+                if (ruler != null)
+                {
+                    ruler.SetActive(isVisible);
+                }
+            }
+        }
+    }
 
     public static void ClearPlaneList()
     {
@@ -103,7 +128,7 @@ public class TouchInput : MonoBehaviour {
                 Vector3 touchNormal = touchData.inputDeviceRotation * UnityEngine.Vector3.forward; 
                 Quaternion spawnRotation = Quaternion.FromToRotation(Vector3.up, touchNormal);
 
-                spawnRotation *= Quaternion.Euler(0, 90f, 0); 
+                spawnRotation *= Quaternion.Euler(0, 100f, 0); 
 
                 SpawnPlaneFragment(spawnPosition, spawnRotation);
 
