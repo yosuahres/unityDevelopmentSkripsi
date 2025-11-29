@@ -1,6 +1,5 @@
-//osteotomyplanlogic.cs
 using System.Collections;
-using System.Collections.Generic; 
+using System.Collections.Generic;
 using UnityEngine;
 using Unity.PolySpatial; 
 
@@ -24,11 +23,13 @@ namespace Assets.Scripts.Scripts
         private GameObject m_LoadedFragment;
         private GameObject m_WholeModel; 
         private List<GameObject> m_ActiveFragments = new List<GameObject>();
+        // Clean reference copy for reversion
+        private GameObject m_OriginalModelPrefab; 
 
         void Start()
         {
             HasPerformedSlice = false;
-            
+
             if (DataManager.Instance == null)
             {
                 Debug.LogError("OsteotomyPlanLogic: DataManager.Instance is null! Cannot load models.");
@@ -41,79 +42,91 @@ namespace Assets.Scripts.Scripts
                 return;
             }
 
-            m_LoadedFragment = DataManager.Instance.SelectedFragment;
-            Debug.Log($"OsteotomyPlanLogic: Retrieved fragment '{m_LoadedFragment.name}'. Tag: '{m_LoadedFragment.tag}'");
-            
+            GameObject sourceFragment = DataManager.Instance.SelectedFragment;
             DataManager.Instance.SelectedFragment = null; 
-            Debug.Log($"OsteotomyPlanLogic: DataManager.Instance.SelectedFragment cleared.");
 
-            string originalModelName = m_LoadedFragment.name.Replace("(Clone)", "").Replace("_Left", "").Replace("_Right", "");
+            string originalModelName = sourceFragment.name.Replace("(Clone)", "").Replace("_Left", "").Replace("_Right", "");
             var wholeModelPrefab = Resources.Load<GameObject>(originalModelName);
 
+            m_OriginalModelPrefab = Instantiate(sourceFragment);
+            m_OriginalModelPrefab.name = "Original_Uncut_Fragment";
+            DontDestroyOnLoad(m_OriginalModelPrefab); 
+            m_OriginalModelPrefab.SetActive(false); 
+
+            m_LoadedFragment = sourceFragment;
+            PositionFragment(m_LoadedFragment);
+            if (m_LoadedFragment.GetComponent<TouchableObject>() == null)
+                m_LoadedFragment.AddComponent<TouchableObject>();
+            m_LoadedFragment.tag = TouchInput.SPAWNABLE_TAG; 
+
+            StartCoroutine(SafeSetupCollider(m_LoadedFragment));
+            m_LoadedFragment.SetActive(true);
+
+            var hoverEffect = m_LoadedFragment.GetComponent<VisionOSHoverEffect>();
+            if (hoverEffect == null) // Check if component exists
+                hoverEffect = m_LoadedFragment.AddComponent<VisionOSHoverEffect>();
+            else
+                hoverEffect.enabled = true; // Ensure it's enabled if it was already present
+
+            // FIX: Changed lowercase fields to PascalCase properties (Type, Color, IntensityMultiplier)
+            hoverEffect.Type = VisionOSHoverEffect.EffectType.Highlight;
+            hoverEffect.Color = Color.white;
+            hoverEffect.IntensityMultiplier = 2.0f;
+
+            m_ActiveFragments.Add(m_LoadedFragment);
+            
+            // --- Set up the Whole Model ---
             if (wholeModelPrefab != null)
             {
                 m_WholeModel = Instantiate(wholeModelPrefab);
                 DontDestroyOnLoad(m_WholeModel); 
                 m_WholeModel.tag = "ROTATEONLY"; 
-                Debug.Log($"OsteotomyPlanLogic: Successfully loaded whole model '{m_WholeModel.name}' from Resources.");
-                if (m_WholeModel != null)
-                {
-                    Debug.Log($"OsteotomyPlanLogic: Whole Model has MeshFilter: {m_WholeModel.GetComponent<MeshFilter>() != null}");
-                    Debug.Log($"OsteotomyPlanLogic: Whole Model has MeshRenderer: {m_WholeModel.GetComponent<MeshRenderer>() != null}");
-                }
+                PositionWholeModel(m_WholeModel, m_LoadedFragment.transform.position);
+                if (m_WholeModel.GetComponent<TouchableObject>() == null)
+                    m_WholeModel.AddComponent<TouchableObject>();
+                StartCoroutine(SafeSetupCollider(m_WholeModel));
+                m_WholeModel.SetActive(true);
             }
             else
             {
                 Debug.LogError($"OsteotomyPlanLogic: Could not find original model '{originalModelName}' in Resources to load whole model.");
-                return;
             }
-
-            PositionFragment(m_LoadedFragment);
-            if (m_LoadedFragment.GetComponent<TouchableObject>() == null)
-                m_LoadedFragment.AddComponent<TouchableObject>();
-            StartCoroutine(SafeSetupCollider(m_LoadedFragment));
-            m_LoadedFragment.SetActive(true);
-            m_ActiveFragments.Add(m_LoadedFragment);
-
-            PositionWholeModel(m_WholeModel, m_LoadedFragment.transform.position);
-            if (m_WholeModel.GetComponent<TouchableObject>() == null)
-                m_WholeModel.AddComponent<TouchableObject>();
-            StartCoroutine(SafeSetupCollider(m_WholeModel));
-            m_WholeModel.SetActive(true);
         }
 
         private void PositionFragment(GameObject fragment)
         {
             Camera mainCamera = Camera.main;
-            var volumeCamera = Object.FindObjectOfType<VolumeCamera>();
+            // FIX: Replaced obsolete Object.FindObjectOfType with Object.FindFirstObjectByType
+            var volumeCamera = Object.FindFirstObjectByType<VolumeCamera>();
 
-                fragment.transform.SetParent(volumeCamera.transform, false); 
-                fragment.transform.localPosition = new Vector3(0, spawnHeight, spawnDistance); 
-                fragment.transform.localScale = fragmentModelScale;
+            // ⭐ CRITICAL: Reparenting to VolumeCamera is essential for spatial context
+            fragment.transform.SetParent(volumeCamera.transform, false); 
+            fragment.transform.localPosition = new Vector3(0, spawnHeight, spawnDistance); 
+            fragment.transform.localScale = fragmentModelScale;
 
-                if (mainCamera != null)
-                    fragment.transform.LookAt(mainCamera.transform, mainCamera.transform.up);
+            if (mainCamera != null)
+                fragment.transform.LookAt(mainCamera.transform, mainCamera.transform.up);
 
-                if (fragment.name.Contains("Left"))
-                    fragment.transform.Rotate(0, 90, -60, Space.Self);
-                else if (fragment.name.Contains("Right"))
-                    fragment.transform.Rotate(0, -90, 60, Space.Self);
-            }
+            if (fragment.name.Contains("Left"))
+                fragment.transform.Rotate(0, 90, -60, Space.Self);
+            else if (fragment.name.Contains("Right"))
+                fragment.transform.Rotate(0, -90, 60, Space.Self);
+        }
 
-            private void PositionWholeModel(GameObject wholeModel, Vector3 referencePosition)
-            {
-                Camera mainCamera = Camera.main;
-                var volumeCamera = Object.FindObjectOfType<VolumeCamera>();
+        private void PositionWholeModel(GameObject wholeModel, Vector3 referencePosition)
+        {
+            Camera mainCamera = Camera.main;
+            // FIX: Replaced obsolete Object.FindObjectOfType with Object.FindFirstObjectByType
+            var volumeCamera = Object.FindFirstObjectByType<VolumeCamera>();
 
-                wholeModel.transform.SetParent(volumeCamera.transform, false);
+            wholeModel.transform.SetParent(volumeCamera.transform, false);
 
-                wholeModel.transform.localPosition = referencePosition + new Vector3(1.0f, 1.0f, 0f); 
-                wholeModel.transform.localScale = wholeModelScale; 
-                Debug.Log($"OsteotomyPlanLogic: Whole model final position: {wholeModel.transform.localPosition}, final scale: {wholeModel.transform.localScale}");
+            wholeModel.transform.localPosition = referencePosition + new Vector3(1.0f, 1.0f, 0f); 
+            wholeModel.transform.localScale = wholeModelScale; 
 
-                if (mainCamera != null)
-                    wholeModel.transform.LookAt(mainCamera.transform, mainCamera.transform.up);
-            }
+            if (mainCamera != null)
+                wholeModel.transform.LookAt(mainCamera.transform, mainCamera.transform.up);
+        }
 
 
         private IEnumerator SafeSetupCollider(GameObject model)
@@ -161,6 +174,7 @@ namespace Assets.Scripts.Scripts
             Debug.LogError("OsteotomyPlanLogic: Convex MeshCollider FAILED after all retries.");
         }
 
+
         [UnityEngine.Scripting.Preserve]
         public void PerformOsteotomySlice()
         {
@@ -171,6 +185,22 @@ namespace Assets.Scripts.Scripts
             }
 
             List<GameObject> currentPlanes = TouchInput.currentCuttingPlanes;
+
+            foreach (var plane in currentPlanes)
+            {
+            if (plane == null) continue;
+
+            var hoverPlane = plane.GetComponent<VisionOSHoverEffect>();
+            if (hoverPlane == null)
+                hoverPlane = plane.AddComponent<VisionOSHoverEffect>();
+
+            // The hover effect logic here already used PascalCase (Type, Color, IntensityMultiplier) 
+            // and did not contain the original CS1061 errors.
+            hoverPlane.Type = VisionOSHoverEffect.EffectType.Highlight;
+            hoverPlane.Color = Color.white;
+            hoverPlane.IntensityMultiplier = 1.0f;
+            }
+
             if (currentPlanes == null || currentPlanes.Count == 0)
             {
                 Debug.LogWarning("OsteotomyPlanLogic: No cutting planes found in TouchInput.");
@@ -181,6 +211,7 @@ namespace Assets.Scripts.Scripts
             Debug.Log("OsteotomyPlanLogic: Slice performed. Plane spawning is now disabled.");
 
             List<GameObject> currentSetOfFragments = new List<GameObject>(m_ActiveFragments);
+            m_ActiveFragments.Clear(); 
 
             foreach (GameObject plane in currentPlanes)
             {
@@ -191,7 +222,6 @@ namespace Assets.Scripts.Scripts
 
                     Vector3 sliceOrigin = plane.transform.position;
                     Vector3 sliceNormal = plane.transform.up;
-                    // Vector3 sliceNormal = plane.transform.forward;
 
                     AddSliceComponents(frag, sliceOrigin, sliceNormal, (fragA, fragB) =>
                     {
@@ -244,8 +274,56 @@ namespace Assets.Scripts.Scripts
                     if (frag != null) frag.SetActive(true);
             }
 
-            TouchInput.ClearPlaneList();
+            TouchInput.SetPlaneVisibility(false);
+            TouchInput.SetRulerVisibility(false);
         }
+
+        [UnityEngine.Scripting.Preserve]
+        public void RevertToUncutModel()
+        {
+            Debug.Log("OsteotomyPlanLogic: Reverting to uncut model.");
+            
+            foreach (GameObject frag in m_ActiveFragments)
+            {
+                if (frag != null)
+                {
+                    Destroy(frag);
+                }
+            }
+            m_ActiveFragments.Clear();
+
+            if (m_LoadedFragment != null)
+            {
+                Destroy(m_LoadedFragment);
+                m_LoadedFragment = null;
+            }
+
+            if (m_OriginalModelPrefab != null)
+            {
+                m_LoadedFragment = Instantiate(m_OriginalModelPrefab);
+                m_LoadedFragment.name = m_OriginalModelPrefab.name.Replace("Original_Uncut_", "");
+                
+                PositionFragment(m_LoadedFragment);
+                if (m_LoadedFragment.GetComponent<TouchableObject>() == null)
+                    m_LoadedFragment.AddComponent<TouchableObject>();
+                m_LoadedFragment.tag = TouchInput.SPAWNABLE_TAG; 
+                
+                StartCoroutine(SafeSetupCollider(m_LoadedFragment));
+
+                m_LoadedFragment.SetActive(true);
+                m_ActiveFragments.Add(m_LoadedFragment);
+            }
+            else
+            {
+                Debug.LogError("OsteotomyPlanLogic: Original reference fragment (m_OriginalModelPrefab) is null. Cannot revert.");
+            }
+            HasPerformedSlice = false;
+            TouchInput.SetPlaneVisibility(true);
+            TouchInput.SetRulerVisibility(true);
+            
+            Debug.Log("OsteotomyPlanLogic: Reversion complete. Ready for adjustment.");
+        }
+
 
         private void AddSliceComponents(GameObject target, Vector3 sliceOriginWorld, Vector3 sliceNormalWorld, System.Action<GameObject, GameObject> onFinished)
         {
@@ -303,6 +381,17 @@ namespace Assets.Scripts.Scripts
                 fragment.AddComponent<TouchableObject>();
 
             StartCoroutine(ForceConvexMeshCollider(fragment));
+
+            var hoverEffect = fragment.GetComponent<VisionOSHoverEffect>();
+            if (hoverEffect == null) // Check if component exists
+                hoverEffect = fragment.AddComponent<VisionOSHoverEffect>();
+            else
+                hoverEffect.enabled = true; // Ensure it's enabled if it was already present
+
+            // FIX: Changed lowercase fields to PascalCase properties (Type, Color, IntensityMultiplier)
+            hoverEffect.Type = VisionOSHoverEffect.EffectType.Highlight;
+            hoverEffect.Color = Color.white;
+            hoverEffect.IntensityMultiplier = 2.0f;
 
             fragment.SetActive(true);
         }

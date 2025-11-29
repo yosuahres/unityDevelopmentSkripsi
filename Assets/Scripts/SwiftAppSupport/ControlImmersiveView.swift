@@ -1,3 +1,4 @@
+//controlimmersiveview.swift
 import SwiftUI
 import RealityKit
 import UnityFramework
@@ -6,7 +7,9 @@ import PolySpatialRealityKit
 struct ControlImmersiveView: View {
 
     @ObservedObject var appState: AppState
-    @State private var currentPlaneValue: Float = 0.2 
+    @State private var currentPlaneValue: Float = 0.2
+    // State to track if the slice has been performed
+    @State private var hasPerformedSlice: Bool = false 
 
     init(appState: AppState = AppState.shared) {
         _appState = ObservedObject(wrappedValue: appState)
@@ -74,9 +77,27 @@ struct ControlImmersiveView: View {
                             HStack(spacing: 20) {
                                 VStack(spacing: 30) { 
                                     
-                                    // slice Button
-                                    Button("Slice") {
-                                        CallCSharpCallback("TriggerSliceModel")
+                                    // Slice/Toggle Button
+                                    Button(hasPerformedSlice ? "Adjust" : "Slice") {
+                                        if hasPerformedSlice {
+                                            // Revert (Adjust mode): Revert model, show planes
+                                            CallCSharpCallback("RevertToUncutModel")
+                                            hasPerformedSlice = false // Go back to Slice mode
+                                            
+                                            // ⭐ CRITICAL FIX: Explicitly set visibility to true via C# callback
+                                            appState.isPlaneVisible = true 
+                                            appState.isRulerVisible = true 
+                                            CallCSharpCallback("SetPlaneVisibility", 1) 
+                                            CallCSharpCallback("SetRulerVisibility", 1)
+                                        } else {
+                                            // Perform slice: Cut model, hide planes
+                                            CallCSharpCallback("TriggerSliceModel")
+                                            hasPerformedSlice = true // Go to Adjust mode
+                                            
+                                            // Visibility is handled inside PerformOsteotomySlice (SetPlaneVisibility(false))
+                                            appState.isPlaneVisible = false 
+                                            appState.isRulerVisible = false
+                                        }
                                     }
                                     .font(.system(size: 80))
                                     .fontWeight(.bold)

@@ -17,32 +17,59 @@ struct GUIConfigurationView: View {
     
     var body: some View {
         VStack {
-            if let modelName = appState.selectedModel {
+            HStack {
                 
-                if let resourceRoot = Bundle.main.resourceURL,
-                   let url = URL(string: "Data/Raw/\(modelName)", relativeTo: resourceRoot) {
+                VStack(alignment: .leading) {
+                    Text("RIGHT SIDE")
+                        .font(.title2)
+                        .lineLimit(nil) 
+                        .padding(.top, 20)
+                        .padding(.leading, 20)
+                    Spacer()
+                }
+                Spacer() 
+                
+                if let modelName = appState.selectedModel {
                     
-                    Model3D(url: url) { model in
-                        model
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .scaleEffect(0.5) 
-                            .offset(y: -50)  
-                    } placeholder: {
-                        ProgressView("Loading \(modelName)...")
+                    if let resourceRoot = Bundle.main.resourceURL,
+                       let url = URL(string: "Data/Raw/\(modelName)", relativeTo: resourceRoot) {
+                        
+                        Model3D(url: url) { model in
+                            model
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .scaleEffect(0.2) 
+                                .offset(y: -50)  
+                        } placeholder: {
+                            ProgressView("Loading \(modelName)...")
+                        }
+                        .frame(width: 400, height: 400) 
+                        
+                    } else {
+                        Text("Error: Could not find or access model file: \(modelName)")
+                            .foregroundColor(.red)
+                            .padding()
                     }
                     
                 } else {
-                    Text("Error: Could not find or access model file: \(modelName)")
-                        .foregroundColor(.red)
+                    Text("No model was selected from the Home screen.")
+                        .foregroundColor(.secondary)
                         .padding()
                 }
                 
-            } else {
-                Text("No model was selected from the Home screen.")
-                    .foregroundColor(.secondary)
-                    .padding()
+                Spacer() 
+
+                VStack(alignment: .trailing) {
+                    Text("LEFT SIDE")
+                        .font(.title2)
+                        .lineLimit(nil)
+                        .padding(.top, 20)
+                        .padding(.trailing, 20)
+                    Spacer()
+                }
             }
+            .padding(.horizontal, 50) 
+
         }
         .onAppear {
             if let modelName = appState.selectedModel {
@@ -63,22 +90,8 @@ struct GUIConfigurationView: View {
             ToolbarItem(placement: .bottomOrnament) {
                 VStack(spacing: 12) {
                     HStack {
-                        Button("Left") {
-                            sideSelection = .left
-                            print("Left side selected")
-                        }
-                        .font(.title2)
-                        .controlSize(.large)
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 10)
-                        .glassBackgroundEffect(
-                            in: .rect(cornerRadius: 10),
-                            displayMode: sideSelection == .left ? .always : .implicit
-                        )
-                        
                         Button("Right") {
                             sideSelection = .right
-                            print("Right side selected")
                         }
                         .font(.title2)
                         .controlSize(.large)
@@ -88,20 +101,28 @@ struct GUIConfigurationView: View {
                             in: .rect(cornerRadius: 10),
                             displayMode: sideSelection == .right ? .always : .implicit
                         )
+                        
+                        Button("Left") {
+                            sideSelection = .left
+                        }
+                        .font(.title2)
+                        .controlSize(.large)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 10)
+                        .glassBackgroundEffect(
+                            in: .rect(cornerRadius: 10),
+                            displayMode: sideSelection == .left ? .always : .implicit
+                        )
                     }
                     
                     Button("Continue") {
                         if sideSelection == .left {
                             appState.selectedSide = "Left"
-
                             // swapped because flipped gameobject in GUISlicing.cs
                             CallCSharpCallback("TriggerRight")
-                            print("Continue tapped: Triggering Left")
                         } else if sideSelection == .right {
                             appState.selectedSide = "Right"
-                            
                             CallCSharpCallback("TriggerLeft")
-                            print("Continue tapped: Triggering Right")
                         }
                     }
                     .font(.title)

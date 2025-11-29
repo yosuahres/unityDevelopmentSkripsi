@@ -10,7 +10,6 @@ using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 using TouchPhase = UnityEngine.InputSystem.TouchPhase;
 using UnityEngine.InputSystem.LowLevel;
 using System.Collections.Generic; 
-// ⭐ NEW: Import namespace to access OsteotomyPlanLogic static flag
 using Assets.Scripts.Scripts; 
 
 public class TouchInput : MonoBehaviour {
@@ -87,7 +86,10 @@ public class TouchInput : MonoBehaviour {
 
         foreach (var plane in currentCuttingPlanes)
         {
-            plane.transform.localScale = new Vector3(currentPlaneScale, 0.0002f, currentPlaneScale);
+            if(plane != null)
+            {
+                plane.transform.localScale = new Vector3(currentPlaneScale, 0.0002f, currentPlaneScale);
+            }
         }
     }
 
@@ -107,7 +109,7 @@ public class TouchInput : MonoBehaviour {
 
     private void HandleTouchBegan(Touch touch)
     {
-        // ⭐ NEW: Check if slicing has been performed before allowing plane spawn
+        // This prevents new planes from being spawned after a slice, forcing the user to 'Adjust' first.
         if (OsteotomyPlanLogic.HasPerformedSlice)
         {
             Debug.Log("TouchInput: Slice has already been performed. Skipping plane spawn.");
