@@ -10,6 +10,7 @@ public class GestureInput : MonoBehaviour
     private GameObject selectedObject;
     private UnityEngine.Vector3 lastPosition;
     private float lastTwoFingerAngle; 
+    private Quaternion lastInputDeviceRotation; 
 
     [SerializeField]
     private float rotationSpeed = 5f;
@@ -33,21 +34,30 @@ public class GestureInput : MonoBehaviour
                 if (touch.phase == TouchPhase.Began)
                 {
                     selectedObject = touchData.targetObject;
+
+                    // the position of the user's pinch
                     lastPosition = touchData.interactionPosition;
+
+                    // the rotation of the user's pinch
+                    lastInputDeviceRotation = touchData.inputDeviceRotation; 
                 }
                 else if (touch.phase == TouchPhase.Moved && selectedObject != null)
                 {
+                    UnityEngine.Vector3 deltaPosition = touchData.interactionPosition - lastPosition;
+
                     if (!selectedObject.CompareTag(ROTATION_ONLY_TAG) && !DataManager.Instance.IsPositionLocked)
                     {
-                        UnityEngine.Vector3 deltaPosition = touchData.interactionPosition - lastPosition;
                         selectedObject.transform.position += deltaPosition;
                         Debug.Log($"[GestureInput] Object moved: {selectedObject.name}, New Position: {selectedObject.transform.position}");
                     }
-                    else if (DataManager.Instance.IsPositionLocked)
-                    {
-                        Debug.Log($"[GestureInput] Object movement blocked for {selectedObject.name} because IsPositionLocked is true.");
-                    }
+                    Quaternion deltaRotation = Quaternion.Inverse(lastInputDeviceRotation) * touchData.inputDeviceRotation;
+                    
+                    float zRoll = deltaRotation.eulerAngles.z;
+                    if (zRoll > 180f) zRoll -= 360f;
+                    selectedObject.transform.Rotate(UnityEngine.Vector3.forward, zRoll, Space.Self);
+                    
                     lastPosition = touchData.interactionPosition;
+                    lastInputDeviceRotation = touchData.inputDeviceRotation;
                 }
             }
         }

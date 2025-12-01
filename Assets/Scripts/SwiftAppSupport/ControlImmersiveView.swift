@@ -1,4 +1,3 @@
-//controlimmersiveview.swift
 import SwiftUI
 import RealityKit
 import UnityFramework
@@ -81,10 +80,10 @@ struct ControlImmersiveView: View {
                                     Button(hasPerformedSlice ? "Adjust" : "Slice") {
                                         if hasPerformedSlice {
                                             // Revert (Adjust mode): Revert model, show planes
-                                            CallCSharpCallback("RevertToUncutModel")
+                                            CallCSharpCallback("RevertToUncutModel") 
                                             hasPerformedSlice = false // Go back to Slice mode
                                             
-                                            // ⭐ CRITICAL FIX: Explicitly set visibility to true via C# callback
+                                            // Explicitly set visibility to true for UI and C#
                                             appState.isPlaneVisible = true 
                                             appState.isRulerVisible = true 
                                             CallCSharpCallback("SetPlaneVisibility", 1) 

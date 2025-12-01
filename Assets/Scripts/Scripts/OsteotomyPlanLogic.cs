@@ -23,7 +23,6 @@ namespace Assets.Scripts.Scripts
         private GameObject m_LoadedFragment;
         private GameObject m_WholeModel; 
         private List<GameObject> m_ActiveFragments = new List<GameObject>();
-        // Clean reference copy for reversion
         private GameObject m_OriginalModelPrefab; 
 
         void Start()
@@ -63,19 +62,19 @@ namespace Assets.Scripts.Scripts
             m_LoadedFragment.SetActive(true);
 
             var hoverEffect = m_LoadedFragment.GetComponent<VisionOSHoverEffect>();
-            if (hoverEffect == null) // Check if component exists
+            if (hoverEffect == null) 
                 hoverEffect = m_LoadedFragment.AddComponent<VisionOSHoverEffect>();
             else
-                hoverEffect.enabled = true; // Ensure it's enabled if it was already present
+                hoverEffect.enabled = true; 
 
-            // FIX: Changed lowercase fields to PascalCase properties (Type, Color, IntensityMultiplier)
+            
             hoverEffect.Type = VisionOSHoverEffect.EffectType.Highlight;
             hoverEffect.Color = Color.white;
             hoverEffect.IntensityMultiplier = 2.0f;
 
             m_ActiveFragments.Add(m_LoadedFragment);
             
-            // --- Set up the Whole Model ---
+            
             if (wholeModelPrefab != null)
             {
                 m_WholeModel = Instantiate(wholeModelPrefab);
@@ -96,10 +95,10 @@ namespace Assets.Scripts.Scripts
         private void PositionFragment(GameObject fragment)
         {
             Camera mainCamera = Camera.main;
-            // FIX: Replaced obsolete Object.FindObjectOfType with Object.FindFirstObjectByType
+            
             var volumeCamera = Object.FindFirstObjectByType<VolumeCamera>();
 
-            // ⭐ CRITICAL: Reparenting to VolumeCamera is essential for spatial context
+            
             fragment.transform.SetParent(volumeCamera.transform, false); 
             fragment.transform.localPosition = new Vector3(0, spawnHeight, spawnDistance); 
             fragment.transform.localScale = fragmentModelScale;
@@ -116,7 +115,7 @@ namespace Assets.Scripts.Scripts
         private void PositionWholeModel(GameObject wholeModel, Vector3 referencePosition)
         {
             Camera mainCamera = Camera.main;
-            // FIX: Replaced obsolete Object.FindObjectOfType with Object.FindFirstObjectByType
+            
             var volumeCamera = Object.FindFirstObjectByType<VolumeCamera>();
 
             wholeModel.transform.SetParent(volumeCamera.transform, false);
@@ -194,11 +193,11 @@ namespace Assets.Scripts.Scripts
             if (hoverPlane == null)
                 hoverPlane = plane.AddComponent<VisionOSHoverEffect>();
 
-            // The hover effect logic here already used PascalCase (Type, Color, IntensityMultiplier) 
-            // and did not contain the original CS1061 errors.
+            
+            
             hoverPlane.Type = VisionOSHoverEffect.EffectType.Highlight;
             hoverPlane.Color = Color.white;
-            hoverPlane.IntensityMultiplier = 1.0f;
+            hoverPlane.IntensityMultiplier = 2.0f;
             }
 
             if (currentPlanes == null || currentPlanes.Count == 0)
@@ -383,15 +382,15 @@ namespace Assets.Scripts.Scripts
             StartCoroutine(ForceConvexMeshCollider(fragment));
 
             var hoverEffect = fragment.GetComponent<VisionOSHoverEffect>();
-            if (hoverEffect == null) // Check if component exists
+            if (hoverEffect == null) 
                 hoverEffect = fragment.AddComponent<VisionOSHoverEffect>();
             else
-                hoverEffect.enabled = true; // Ensure it's enabled if it was already present
+                hoverEffect.enabled = true; 
 
-            // FIX: Changed lowercase fields to PascalCase properties (Type, Color, IntensityMultiplier)
+            
             hoverEffect.Type = VisionOSHoverEffect.EffectType.Highlight;
             hoverEffect.Color = Color.white;
-            hoverEffect.IntensityMultiplier = 2.0f;
+            hoverEffect.IntensityMultiplier = 1.0f;
 
             fragment.SetActive(true);
         }

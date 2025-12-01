@@ -38,12 +38,12 @@ struct GUIConfigurationView: View {
                             model
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
-                                .scaleEffect(0.2) 
+                                .scaleEffect(0.7) 
                                 .offset(y: -50)  
                         } placeholder: {
                             ProgressView("Loading \(modelName)...")
                         }
-                        .frame(width: 400, height: 400) 
+                        // .frame(width: 400, height: 400) 
                         
                     } else {
                         Text("Error: Could not find or access model file: \(modelName)")
