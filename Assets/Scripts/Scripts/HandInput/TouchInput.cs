@@ -1,6 +1,6 @@
-//touchInput.cs
-//mark 6 november (Corrected)
-// handle the fragment spawn on target touch object
+
+
+
 
 using UnityEngine;
 using Unity.PolySpatial;
@@ -17,9 +17,11 @@ public class TouchInput : MonoBehaviour {
     public GameObject planeFragmentPrefab;
     public GameObject rulerPrefab;
 
-    public static float currentPlaneScale = 0.2f; // Initial plane scale
+    public static float currentPlaneScale = 0.2f; 
     public static readonly float minPlaneScale = 0.2f;
     public static readonly float maxPlaneScale = 0.5f;
+
+    private static readonly int MAX_PLANES = 4;
 
     public static List<GameObject> currentCuttingPlanes { get; private set; } = new List<GameObject>();
     private List<GameObject> activeRulers = new List<GameObject>();
@@ -78,7 +80,6 @@ public class TouchInput : MonoBehaviour {
         }
     }
 
-    // This method can be called from Swift to set the plane scale
     public static void SetPlaneScale(float scale)
     {
         currentPlaneScale = Mathf.Clamp(scale, minPlaneScale, maxPlaneScale);
@@ -109,7 +110,6 @@ public class TouchInput : MonoBehaviour {
 
     private void HandleTouchBegan(Touch touch)
     {
-        // This prevents new planes from being spawned after a slice, forcing the user to 'Adjust' first.
         if (OsteotomyPlanLogic.HasPerformedSlice)
         {
             Debug.Log("TouchInput: Slice has already been performed. Skipping plane spawn.");
@@ -157,10 +157,15 @@ public class TouchInput : MonoBehaviour {
 
     private void SpawnPlaneFragment(Vector3 position, Quaternion rotation)
     {
+        if (currentCuttingPlanes.Count >= MAX_PLANES) 
+        {
+            return; 
+        }
+
         if (planeFragmentPrefab != null)
         {
             GameObject spawnedPlane = Instantiate(planeFragmentPrefab, position, rotation);
-            //planescale
+            
             spawnedPlane.transform.localScale = new Vector3(currentPlaneScale, 0.0002f, currentPlaneScale); 
             currentCuttingPlanes.Add(spawnedPlane);
             Debug.Log($"TouchInput: Spawned new plane ({currentCuttingPlanes.Count} total) at {position}");
