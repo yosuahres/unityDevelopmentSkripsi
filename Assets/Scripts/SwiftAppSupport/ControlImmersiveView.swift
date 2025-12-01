@@ -6,8 +6,8 @@ import PolySpatialRealityKit
 struct ControlImmersiveView: View {
 
     @ObservedObject var appState: AppState
-    @State private var currentPlaneValue: Float = 0.2
-    // State to track if the slice has been performed
+    @State private var currentPlaneValue: Float = 0.2 //default to 0.2 mm plane width
+    @State private var currentMaxPlaneValue: Int = 3 //default to 3 planes max
     @State private var hasPerformedSlice: Bool = false 
 
     init(appState: AppState = AppState.shared) {
@@ -75,25 +75,17 @@ struct ControlImmersiveView: View {
                         VStack(alignment: .leading, spacing: 60) {
                             HStack(spacing: 20) {
                                 VStack(spacing: 30) { 
-                                    
-                                    // Slice/Toggle Button
                                     Button(hasPerformedSlice ? "Adjust" : "Slice") {
                                         if hasPerformedSlice {
-                                            // Revert (Adjust mode): Revert model, show planes
                                             CallCSharpCallback("RevertToUncutModel") 
-                                            hasPerformedSlice = false // Go back to Slice mode
-                                            
-                                            // Explicitly set visibility to true for UI and C#
+                                            hasPerformedSlice = false
                                             appState.isPlaneVisible = true 
                                             appState.isRulerVisible = true 
                                             CallCSharpCallback("SetPlaneVisibility", 1) 
                                             CallCSharpCallback("SetRulerVisibility", 1)
                                         } else {
-                                            // Perform slice: Cut model, hide planes
                                             CallCSharpCallback("TriggerSliceModel")
-                                            hasPerformedSlice = true // Go to Adjust mode
-                                            
-                                            // Visibility is handled inside PerformOsteotomySlice (SetPlaneVisibility(false))
+                                            hasPerformedSlice = true 
                                             appState.isPlaneVisible = false 
                                             appState.isRulerVisible = false
                                         }
@@ -105,7 +97,7 @@ struct ControlImmersiveView: View {
                                     .controlSize(.extraLarge)
                                     .hoverEffect()
 
-                                    //lock position
+                                    //lock position button
                                     HStack(spacing: 40) {
                                         Image(systemName: appState.isLocked ? "lock.fill" : "lock.open.fill")
                                             .font(.system(size: 60))
@@ -126,6 +118,7 @@ struct ControlImmersiveView: View {
                                 }
                                 .padding(.bottom, 30)
 
+                                //plane scale button
                                 Button(action: {
                                     currentPlaneValue = max(0.2, currentPlaneValue - 0.05)
                                     CallCSharpCallback("SetPlaneScale", Int32(currentPlaneValue * 100))
@@ -143,10 +136,37 @@ struct ControlImmersiveView: View {
                                     .font(.system(size: 80, weight: .bold))
                                     .frame(minWidth: 100)
 
-                                // Plus button
                                 Button(action: {
                                     currentPlaneValue = min(0.5, currentPlaneValue + 0.05)
                                     CallCSharpCallback("SetPlaneScale", Int32(currentPlaneValue * 100))
+                                }) {
+                                    Image(systemName: "plus.circle.fill")
+                                        .font(.system(size: 80))
+                                }
+                                .buttonStyle(.plain)
+
+
+                                //max scale button
+                                Button(action: {
+                                    currentMaxPlaneValue = max(1, currentMaxPlaneValue - 1)
+                                    CallCSharpCallback("SetMaxPlane", Int32(currentMaxPlaneValue))
+                                }) {
+                                    Image(systemName: "minus.circle.fill")
+                                        .font(.system(size: 80))
+                                }
+                                .buttonStyle(.plain)
+                                .simultaneousGesture(LongPressGesture().onEnded { _ in
+                                    currentMaxPlaneValue = 3
+                                    CallCSharpCallback("SetMaxPlane", Int32(currentMaxPlaneValue))
+                                })
+
+                                Text("\(currentMaxPlaneValue)")
+                                    .font(.system(size: 80, weight: .bold))
+                                    .frame(minWidth: 100)
+
+                                Button(action: {
+                                    currentMaxPlaneValue = min(5, currentMaxPlaneValue + 1)
+                                    CallCSharpCallback("SetMaxPlane", Int32(currentMaxPlaneValue))
                                 }) {
                                     Image(systemName: "plus.circle.fill")
                                         .font(.system(size: 80))

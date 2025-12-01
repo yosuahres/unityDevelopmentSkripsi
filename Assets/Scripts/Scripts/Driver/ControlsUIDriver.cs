@@ -1,4 +1,3 @@
-//ControlsUIDriver.cs
 //mark 4 november
 
 using System;
@@ -85,6 +84,13 @@ namespace Assets.Scripts.Scripts
                     bool isVisible = (value == 1);
                     TouchInput.SetRulerVisibility(isVisible);
                     Debug.Log($"[ControlsUIDriver] Received command 'SetRulerVisibility' with value: {value}. Rulers visibility set to: {isVisible}");
+                }
+                else if (command == "SetMaxPlane")
+                {
+                    int maxPlanes = value;
+                    TouchInput.maxCuttingPlanes = maxPlanes;
+                    Debug.Log($"[ControlsUIDriver] Received command 'SetMaxPlane' with value: {value}. Max cutting planes set to: {maxPlanes}");
+                    TouchInput.CheckAndEnforceMaxPlanes();
                 }
 
             }
