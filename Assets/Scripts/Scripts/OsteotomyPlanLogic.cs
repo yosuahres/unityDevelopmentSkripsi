@@ -1,3 +1,4 @@
+//osteotomyplanlogic.cs
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -22,8 +23,8 @@ namespace Assets.Scripts.Scripts
 
         private GameObject m_LoadedFragment;
         private GameObject m_WholeModel; 
+        private GameObject m_InitialFragmentPrefab;
         private List<GameObject> m_ActiveFragments = new List<GameObject>();
-        private GameObject m_OriginalModelPrefab; 
 
         void Start()
         {
@@ -47,10 +48,29 @@ namespace Assets.Scripts.Scripts
             string originalModelName = sourceFragment.name.Replace("(Clone)", "").Replace("_Left", "").Replace("_Right", "");
             var wholeModelPrefab = Resources.Load<GameObject>(originalModelName);
 
-            m_OriginalModelPrefab = Instantiate(sourceFragment);
-            m_OriginalModelPrefab.name = "Original_Uncut_Fragment";
-            DontDestroyOnLoad(m_OriginalModelPrefab); 
-            m_OriginalModelPrefab.SetActive(false); 
+            // --- START REVERT PREPARATION (New code) ---
+            // 1. Create a copy of the sourceFragment to serve as the original uncut model "prefab"
+            m_InitialFragmentPrefab = Instantiate(sourceFragment);
+            m_InitialFragmentPrefab.name = sourceFragment.name + "_InitialCopy";
+            m_InitialFragmentPrefab.SetActive(false); // Keep the copy inactive
+            DontDestroyOnLoad(m_InitialFragmentPrefab); // Ensure it persists across scenes if necessary
+            
+            // 2. Set up components on the INITIAL PREFAB (to be copied on revert)
+            if (m_InitialFragmentPrefab.GetComponent<TouchableObject>() == null)
+                m_InitialFragmentPrefab.AddComponent<TouchableObject>();
+            m_InitialFragmentPrefab.tag = TouchInput.SPAWNABLE_TAG; 
+
+            var initialHoverEffect = m_InitialFragmentPrefab.GetComponent<VisionOSHoverEffect>();
+            if (initialHoverEffect == null) 
+                initialHoverEffect = m_InitialFragmentPrefab.AddComponent<VisionOSHoverEffect>();
+            
+            initialHoverEffect.Type = VisionOSHoverEffect.EffectType.Highlight;
+            initialHoverEffect.Color = Color.white;
+            initialHoverEffect.IntensityMultiplier = 2.0f;
+            
+            // Ensure the collider is set up on the prefab copy
+            StartCoroutine(SafeSetupCollider(m_InitialFragmentPrefab)); 
+            // --- END REVERT PREPARATION ---
 
             m_LoadedFragment = sourceFragment;
             PositionFragment(m_LoadedFragment);
@@ -277,50 +297,51 @@ namespace Assets.Scripts.Scripts
             TouchInput.SetRulerVisibility(false);
         }
 
+// Inside OsteotomyPlanLogic.cs
         [UnityEngine.Scripting.Preserve]
         public void RevertToUncutModel()
         {
             Debug.Log("OsteotomyPlanLogic: Reverting to uncut model.");
-            
+
+            // 1. Destroy all current active/sliced fragments
             foreach (GameObject frag in m_ActiveFragments)
             {
                 if (frag != null)
-                {
                     Destroy(frag);
-                }
             }
             m_ActiveFragments.Clear();
-
+            
             if (m_LoadedFragment != null)
             {
                 Destroy(m_LoadedFragment);
                 m_LoadedFragment = null;
             }
 
-            if (m_OriginalModelPrefab != null)
+            // 2. Check for the master copy
+            if (m_InitialFragmentPrefab == null)
             {
-                m_LoadedFragment = Instantiate(m_OriginalModelPrefab);
-                m_LoadedFragment.name = m_OriginalModelPrefab.name.Replace("Original_Uncut_", "");
-                
-                PositionFragment(m_LoadedFragment);
-                if (m_LoadedFragment.GetComponent<TouchableObject>() == null)
-                    m_LoadedFragment.AddComponent<TouchableObject>();
-                m_LoadedFragment.tag = TouchInput.SPAWNABLE_TAG; 
-                
-                StartCoroutine(SafeSetupCollider(m_LoadedFragment));
+                Debug.LogError("OsteotomyPlanLogic: Cannot revert. Initial fragment prefab is missing.");
+                return;
+            }
 
-                m_LoadedFragment.SetActive(true);
-                m_ActiveFragments.Add(m_LoadedFragment);
-            }
-            else
-            {
-                Debug.LogError("OsteotomyPlanLogic: Original reference fragment (m_OriginalModelPrefab) is null. Cannot revert.");
-            }
-            HasPerformedSlice = false;
-            TouchInput.SetPlaneVisibility(true);
+            // 3. Instantiate the stored initial uncut model prefab
+            GameObject newFragment = Instantiate(m_InitialFragmentPrefab);
+            newFragment.name = m_InitialFragmentPrefab.name.Replace("_InitialCopy", ""); // Restore original name
+
+            // 4. Position the new fragment and ensure it's active
+            PositionFragment(newFragment);
+            newFragment.SetActive(true);
+            
+            // 5. Update internal state and reset slice flag
+            m_LoadedFragment = newFragment;
+            m_ActiveFragments.Add(m_LoadedFragment);
+            HasPerformedSlice = false; 
+
+            // 6. Re-enable plane and ruler visibility (handled by Swift callback, but enforced here too)
+            TouchInput.SetPlaneVisibility(true); 
             TouchInput.SetRulerVisibility(true);
             
-            Debug.Log("OsteotomyPlanLogic: Reversion complete. Ready for adjustment.");
+            Debug.Log($"OsteotomyPlanLogic: Successfully reverted to uncut model: {m_LoadedFragment.name}.");
         }
 
 

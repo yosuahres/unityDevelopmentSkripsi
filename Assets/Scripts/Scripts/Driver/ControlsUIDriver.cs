@@ -55,8 +55,13 @@ namespace Assets.Scripts.Scripts
                 {
                     var osteotomyPlanLogic = FindFirstObjectByType<OsteotomyPlanLogic>();
                     osteotomyPlanLogic.PerformOsteotomySlice();
-
                 }
+                else if(command == "RevertToUncutModel")
+                {
+                    var osteotomyPlanLogic = FindFirstObjectByType<OsteotomyPlanLogic>();
+                    osteotomyPlanLogic.RevertToUncutModel();
+                }
+                else
 
                 if (command == "TriggerHomeScene")
                 {
