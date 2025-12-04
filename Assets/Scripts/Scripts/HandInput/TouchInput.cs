@@ -196,6 +196,7 @@ public class TouchInput : MonoBehaviour {
         if (planeFragmentPrefab != null)
         {
             GameObject spawnedPlane = Instantiate(planeFragmentPrefab, position, rotation);
+            spawnedPlane.tag = "PLANE";
             
             spawnedPlane.transform.localScale = new Vector3(currentPlaneScale, 0.0002f, currentPlaneScale); 
             currentCuttingPlanes.Add(spawnedPlane);

@@ -6,6 +6,7 @@ TagManager:
   tags:
   - SPAWNABLE
   - ROTATEONLY
+  - PLANE
   layers:
   - Default
   - TransparentFX

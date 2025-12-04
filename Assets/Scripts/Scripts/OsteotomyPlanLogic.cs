@@ -1,4 +1,4 @@
-//osteotomyplanlogic.cs
+//OsteotomyPlanLogic.cs
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -48,14 +48,14 @@ namespace Assets.Scripts.Scripts
             string originalModelName = sourceFragment.name.Replace("(Clone)", "").Replace("_Left", "").Replace("_Right", "");
             var wholeModelPrefab = Resources.Load<GameObject>(originalModelName);
 
-            // --- START REVERT PREPARATION (New code) ---
-            // 1. Create a copy of the sourceFragment to serve as the original uncut model "prefab"
+            
+            
             m_InitialFragmentPrefab = Instantiate(sourceFragment);
             m_InitialFragmentPrefab.name = sourceFragment.name + "_InitialCopy";
-            m_InitialFragmentPrefab.SetActive(false); // Keep the copy inactive
-            DontDestroyOnLoad(m_InitialFragmentPrefab); // Ensure it persists across scenes if necessary
+            m_InitialFragmentPrefab.SetActive(false); 
+            DontDestroyOnLoad(m_InitialFragmentPrefab); 
             
-            // 2. Set up components on the INITIAL PREFAB (to be copied on revert)
+            
             if (m_InitialFragmentPrefab.GetComponent<TouchableObject>() == null)
                 m_InitialFragmentPrefab.AddComponent<TouchableObject>();
             m_InitialFragmentPrefab.tag = TouchInput.SPAWNABLE_TAG; 
@@ -66,11 +66,11 @@ namespace Assets.Scripts.Scripts
             
             initialHoverEffect.Type = VisionOSHoverEffect.EffectType.Highlight;
             initialHoverEffect.Color = Color.white;
-            initialHoverEffect.IntensityMultiplier = 2.0f;
+            initialHoverEffect.IntensityMultiplier = 0.5f;
             
-            // Ensure the collider is set up on the prefab copy
+            
             StartCoroutine(SafeSetupCollider(m_InitialFragmentPrefab)); 
-            // --- END REVERT PREPARATION ---
+            
 
             m_LoadedFragment = sourceFragment;
             PositionFragment(m_LoadedFragment);
@@ -90,7 +90,7 @@ namespace Assets.Scripts.Scripts
             
             hoverEffect.Type = VisionOSHoverEffect.EffectType.Highlight;
             hoverEffect.Color = Color.white;
-            hoverEffect.IntensityMultiplier = 2.0f;
+            hoverEffect.IntensityMultiplier = 0.5f;
 
             m_ActiveFragments.Add(m_LoadedFragment);
             
@@ -217,7 +217,7 @@ namespace Assets.Scripts.Scripts
             
             hoverPlane.Type = VisionOSHoverEffect.EffectType.Highlight;
             hoverPlane.Color = Color.white;
-            hoverPlane.IntensityMultiplier = 2.0f;
+            hoverPlane.IntensityMultiplier = 0.5f;
             }
 
             if (currentPlanes == null || currentPlanes.Count == 0)
@@ -232,6 +232,17 @@ namespace Assets.Scripts.Scripts
             List<GameObject> currentSetOfFragments = new List<GameObject>(m_ActiveFragments);
             m_ActiveFragments.Clear(); 
 
+            
+            Dictionary<GameObject, (Vector3 position, Quaternion rotation)> initialTransforms = new Dictionary<GameObject, (Vector3 position, Quaternion rotation)>();
+            foreach (GameObject frag in currentSetOfFragments)
+            {
+                if (frag != null)
+                {
+                    initialTransforms[frag] = (frag.transform.position, frag.transform.rotation);
+                }
+            }
+            
+
             foreach (GameObject plane in currentPlanes)
             {
                 List<GameObject> nextSet = new List<GameObject>();
@@ -242,7 +253,12 @@ namespace Assets.Scripts.Scripts
                     Vector3 sliceOrigin = plane.transform.position;
                     Vector3 sliceNormal = plane.transform.up;
 
-                    AddSliceComponents(frag, sliceOrigin, sliceNormal, (fragA, fragB) =>
+                    
+                    (Vector3 position, Quaternion rotation) capturedTransform = initialTransforms.ContainsKey(frag) 
+                                                                               ? initialTransforms[frag] 
+                                                                               : (frag.transform.position, frag.transform.rotation);
+                                                                               
+                    AddSliceComponents(frag, sliceOrigin, sliceNormal, capturedTransform, (fragA, fragB) =>
                     {
                         if (fragA != null) nextSet.Add(fragA);
                         if (fragB != null) nextSet.Add(fragB);
@@ -297,13 +313,31 @@ namespace Assets.Scripts.Scripts
             TouchInput.SetRulerVisibility(false);
         }
 
-// Inside OsteotomyPlanLogic.cs
         [UnityEngine.Scripting.Preserve]
         public void RevertToUncutModel()
         {
             Debug.Log("OsteotomyPlanLogic: Reverting to uncut model.");
 
-            // 1. Destroy all current active/sliced fragments
+            
+            Vector3 lastFragmentPosition = Vector3.zero;
+            Quaternion lastFragmentRotation = Quaternion.identity;
+
+            
+            GameObject fragmentToCapture = m_LoadedFragment;
+            if (fragmentToCapture == null && m_ActiveFragments.Count > 0)
+            {
+                fragmentToCapture = m_ActiveFragments[0];
+            }
+
+            if (fragmentToCapture != null)
+            {
+                lastFragmentPosition = fragmentToCapture.transform.position;
+                lastFragmentRotation = fragmentToCapture.transform.rotation;
+                Debug.Log($"OsteotomyPlanLogic: Captured last position: {lastFragmentPosition}, rotation: {lastFragmentRotation}");
+            }
+
+
+            
             foreach (GameObject frag in m_ActiveFragments)
             {
                 if (frag != null)
@@ -317,27 +351,55 @@ namespace Assets.Scripts.Scripts
                 m_LoadedFragment = null;
             }
 
-            // 2. Check for the master copy
+            
             if (m_InitialFragmentPrefab == null)
             {
                 Debug.LogError("OsteotomyPlanLogic: Cannot revert. Initial fragment prefab is missing.");
                 return;
             }
 
-            // 3. Instantiate the stored initial uncut model prefab
+            
             GameObject newFragment = Instantiate(m_InitialFragmentPrefab);
-            newFragment.name = m_InitialFragmentPrefab.name.Replace("_InitialCopy", ""); // Restore original name
+            newFragment.name = m_InitialFragmentPrefab.name.Replace("_InitialCopy", ""); 
 
-            // 4. Position the new fragment and ensure it's active
-            PositionFragment(newFragment);
+            
+            if (fragmentToCapture != null)
+            {
+                
+                var volumeCamera = Object.FindFirstObjectByType<VolumeCamera>();
+                if (volumeCamera != null)
+                {
+                    
+                    newFragment.transform.SetParent(volumeCamera.transform, true); 
+                }
+                else
+                {
+                    
+                    newFragment.transform.SetParent(null);
+                }
+                
+                
+                newFragment.transform.position = lastFragmentPosition;
+                newFragment.transform.rotation = lastFragmentRotation;
+                
+                
+                newFragment.transform.localScale = fragmentModelScale; 
+            }
+            else
+            {
+                
+                PositionFragment(newFragment); 
+                Debug.LogWarning("OsteotomyPlanLogic: Reverting to initial position (no last fragment found).");
+            }
+
             newFragment.SetActive(true);
             
-            // 5. Update internal state and reset slice flag
+            
             m_LoadedFragment = newFragment;
             m_ActiveFragments.Add(m_LoadedFragment);
             HasPerformedSlice = false; 
 
-            // 6. Re-enable plane and ruler visibility (handled by Swift callback, but enforced here too)
+            
             TouchInput.SetPlaneVisibility(true); 
             TouchInput.SetRulerVisibility(true);
             
@@ -345,7 +407,9 @@ namespace Assets.Scripts.Scripts
         }
 
 
-        private void AddSliceComponents(GameObject target, Vector3 sliceOriginWorld, Vector3 sliceNormalWorld, System.Action<GameObject, GameObject> onFinished)
+        private void AddSliceComponents(GameObject target, Vector3 sliceOriginWorld, Vector3 sliceNormalWorld, 
+                                        (Vector3 position, Quaternion rotation) capturedTransform, 
+                                        System.Action<GameObject, GameObject> onFinished)
         {
             if (target == null) return;
 
@@ -378,8 +442,9 @@ namespace Assets.Scripts.Scripts
 
             slice.OnSliceFinished = (fragA, fragB) =>
             {
-                HandleNewFragment(fragA, target.name + "_A");
-                HandleNewFragment(fragB, target.name + "_B");
+                
+                HandleNewFragment(fragA, target.name + "_A", capturedTransform); 
+                HandleNewFragment(fragB, target.name + "_B", capturedTransform); 
                 onFinished?.Invoke(fragA, fragB);
 
                 if (fragA != null || fragB != null)
@@ -389,13 +454,26 @@ namespace Assets.Scripts.Scripts
             slice.ComputeSlice(sliceNormalWorld, sliceOriginWorld);
         }
 
-        private void HandleNewFragment(GameObject fragment, string name)
+        private void HandleNewFragment(GameObject fragment, string name, (Vector3 position, Quaternion rotation) capturedTransform) 
         {
             if (fragment == null) return;
 
             fragment.name = name;
 
-            PositionFragment(fragment);
+            
+            
+            var volumeCamera = Object.FindFirstObjectByType<VolumeCamera>();
+            if (volumeCamera != null)
+            {
+                
+                fragment.transform.SetParent(volumeCamera.transform, true);
+            }
+            
+            
+            fragment.transform.position = capturedTransform.position;
+            fragment.transform.rotation = capturedTransform.rotation;
+            fragment.transform.localScale = fragmentModelScale; 
+            
 
             if (fragment.GetComponent<TouchableObject>() == null)
                 fragment.AddComponent<TouchableObject>();
@@ -411,7 +489,7 @@ namespace Assets.Scripts.Scripts
             
             hoverEffect.Type = VisionOSHoverEffect.EffectType.Highlight;
             hoverEffect.Color = Color.white;
-            hoverEffect.IntensityMultiplier = 1.0f;
+            hoverEffect.IntensityMultiplier = 0.5f;
 
             fragment.SetActive(true);
         }
