@@ -1,4 +1,3 @@
-//OsteotomyPlanLogic.cs
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -269,15 +268,26 @@ namespace Assets.Scripts.Scripts
 
             m_ActiveFragments = currentSetOfFragments;
 
+            // --- START OF ROBUST FILTERING LOGIC ---
             if (m_ActiveFragments.Count > 0 && currentPlanes.Count > 1)
             {
-                float minX = float.MaxValue;
-                float maxX = float.MinValue;
+                
+                // 1. Establish the reference plane and the filtering axis (Normal)
+                GameObject referencePlane = currentPlanes[0];
+                Vector3 filterNormal = referencePlane.transform.up;
+                Vector3 originPosition = referencePlane.transform.position;
+
+                // 2. Calculate the minimum and maximum projection distances of all planes
+                float minProjectionDistance = 0f; // Distance from the first plane to itself is 0
+                float maxProjectionDistance = 0f; 
 
                 foreach (GameObject plane in currentPlanes)
                 {
-                    minX = Mathf.Min(minX, plane.transform.position.x);
-                    maxX = Mathf.Max(maxX, plane.transform.position.x);
+                    // Calculate the distance of the plane from the reference plane along the filterNormal
+                    float currentProjectionDistance = Vector3.Dot(plane.transform.position - originPosition, filterNormal);
+                    
+                    minProjectionDistance = Mathf.Min(minProjectionDistance, currentProjectionDistance);
+                    maxProjectionDistance = Mathf.Max(maxProjectionDistance, currentProjectionDistance);
                 }
 
                 List<GameObject> kept = new List<GameObject>();
@@ -286,25 +296,36 @@ namespace Assets.Scripts.Scripts
                     if (frag == null) continue;
                     MeshRenderer mr = frag.GetComponent<MeshRenderer>();
 
-                    if (mr == null) { kept.Add(frag); continue; }
+                    if (mr == null) 
+                    { 
+                        kept.Add(frag); 
+                        frag.SetActive(true);
+                        continue; 
+                    }
 
-                    float x = mr.bounds.center.x;
+                    // 3. Calculate the fragment's projection distance (D)
+                    Vector3 fragmentCenter = mr.bounds.center;
+                    float fragmentProjectionDistance = Vector3.Dot(fragmentCenter - originPosition, filterNormal);
 
-                    if (x < minX || x > maxX)
+                    // 4. Robust Filter: Keep the fragment if its projection is OUTSIDE the range
+                    if (fragmentProjectionDistance < minProjectionDistance || fragmentProjectionDistance > maxProjectionDistance)
                     {
-                        kept.Add(frag);
+                        kept.Add(frag); // Kept if it's on the 'outside'
                         frag.SetActive(true);
                     }
                     else
                     {
-                        frag.SetActive(false);
+                        frag.SetActive(false); // Discarded if it's in the 'middle'
                     }
                 }
 
                 m_ActiveFragments = kept;
+                Debug.Log($"OsteotomyPlanLogic: Robustly filtered fragments. Kept {m_ActiveFragments.Count} pieces.");
             }
+            // --- END OF ROBUST FILTERING LOGIC ---
             else
             {
+                // If only one plane was used, or if the list is empty, just ensure everything is active
                 foreach (GameObject frag in m_ActiveFragments)
                     if (frag != null) frag.SetActive(true);
             }

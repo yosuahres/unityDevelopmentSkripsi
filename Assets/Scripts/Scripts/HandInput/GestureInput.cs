@@ -43,15 +43,8 @@ public class GestureInput : MonoBehaviour
                     
                     if (touchData.Kind == SpatialPointerKind.IndirectPinch)
                     {
-                        
                         UnityEngine.Vector3 deltaPosition = touchData.deltaInteractionPosition;
-
-                        
-                        
-                        
-                        
                         bool isPositionLockedForThisObject = selectedObject.CompareTag(SPAWNABLE_TAG) && DataManager.Instance.IsPositionLocked;
-                        
                         
                         if (!selectedObject.CompareTag(ROTATION_ONLY_TAG) && !isPositionLockedForThisObject)
                         {
