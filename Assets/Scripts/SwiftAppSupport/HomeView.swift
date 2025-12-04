@@ -98,7 +98,7 @@ struct HomeView: View {
             ToolbarItem(placement: .bottomOrnament) {
                 VStack {
                     if selection != nil {
-                        Button("Go to Immersive Space") {
+                        Button("Continue to Configuration") {
                             CallCSharpCallback("TriggerConfigurationScene")
                         }
                         .disabled(selection == nil)

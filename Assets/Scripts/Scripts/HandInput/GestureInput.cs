@@ -8,12 +8,13 @@ using UnityEngine.InputSystem.LowLevel;
 public class GestureInput : MonoBehaviour
 {
     private GameObject selectedObject;
-    private UnityEngine.Vector3 lastPosition;
-    private float lastTwoFingerAngle; 
-    private Quaternion lastInputDeviceRotation; 
+    private Quaternion lastInputDeviceRotation; // Only needed for Rotation tracking
 
     [SerializeField]
     private float rotationSpeed = 5f;
+    
+    // Note: The two-finger logic is retained but placed in the 'else if' block
+    private float lastTwoFingerAngle; 
     
     private const string ROTATION_ONLY_TAG = "ROTATEONLY";
 
@@ -34,34 +35,42 @@ public class GestureInput : MonoBehaviour
                 if (touch.phase == TouchPhase.Began)
                 {
                     selectedObject = touchData.targetObject;
-
-                    // the position of the user's pinch
-                    lastPosition = touchData.interactionPosition;
-
-                    // the rotation of the user's pinch
                     lastInputDeviceRotation = touchData.inputDeviceRotation; 
                 }
                 else if (touch.phase == TouchPhase.Moved && selectedObject != null)
                 {
-                    UnityEngine.Vector3 deltaPosition = touchData.interactionPosition - lastPosition;
-
-                    if (!selectedObject.CompareTag(ROTATION_ONLY_TAG) && !DataManager.Instance.IsPositionLocked)
+                    // --- 1. INDIRECT PINCH (Translation/Movement) ---
+                    if (touchData.Kind == SpatialPointerKind.IndirectPinch)
                     {
-                        selectedObject.transform.position += deltaPosition;
-                        Debug.Log($"[GestureInput] Object moved: {selectedObject.name}, New Position: {selectedObject.transform.position}");
+                        // Use the built-in delta for reliable movement tracking
+                        UnityEngine.Vector3 deltaPosition = touchData.deltaInteractionPosition;
+
+                        if (!selectedObject.CompareTag(ROTATION_ONLY_TAG) && !DataManager.Instance.IsPositionLocked)
+                        {
+                            selectedObject.transform.position += deltaPosition;
+                            Debug.Log($"[GestureInput] Object moved (Indirect): {selectedObject.name}, Delta: {deltaPosition}");
+                        }
                     }
-                    Quaternion deltaRotation = Quaternion.Inverse(lastInputDeviceRotation) * touchData.inputDeviceRotation;
                     
-                    float zRoll = deltaRotation.eulerAngles.z;
-                    if (zRoll > 180f) zRoll -= 360f;
-                    selectedObject.transform.Rotate(UnityEngine.Vector3.forward, zRoll, Space.Self);
-                    
-                    lastPosition = touchData.interactionPosition;
-                    lastInputDeviceRotation = touchData.inputDeviceRotation;
+                    // --- 2. DIRECT PINCH (Rotation) ---
+                    else if (touchData.Kind == SpatialPointerKind.DirectPinch)
+                    {
+                        // Calculate the rotation change from the input device's orientation (wrist roll, pitch, yaw)
+                        Quaternion deltaRotation = Quaternion.Inverse(lastInputDeviceRotation) * touchData.inputDeviceRotation;
+                        
+                        // Apply the full 3D rotation change
+                        selectedObject.transform.localRotation *= deltaRotation;
+                        
+                        Debug.Log($"[GestureInput] Object rotated (Direct): {selectedObject.name}");
+
+                        // Update the last rotation for the next frame's delta calculation
+                        lastInputDeviceRotation = touchData.inputDeviceRotation;
+                    }
                 }
             }
         }
         
+        // --- 3. TWO-FINGER INPUT (Scaling or dedicated rotation/translation) ---
         else if (Touch.activeTouches.Count == 2)
         {
             var touch1 = Touch.activeTouches[0];
@@ -81,6 +90,7 @@ public class GestureInput : MonoBehaviour
                 else if ((touch1.phase == TouchPhase.Moved || touch2.phase == TouchPhase.Moved) && selectedObject != null)
                 {
                     float deltaAngle = Mathf.DeltaAngle(lastTwoFingerAngle, currentAngle);
+                    // This uses screen space rotation (e.g., rotating fingers on the surface)
                     selectedObject.transform.Rotate(UnityEngine.Vector3.up, -deltaAngle * rotationSpeed, Space.World);
                     lastTwoFingerAngle = currentAngle;
                 }
