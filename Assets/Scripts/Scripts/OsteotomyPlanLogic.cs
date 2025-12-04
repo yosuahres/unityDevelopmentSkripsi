@@ -267,23 +267,27 @@ namespace Assets.Scripts.Scripts
             }
 
             m_ActiveFragments = currentSetOfFragments;
-
-            // --- START OF ROBUST FILTERING LOGIC ---
             if (m_ActiveFragments.Count > 0 && currentPlanes.Count > 1)
             {
+                // Calculate the Average Filtering Normal (the "ruler" direction)
+                Vector3 sumNormal = Vector3.zero;
+                foreach (GameObject plane in currentPlanes)
+                {
+                    sumNormal += plane.transform.up;
+                }
+                Vector3 filterNormal = sumNormal.normalized;
                 
-                // 1. Establish the reference plane and the filtering axis (Normal)
                 GameObject referencePlane = currentPlanes[0];
-                Vector3 filterNormal = referencePlane.transform.up;
                 Vector3 originPosition = referencePlane.transform.position;
-
-                // 2. Calculate the minimum and maximum projection distances of all planes
-                float minProjectionDistance = 0f; // Distance from the first plane to itself is 0
+                
+                // Calculate the minimum and maximum projection distances of all planes
+                // This defines the boundary of the 'discard' zone along the filterNormal axis.
+                float minProjectionDistance = 0f; 
                 float maxProjectionDistance = 0f; 
 
                 foreach (GameObject plane in currentPlanes)
                 {
-                    // Calculate the distance of the plane from the reference plane along the filterNormal
+                    // Projection: Vector3.Dot(Vector that goes from origin to plane, Filter Normal)
                     float currentProjectionDistance = Vector3.Dot(plane.transform.position - originPosition, filterNormal);
                     
                     minProjectionDistance = Mathf.Min(minProjectionDistance, currentProjectionDistance);
@@ -303,29 +307,28 @@ namespace Assets.Scripts.Scripts
                         continue; 
                     }
 
-                    // 3. Calculate the fragment's projection distance (D)
+                    // Calculate the fragment's projection distance (D)
                     Vector3 fragmentCenter = mr.bounds.center;
                     float fragmentProjectionDistance = Vector3.Dot(fragmentCenter - originPosition, filterNormal);
 
-                    // 4. Robust Filter: Keep the fragment if its projection is OUTSIDE the range
+                    // Keep the fragment if its projection is OUTSIDE the range
+                    // D < Min or D > Max means it's one of the end pieces.
                     if (fragmentProjectionDistance < minProjectionDistance || fragmentProjectionDistance > maxProjectionDistance)
                     {
-                        kept.Add(frag); // Kept if it's on the 'outside'
+                        kept.Add(frag);
                         frag.SetActive(true);
                     }
                     else
                     {
-                        frag.SetActive(false); // Discarded if it's in the 'middle'
+                        frag.SetActive(false); 
                     }
                 }
 
                 m_ActiveFragments = kept;
-                Debug.Log($"OsteotomyPlanLogic: Robustly filtered fragments. Kept {m_ActiveFragments.Count} pieces.");
+                Debug.Log($"OsteotomyPlanLogic: Robustly filtered fragments using Average Normal. Kept {m_ActiveFragments.Count} pieces.");
             }
-            // --- END OF ROBUST FILTERING LOGIC ---
             else
             {
-                // If only one plane was used, or if the list is empty, just ensure everything is active
                 foreach (GameObject frag in m_ActiveFragments)
                     if (frag != null) frag.SetActive(true);
             }
@@ -333,6 +336,7 @@ namespace Assets.Scripts.Scripts
             TouchInput.SetPlaneVisibility(false);
             TouchInput.SetRulerVisibility(false);
         }
+
 
         [UnityEngine.Scripting.Preserve]
         public void RevertToUncutModel()
