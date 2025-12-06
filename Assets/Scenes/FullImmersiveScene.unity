@@ -445,13 +445,19 @@ MonoBehaviour:
     onCompleted:
       m_PersistentCalls:
         m_Calls: []
-  gizmoPrefab: {fileID: 919132149155446097, guid: 2646cf277bc3248c38a74c7b81ef2ea4, type: 3}
-  gizmoColor: {r: 1, g: 0, b: 0, a: 1}
+  gizmoPrefabZ: {fileID: 919132149155446097, guid: 2646cf277bc3248c38a74c7b81ef2ea4, type: 3}
+  gizmoColorZ: {r: 1, g: 0, b: 0, a: 1}
   gizmoZRotation: 90
+  gizmoPrefabX: {fileID: 919132149155446097, guid: 2646cf277bc3248c38a74c7b81ef2ea4, type: 3}
+  gizmoColorX: {r: 0, g: 1, b: 0, a: 1}
+  gizmoXRotation: 0
   gizmoScaleFactor: 45
-  gizmoViewOffsetZ: 0
-  gizmoViewOffsetY: 0
-  gizmoViewOffsetX: 65
+  gizmoViewOffsetX_ZAxis: 65
+  gizmoViewOffsetY_ZAxis: 0
+  gizmoViewOffsetZ_ZAxis: 0
+  gizmoViewOffsetX_XAxis: 0
+  gizmoViewOffsetY_XAxis: -65
+  gizmoViewOffsetZ_XAxis: 0
 --- !u!114 &424541898
 MonoBehaviour:
   m_ObjectHideFlags: 0

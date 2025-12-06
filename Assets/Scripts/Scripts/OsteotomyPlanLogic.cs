@@ -20,17 +20,33 @@ namespace Assets.Scripts.Scripts
         public SliceOptions osteotomySliceOptions;
         public CallbackOptions osteotomyCallbackOptions; 
 
-        // === GIZMO FIELDS UPDATED ===
-        [Header("Gizmo Setup")]
-        public GameObject gizmoPrefab; // Assign the gizmo model prefab in the Inspector
-        public Color gizmoColor = Color.red; // NEW FIELD: Color for the gizmo (Defaulting to Red)
-        public float gizmoZRotation = 90f; // The required Z-axis rotation angle
-        public float gizmoScaleFactor = 100f; // Increased scale for visibility check
-        public float gizmoViewOffsetZ = 0f; // NEW FIELD: Offset magnitude to move gizmo forward (towards the user/camera)
-        public float gizmoViewOffsetY = 0f; // NEW FIELD: Offset magnitude to move gizmo upward
-        public float gizmoViewOffsetX = 0f; // NEW FIELD: Offset magnitude to move gizmo sideways
-        private GameObject m_LoadedGizmo;
-        // ============================
+        // === GIZMO FIELDS MODIFIED FOR COMPLETELY INDEPENDENT OFFSETS ===
+        [Header("Gizmo Setup (Z-Axis Ring)")]
+        public GameObject gizmoPrefabZ; 
+        public Color gizmoColorZ = Color.red; 
+        public float gizmoZRotation = 90f; 
+
+        [Header("Gizmo Setup (X-Axis Ring)")]
+        public GameObject gizmoPrefabX; 
+        public Color gizmoColorX = Color.green; 
+        public float gizmoXRotation = 0f; 
+
+        [Header("Common Gizmo Settings")]
+        public float gizmoScaleFactor = 100f; 
+        
+        [Header("Z-Axis Ring Specific Offsets")]
+        public float gizmoViewOffsetX_ZAxis = 0f; // NEW: X-offset for Z-ring
+        public float gizmoViewOffsetY_ZAxis = 0f; // NEW: Y-offset for Z-ring
+        public float gizmoViewOffsetZ_ZAxis = 0f; // NEW: Z-offset for Z-ring
+
+        [Header("X-Axis Ring Specific Offsets")]
+        public float gizmoViewOffsetX_XAxis = 0f; // NEW: X-offset for X-ring
+        public float gizmoViewOffsetY_XAxis = 0f; // NEW: Y-offset for X-ring
+        public float gizmoViewOffsetZ_XAxis = 0f; // NEW: Z-offset for X-ring
+
+        private GameObject m_LoadedGizmoZ; 
+        private GameObject m_LoadedGizmoX; 
+        // ============================================
 
         private GameObject m_LoadedFragment;
         private GameObject m_WholeModel; 
@@ -106,7 +122,7 @@ namespace Assets.Scripts.Scripts
             m_ActiveFragments.Add(m_LoadedFragment);
             
             // ======================================
-            // CENTER AND ROTATE GIZMO ON START
+            // CENTER AND ROTATE BOTH GIZMOS ON START
             // ======================================
             SetupAndCenterGizmo(m_LoadedFragment);
             // ======================================
@@ -130,43 +146,33 @@ namespace Assets.Scripts.Scripts
         }
 
         /// <summary>
-        /// Centers the gizmo on the fragment's visible mesh bounds, adds Z-offset, and applies Z-rotation.
-        /// Includes URP color compatibility.
+        /// Instantiates, centers, parents, colors, and rotates a single gizmo instance.
         /// </summary>
-        /// <param name="fragment">The fragment model to parent the gizmo to.</param>
-        private void SetupAndCenterGizmo(GameObject fragment)
+        private void InitializeAndPositionGizmo(GameObject gizmoPrefab, ref GameObject loadedGizmoInstance, GameObject fragment, Color color, float rotationAngle, string rotationAxis, float offsetX, float offsetY, float offsetZ)
         {
             if (gizmoPrefab == null)
             {
-                Debug.LogWarning("Gizmo Prefab is not assigned. Skipping gizmo setup.");
+                Debug.LogWarning($"Gizmo Prefab for {rotationAxis}-Axis is not assigned. Skipping gizmo setup.");
                 return;
             }
 
-            if (m_LoadedGizmo == null)
+            if (loadedGizmoInstance == null)
             {
-                m_LoadedGizmo = Instantiate(gizmoPrefab);
+                loadedGizmoInstance = Instantiate(gizmoPrefab);
             }
 
-            // **********************************
-            // ENHANCED CODE TO SET GIZMO COLOR FOR URP
-            // **********************************
-            MeshRenderer gizmoRenderer = m_LoadedGizmo.GetComponentInChildren<MeshRenderer>();
+            // --- Apply Color for URP compatibility ---
+            MeshRenderer gizmoRenderer = loadedGizmoInstance.GetComponentInChildren<MeshRenderer>();
             if (gizmoRenderer != null && gizmoRenderer.material != null)
             {
-                // Get the material instance
                 Material mat = gizmoRenderer.material;
-                
-                // 1. Try setting the common URP property: "_BaseColor" (PBR workflow)
                 if (mat.HasProperty("_BaseColor"))
                 {
-                    mat.SetColor("_BaseColor", gizmoColor);
-                    Debug.Log($"Gizmo color set using URP property: _BaseColor to {gizmoColor}");
+                    mat.SetColor("_BaseColor", color);
                 }
-                // 2. Try setting the common Standard/Legacy property: "_Color"
                 else if (mat.HasProperty("_Color"))
                 {
-                    mat.SetColor("_Color", gizmoColor);
-                    Debug.Log($"Gizmo color set using Standard property: _Color to {gizmoColor}");
+                    mat.SetColor("_Color", color);
                 }
                 else
                 {
@@ -177,9 +183,10 @@ namespace Assets.Scripts.Scripts
             {
                 Debug.LogWarning("Gizmo model is missing a MeshRenderer or Material. Cannot set color.");
             }
-            // **********************************
-
+            // --- End Apply Color ---
+            
             MeshRenderer fragmentRenderer = fragment.GetComponent<MeshRenderer>();
+            Vector3 finalLocalPosition;
 
             if (fragmentRenderer != null)
             {
@@ -189,35 +196,71 @@ namespace Assets.Scripts.Scripts
                 // 2. Convert that WORLD center to LOCAL space, relative to the fragment (the parent)
                 Vector3 localCenterOffset = fragment.transform.InverseTransformPoint(worldCenter);
                 
-                // 3. APPLY THE NEW VIEW OFFSET ALONG THE LOCAL Z-AXIS
-                localCenterOffset += new Vector3(gizmoViewOffsetX, gizmoViewOffsetY, gizmoViewOffsetZ);
-                
-                // 4. Parent the gizmo to the fragment
-                m_LoadedGizmo.transform.SetParent(fragment.transform, false); 
-                
-                // 5. Set the gizmo's final local position
-                m_LoadedGizmo.transform.localPosition = localCenterOffset; 
-                
-                // 6. Set the scale
-                m_LoadedGizmo.transform.localScale = Vector3.one * gizmoScaleFactor; 
-                
-                // 7. Apply the required local Z-axis rotation
-                m_LoadedGizmo.transform.localRotation = Quaternion.identity;
-                m_LoadedGizmo.transform.Rotate(0, 0, gizmoZRotation, Space.Self); 
+                // 3. APPLY THE NEW X, Y, and Z VIEW OFFSETS 
+                finalLocalPosition = localCenterOffset + new Vector3(offsetX, offsetY, offsetZ);
             }
             else
             {
-                Debug.LogError("Fragment model is missing a MeshRenderer. Cannot calculate center for gizmo. Falling back to pivot.");
-                
-                // Fallback: Parent and use pivot (Vector3.zero) + View Offset
-                m_LoadedGizmo.transform.SetParent(fragment.transform, false); 
-                m_LoadedGizmo.transform.localPosition = new Vector3(gizmoViewOffsetX, gizmoViewOffsetY, gizmoViewOffsetZ); // Added offset to fallback
-                m_LoadedGizmo.transform.localScale = Vector3.one * gizmoScaleFactor; 
-                m_LoadedGizmo.transform.localRotation = Quaternion.identity;
-                m_LoadedGizmo.transform.Rotate(0, 0, gizmoZRotation, Space.Self); 
+                // Fallback: Use pivot (Vector3.zero) + X, Y, Z Offsets
+                finalLocalPosition = new Vector3(offsetX, offsetY, offsetZ);
+                Debug.LogError("Fragment model is missing a MeshRenderer. Gizmo using pivot fallback.");
             }
 
-            m_LoadedGizmo.SetActive(true);
+            // 4. Parent, position, and scale (common to both)
+            loadedGizmoInstance.transform.SetParent(fragment.transform, false); 
+            loadedGizmoInstance.transform.localPosition = finalLocalPosition; 
+            loadedGizmoInstance.transform.localScale = Vector3.one * gizmoScaleFactor; 
+            
+            // 5. Apply the required local rotation based on the axis
+            loadedGizmoInstance.transform.localRotation = Quaternion.identity;
+            
+            switch (rotationAxis.ToUpper())
+            {
+                case "Z":
+                    loadedGizmoInstance.transform.Rotate(0, 0, rotationAngle, Space.Self); 
+                    break;
+                case "X":
+                    loadedGizmoInstance.transform.Rotate(rotationAngle, 0, 0, Space.Self); 
+                    break;
+                default:
+                    break;
+            }
+
+            loadedGizmoInstance.SetActive(true);
+        }
+
+
+        /// <summary>
+        /// Centers ALL gizmos on the fragment's visible mesh bounds, adds offset, and applies rotation.
+        /// </summary>
+        /// <param name="fragment">The fragment model to parent the gizmo to.</param>
+        private void SetupAndCenterGizmo(GameObject fragment)
+        {
+            // Setup Z-Axis Gizmo (using independent X, Y, Z offsets)
+            InitializeAndPositionGizmo(
+                gizmoPrefabZ, 
+                ref m_LoadedGizmoZ, 
+                fragment, 
+                gizmoColorZ, 
+                gizmoZRotation, 
+                "Z",
+                gizmoViewOffsetX_ZAxis,
+                gizmoViewOffsetY_ZAxis, // INDEPENDENT Y
+                gizmoViewOffsetZ_ZAxis
+            );
+
+            // Setup X-Axis Gizmo (using independent X, Y, Z offsets)
+            InitializeAndPositionGizmo(
+                gizmoPrefabX, 
+                ref m_LoadedGizmoX, 
+                fragment, 
+                gizmoColorX, 
+                gizmoXRotation, 
+                "X",
+                gizmoViewOffsetX_XAxis,
+                gizmoViewOffsetY_XAxis, // INDEPENDENT Y
+                gizmoViewOffsetZ_XAxis
+            );
         }
 
         private void PositionFragment(GameObject fragment)
@@ -443,16 +486,17 @@ namespace Assets.Scripts.Scripts
             }
 
             // ======================================
-            // RE-CENTER GIZMO ON NEW ACTIVE FRAGMENT
+            // RE-CENTER BOTH GIZMOS ON NEW ACTIVE FRAGMENT
             // ======================================
             if (m_ActiveFragments.Count > 0)
             {
                 // We assume the first fragment in the kept list is the one to follow
                 SetupAndCenterGizmo(m_ActiveFragments[0]);
             }
-            else if (m_LoadedGizmo != null)
+            else 
             {
-                m_LoadedGizmo.SetActive(false);
+                if (m_LoadedGizmoZ != null) m_LoadedGizmoZ.SetActive(false);
+                if (m_LoadedGizmoX != null) m_LoadedGizmoX.SetActive(false); 
             }
             // ======================================
 
@@ -548,7 +592,7 @@ namespace Assets.Scripts.Scripts
             HasPerformedSlice = false; 
 
             // ======================================
-            // RE-CENTER GIZMO ON REVERTED FRAGMENT
+            // RE-CENTER BOTH GIZMOS ON REVERTED FRAGMENT
             // ======================================
             SetupAndCenterGizmo(m_LoadedFragment);
             // ======================================
