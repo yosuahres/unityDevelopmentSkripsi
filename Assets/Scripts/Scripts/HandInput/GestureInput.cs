@@ -6,13 +6,14 @@ using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 using TouchPhase = UnityEngine.InputSystem.TouchPhase;
 using UnityEngine.InputSystem.LowLevel;
 
+
 public class GestureInput : MonoBehaviour
 {
     private GameObject selectedObject;
     private Quaternion lastInputDeviceRotation; 
 
     [SerializeField]
-    private float rotationSpeed = 0.5f;
+    private float rotationSpeed = 0.005f;
     
     private float lastTwoFingerAngle; 
     
@@ -44,7 +45,8 @@ public class GestureInput : MonoBehaviour
                     if (touchData.Kind == SpatialPointerKind.IndirectPinch)
                     {
                         UnityEngine.Vector3 deltaPosition = touchData.deltaInteractionPosition;
-                        bool isPositionLockedForThisObject = selectedObject.CompareTag(SPAWNABLE_TAG) && DataManager.Instance.IsPositionLocked;
+                        
+                        bool isPositionLockedForThisObject = selectedObject.CompareTag(SPAWNABLE_TAG) && DataManager.Instance.IsPositionLocked; 
                         
                         if (!selectedObject.CompareTag(ROTATION_ONLY_TAG) && !isPositionLockedForThisObject)
                         {
@@ -97,7 +99,10 @@ public class GestureInput : MonoBehaviour
                 {
                     float deltaAngle = Mathf.DeltaAngle(lastTwoFingerAngle, currentAngle);
                     
+                    
+                    
                     selectedObject.transform.Rotate(UnityEngine.Vector3.up, -deltaAngle * rotationSpeed, Space.World);
+                    
                     lastTwoFingerAngle = currentAngle;
                 }
             }

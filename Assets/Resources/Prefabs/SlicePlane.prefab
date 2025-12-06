@@ -13,6 +13,8 @@ GameObject:
   - component: {fileID: 1145279530502370431}
   - component: {fileID: 1012924330798243819}
   - component: {fileID: 4617565085443562443}
+  - component: {fileID: 974092686118371731}
+  - component: {fileID: 5967884063628629688}
   m_Layer: 0
   m_Name: SlicePlane
   m_TagString: Untagged
@@ -125,3 +127,32 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1.0000001, y: 1.0000114, z: 1.0000002}
   m_Center: {x: -0.00000023841858, y: 0, z: -0.0000009536743}
+--- !u!114 &974092686118371731
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1593688726762680407}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bec180ed0ef74440b93237e826654f13, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.PolySpatial::Unity.PolySpatial.VisionOSHoverEffect
+  m_Type: 1
+  m_Color: {r: 0, g: 1, b: 0.14495587, a: 1}
+  m_IntensityMultiplier: 0.5
+  m_FadeInDuration: 0
+  m_FadeOutDuration: 0
+--- !u!114 &5967884063628629688
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1593688726762680407}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb3253954b264355a3d7500f55f2655, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.PolySpatial::Unity.PolySpatial.VisionOSGroundingShadow

@@ -1,4 +1,4 @@
-//ControlImmersiveView.swift
+
 import SwiftUI
 import RealityKit
 import UnityFramework
@@ -7,9 +7,9 @@ import PolySpatialRealityKit
 struct ControlImmersiveView: View {
 
     @ObservedObject var appState: AppState
-    @State private var currentPlaneValue: Float = 0.2 
-    @State private var currentMaxPlaneValue: Int = 3 
-    @State private var hasPerformedSlice: Bool = false 
+    @State private var currentPlaneValue: Float = 0.2
+    @State private var currentMaxPlaneValue: Int = 3
+    @State private var hasPerformedSlice: Bool = false
 
     init(appState: AppState = AppState.shared) {
         _appState = ObservedObject(wrappedValue: appState)
@@ -17,7 +17,7 @@ struct ControlImmersiveView: View {
 
     var body: some View {
         ZStack {
-            
+
             VStack (spacing: 20){
                 HStack {
                     Spacer()
@@ -37,13 +37,13 @@ struct ControlImmersiveView: View {
                 Spacer()
             }
 
-            
-            VStack {
-                Spacer() 
-                
-                HStack(alignment: .top, spacing: 80) { 
 
-                    
+            VStack {
+                Spacer()
+
+                HStack(alignment: .top, spacing: 80) {
+
+
                     VStack(alignment: .leading, spacing: 60) {
                         HStack(spacing: 40) {
                             Image(systemName: "ruler.fill")
@@ -74,9 +74,13 @@ struct ControlImmersiveView: View {
                         }
                     }
 
-                    
+
                     VStack(alignment: .center, spacing: 60) {
                         
+                        
+                        Text("Set Plane Width")
+                            .font(.title)
+
                         HStack(spacing: 20) {
                             Button(action: {
                                 currentPlaneValue = max(0.2, currentPlaneValue - 0.05)
@@ -91,7 +95,7 @@ struct ControlImmersiveView: View {
                                 CallCSharpCallback("SetPlaneScale", Int32(currentPlaneValue * 100))
                             })
 
-                            Text(String(format: "%.3f", currentPlaneValue))
+                            Text(String(format: "%.2f", currentPlaneValue))
                                 .font(.system(size: 80, weight: .bold))
                                 .frame(minWidth: 100)
 
@@ -104,8 +108,11 @@ struct ControlImmersiveView: View {
                             }
                             .buttonStyle(.plain)
                         }
+
                         
-                        
+                        Text("Set Max Planes")
+                            .font(.title)
+
                         HStack(spacing: 20) {
                             Button(action: {
                                 currentMaxPlaneValue = max(1, currentMaxPlaneValue - 1)
@@ -134,22 +141,22 @@ struct ControlImmersiveView: View {
                             .buttonStyle(.plain)
                         }
                     }
-                    
-                    
+
+
                     VStack(alignment: .trailing, spacing: 60) {
-                        
+
                         Button(hasPerformedSlice ? "Adjust" : "Slice") {
                             if hasPerformedSlice {
-                                CallCSharpCallback("RevertToUncutModel") 
+                                CallCSharpCallback("RevertToUncutModel")
                                 hasPerformedSlice = false
-                                appState.isPlaneVisible = true 
-                                appState.isRulerVisible = true 
-                                CallCSharpCallback("SetPlaneVisibility", 1) 
+                                appState.isPlaneVisible = true
+                                appState.isRulerVisible = true
+                                CallCSharpCallback("SetPlaneVisibility", 1)
                                 CallCSharpCallback("SetRulerVisibility", 1)
                             } else {
                                 CallCSharpCallback("TriggerSliceModel")
-                                hasPerformedSlice = true 
-                                appState.isPlaneVisible = false 
+                                hasPerformedSlice = true
+                                appState.isPlaneVisible = false
                                 appState.isRulerVisible = false
                             }
                         }
@@ -159,8 +166,8 @@ struct ControlImmersiveView: View {
                         .buttonStyle(.borderedProminent)
                         .controlSize(.extraLarge)
                         .hoverEffect()
-                        
-                        
+
+
                         HStack(spacing: 40) {
                             Image(systemName: appState.isLocked ? "lock.fill" : "lock.open.fill")
                                 .font(.system(size: 60))
@@ -180,11 +187,11 @@ struct ControlImmersiveView: View {
                         }
                     }
                 }
-                .padding(.horizontal, 50) 
+                .padding(.horizontal, 50)
 
-                Spacer() 
+                Spacer()
 
-                
+
                 HStack{
                     Button("Return") {
                         CallCSharpCallback("TriggerHomeScene")

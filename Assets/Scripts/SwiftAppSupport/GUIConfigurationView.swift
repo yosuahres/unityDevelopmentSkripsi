@@ -1,6 +1,6 @@
 import SwiftUI
 import RealityKit
-import UnityFramework 
+import UnityFramework
 import PolySpatialRealityKit
 
 enum SideSelection {
@@ -8,6 +8,7 @@ enum SideSelection {
 }
 
 struct GUIConfigurationView: View {
+    
     @State private var sideSelection: SideSelection? = nil
     @ObservedObject var appState: AppState
 
@@ -16,18 +17,35 @@ struct GUIConfigurationView: View {
     }
     
     var body: some View {
-        VStack {
+        VStack { 
             HStack {
                 
+                
+                VStack {
+                    Button {
+                        CallCSharpCallback("TriggerHomeScene")
+                    } label: {
+                        Image(systemName: "chevron.left")
+                            .font(.largeTitle)
+                    }
+                    .padding(.top, 20)
+                    .padding(.leading, 0)
+                    Spacer()
+                }
+                .padding(.leading, 20)
+
+
                 VStack(alignment: .leading) {
                     Text("RIGHT SIDE")
                         .font(.title2)
-                        .lineLimit(nil) 
+                        .lineLimit(nil)
                         .padding(.top, 20)
                         .padding(.leading, 20)
                     Spacer()
                 }
+                
                 Spacer() 
+                
                 
                 if let modelName = appState.selectedModel {
                     
@@ -43,7 +61,6 @@ struct GUIConfigurationView: View {
                         } placeholder: {
                             ProgressView("Loading \(modelName)...")
                         }
-                        // .frame(width: 400, height: 400) 
                         
                     } else {
                         Text("Error: Could not find or access model file: \(modelName)")
@@ -68,8 +85,8 @@ struct GUIConfigurationView: View {
                     Spacer()
                 }
             }
-            .padding(.horizontal, 50) 
-
+            
+            
         }
         .onAppear {
             if let modelName = appState.selectedModel {
@@ -77,17 +94,8 @@ struct GUIConfigurationView: View {
             }
         }
         .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Button {
-                    CallCSharpCallback("TriggerHomeScene")
-                } label: {
-                    Label("Return to Home", systemImage: "chevron.left")
-                        .labelStyle(.iconOnly)
-                }
-            }
-        }
-        .toolbar {
             ToolbarItem(placement: .bottomOrnament) {
+                
                 VStack(spacing: 12) {
                     HStack {
                         Button("Right") {
@@ -118,11 +126,11 @@ struct GUIConfigurationView: View {
                     Button("Continue") {
                         if sideSelection == .left {
                             appState.selectedSide = "Left"
-                            // swapped because flipped gameobject in GUISlicing.cs
-                            CallCSharpCallback("TriggerRight")
+                            
+                            CallCSharpCallback("TriggerLeft")
                         } else if sideSelection == .right {
                             appState.selectedSide = "Right"
-                            CallCSharpCallback("TriggerLeft")
+                            CallCSharpCallback("TriggerRight")
                         }
                     }
                     .font(.title)

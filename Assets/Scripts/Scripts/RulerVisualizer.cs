@@ -1,5 +1,6 @@
+//rulervisualizer.cs
 using UnityEngine;
-using TMPro; // For TextMeshPro
+using TMPro; 
 using System.Collections.Generic;
 
 public class RulerVisualizer : MonoBehaviour
@@ -9,8 +10,10 @@ public class RulerVisualizer : MonoBehaviour
     public LineRenderer lineRenderer;
     public TextMeshPro textMeshPro; 
 
-    public float rulerWidth = 0.001f; 
+    public float rulerWidth = 0.01f; 
     public Material lineMaterial; 
+    
+    
     private float updateThreshold = 0.001f; 
     private float lastMeasuredDistance = -1f;
 
@@ -20,8 +23,13 @@ public class RulerVisualizer : MonoBehaviour
         UpdateRuler();
     }
 
-    void Update()
-    {
+    // void Update()
+    // {
+        
+    //     UpdateRuler();
+    // }
+
+    void LateUpdate() {
         UpdateRuler();
     }
 
@@ -44,12 +52,17 @@ public class RulerVisualizer : MonoBehaviour
                 GameObject textObj = new GameObject("MeasurementText");
                 textObj.transform.SetParent(transform);
                 textMeshPro = textObj.AddComponent<TextMeshPro>();
-                textMeshPro.fontSize = 0.05f; 
+                
+                // --- MODIFICATIONS FOR SIZE AND BOLDNESS ---
+                textMeshPro.fontSize = 0.1f; 
+                textMeshPro.fontStyle = FontStyles.Bold; // *** Added this line to make the text bold ***
+                textMeshPro.rectTransform.sizeDelta = new Vector2(0.4f, 0.2f); 
+                // ------------------------------------------
+
                 textMeshPro.color = Color.white;
                 textMeshPro.alignment = TextAlignmentOptions.Center;
                 textMeshPro.rectTransform.localPosition = Vector3.zero;
                 textMeshPro.rectTransform.localRotation = Quaternion.identity;
-                textMeshPro.rectTransform.sizeDelta = new Vector2(0.2f, 0.1f); 
             }
         }
 
@@ -60,8 +73,8 @@ public class RulerVisualizer : MonoBehaviour
         else
         {
             lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
-            lineRenderer.startColor = Color.white;
-            lineRenderer.endColor = Color.white;
+            lineRenderer.startColor = Color.yellow;
+            lineRenderer.endColor = Color.yellow;
         }
         lineRenderer.startWidth = rulerWidth;
         lineRenderer.endWidth = rulerWidth;
@@ -95,11 +108,10 @@ public class RulerVisualizer : MonoBehaviour
 
         float currentDistance = Vector3.Distance(p1Pos, p2Pos);
 
-        if (Mathf.Abs(currentDistance - lastMeasuredDistance) > updateThreshold)
-        {
-            lastMeasuredDistance = currentDistance;
-            UpdateMeasurementText(currentDistance);
-        }
+        
+        
+        lastMeasuredDistance = currentDistance;
+        UpdateMeasurementText(currentDistance);
     }
 
     void UpdateMeasurementText(float distance)
@@ -108,12 +120,15 @@ public class RulerVisualizer : MonoBehaviour
         textMeshPro.text = $"{distanceInMm:F1} mm"; 
 
         textMeshPro.rectTransform.position = (startPoint.position + endPoint.position) / 2f;
+        
+        
+        
         textMeshPro.rectTransform.rotation = Quaternion.LookRotation((startPoint.position - endPoint.position).normalized);
         textMeshPro.rectTransform.Rotate(0, 90, 0); 
     }
 
     void OnDestroy()
     {
-        // No tick marks to clear
+        
     }
 }

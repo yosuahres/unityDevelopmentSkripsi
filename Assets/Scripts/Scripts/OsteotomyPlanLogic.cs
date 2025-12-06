@@ -20,6 +20,18 @@ namespace Assets.Scripts.Scripts
         public SliceOptions osteotomySliceOptions;
         public CallbackOptions osteotomyCallbackOptions; 
 
+        // === GIZMO FIELDS UPDATED ===
+        [Header("Gizmo Setup")]
+        public GameObject gizmoPrefab; // Assign the gizmo model prefab in the Inspector
+        public Color gizmoColor = Color.red; // NEW FIELD: Color for the gizmo (Defaulting to Red)
+        public float gizmoZRotation = 90f; // The required Z-axis rotation angle
+        public float gizmoScaleFactor = 100f; // Increased scale for visibility check
+        public float gizmoViewOffsetZ = 0f; // NEW FIELD: Offset magnitude to move gizmo forward (towards the user/camera)
+        public float gizmoViewOffsetY = 0f; // NEW FIELD: Offset magnitude to move gizmo upward
+        public float gizmoViewOffsetX = 0f; // NEW FIELD: Offset magnitude to move gizmo sideways
+        private GameObject m_LoadedGizmo;
+        // ============================
+
         private GameObject m_LoadedFragment;
         private GameObject m_WholeModel; 
         private GameObject m_InitialFragmentPrefab;
@@ -93,6 +105,12 @@ namespace Assets.Scripts.Scripts
 
             m_ActiveFragments.Add(m_LoadedFragment);
             
+            // ======================================
+            // CENTER AND ROTATE GIZMO ON START
+            // ======================================
+            SetupAndCenterGizmo(m_LoadedFragment);
+            // ======================================
+            
             
             if (wholeModelPrefab != null)
             {
@@ -111,6 +129,97 @@ namespace Assets.Scripts.Scripts
             }
         }
 
+        /// <summary>
+        /// Centers the gizmo on the fragment's visible mesh bounds, adds Z-offset, and applies Z-rotation.
+        /// Includes URP color compatibility.
+        /// </summary>
+        /// <param name="fragment">The fragment model to parent the gizmo to.</param>
+        private void SetupAndCenterGizmo(GameObject fragment)
+        {
+            if (gizmoPrefab == null)
+            {
+                Debug.LogWarning("Gizmo Prefab is not assigned. Skipping gizmo setup.");
+                return;
+            }
+
+            if (m_LoadedGizmo == null)
+            {
+                m_LoadedGizmo = Instantiate(gizmoPrefab);
+            }
+
+            // **********************************
+            // ENHANCED CODE TO SET GIZMO COLOR FOR URP
+            // **********************************
+            MeshRenderer gizmoRenderer = m_LoadedGizmo.GetComponentInChildren<MeshRenderer>();
+            if (gizmoRenderer != null && gizmoRenderer.material != null)
+            {
+                // Get the material instance
+                Material mat = gizmoRenderer.material;
+                
+                // 1. Try setting the common URP property: "_BaseColor" (PBR workflow)
+                if (mat.HasProperty("_BaseColor"))
+                {
+                    mat.SetColor("_BaseColor", gizmoColor);
+                    Debug.Log($"Gizmo color set using URP property: _BaseColor to {gizmoColor}");
+                }
+                // 2. Try setting the common Standard/Legacy property: "_Color"
+                else if (mat.HasProperty("_Color"))
+                {
+                    mat.SetColor("_Color", gizmoColor);
+                    Debug.Log($"Gizmo color set using Standard property: _Color to {gizmoColor}");
+                }
+                else
+                {
+                    Debug.LogWarning("Gizmo material does not have a recognized color property (_BaseColor or _Color). Color change may fail.");
+                }
+            }
+            else
+            {
+                Debug.LogWarning("Gizmo model is missing a MeshRenderer or Material. Cannot set color.");
+            }
+            // **********************************
+
+            MeshRenderer fragmentRenderer = fragment.GetComponent<MeshRenderer>();
+
+            if (fragmentRenderer != null)
+            {
+                // 1. Calculate the fragment's center in WORLD space
+                Vector3 worldCenter = fragmentRenderer.bounds.center;
+                
+                // 2. Convert that WORLD center to LOCAL space, relative to the fragment (the parent)
+                Vector3 localCenterOffset = fragment.transform.InverseTransformPoint(worldCenter);
+                
+                // 3. APPLY THE NEW VIEW OFFSET ALONG THE LOCAL Z-AXIS
+                localCenterOffset += new Vector3(gizmoViewOffsetX, gizmoViewOffsetY, gizmoViewOffsetZ);
+                
+                // 4. Parent the gizmo to the fragment
+                m_LoadedGizmo.transform.SetParent(fragment.transform, false); 
+                
+                // 5. Set the gizmo's final local position
+                m_LoadedGizmo.transform.localPosition = localCenterOffset; 
+                
+                // 6. Set the scale
+                m_LoadedGizmo.transform.localScale = Vector3.one * gizmoScaleFactor; 
+                
+                // 7. Apply the required local Z-axis rotation
+                m_LoadedGizmo.transform.localRotation = Quaternion.identity;
+                m_LoadedGizmo.transform.Rotate(0, 0, gizmoZRotation, Space.Self); 
+            }
+            else
+            {
+                Debug.LogError("Fragment model is missing a MeshRenderer. Cannot calculate center for gizmo. Falling back to pivot.");
+                
+                // Fallback: Parent and use pivot (Vector3.zero) + View Offset
+                m_LoadedGizmo.transform.SetParent(fragment.transform, false); 
+                m_LoadedGizmo.transform.localPosition = new Vector3(gizmoViewOffsetX, gizmoViewOffsetY, gizmoViewOffsetZ); // Added offset to fallback
+                m_LoadedGizmo.transform.localScale = Vector3.one * gizmoScaleFactor; 
+                m_LoadedGizmo.transform.localRotation = Quaternion.identity;
+                m_LoadedGizmo.transform.Rotate(0, 0, gizmoZRotation, Space.Self); 
+            }
+
+            m_LoadedGizmo.SetActive(true);
+        }
+
         private void PositionFragment(GameObject fragment)
         {
             Camera mainCamera = Camera.main;
@@ -126,9 +235,9 @@ namespace Assets.Scripts.Scripts
                 fragment.transform.LookAt(mainCamera.transform, mainCamera.transform.up);
 
             if (fragment.name.Contains("Left"))
-                fragment.transform.Rotate(0, 90, -60, Space.Self);
+                fragment.transform.Rotate(0, 90, 0, Space.Self); //-60
             else if (fragment.name.Contains("Right"))
-                fragment.transform.Rotate(0, -90, 60, Space.Self);
+                fragment.transform.Rotate(0, -90, 0, Space.Self); //60
         }
 
         private void PositionWholeModel(GameObject wholeModel, Vector3 referencePosition)
@@ -333,6 +442,20 @@ namespace Assets.Scripts.Scripts
                     if (frag != null) frag.SetActive(true);
             }
 
+            // ======================================
+            // RE-CENTER GIZMO ON NEW ACTIVE FRAGMENT
+            // ======================================
+            if (m_ActiveFragments.Count > 0)
+            {
+                // We assume the first fragment in the kept list is the one to follow
+                SetupAndCenterGizmo(m_ActiveFragments[0]);
+            }
+            else if (m_LoadedGizmo != null)
+            {
+                m_LoadedGizmo.SetActive(false);
+            }
+            // ======================================
+
             TouchInput.SetPlaneVisibility(false);
             TouchInput.SetRulerVisibility(false);
         }
@@ -424,6 +547,11 @@ namespace Assets.Scripts.Scripts
             m_ActiveFragments.Add(m_LoadedFragment);
             HasPerformedSlice = false; 
 
+            // ======================================
+            // RE-CENTER GIZMO ON REVERTED FRAGMENT
+            // ======================================
+            SetupAndCenterGizmo(m_LoadedFragment);
+            // ======================================
             
             TouchInput.SetPlaneVisibility(true); 
             TouchInput.SetRulerVisibility(true);

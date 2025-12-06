@@ -445,6 +445,13 @@ MonoBehaviour:
     onCompleted:
       m_PersistentCalls:
         m_Calls: []
+  gizmoPrefab: {fileID: 919132149155446097, guid: 2646cf277bc3248c38a74c7b81ef2ea4, type: 3}
+  gizmoColor: {r: 1, g: 0, b: 0, a: 1}
+  gizmoZRotation: 90
+  gizmoScaleFactor: 45
+  gizmoViewOffsetZ: 0
+  gizmoViewOffsetY: 0
+  gizmoViewOffsetX: 65
 --- !u!114 &424541898
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -471,7 +478,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6e8306a98f30f421696c3bece4482a38, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GestureInput
-  rotationSpeed: 5
+  rotationSpeed: 0.3
 --- !u!1 &1252617236
 GameObject:
   m_ObjectHideFlags: 0

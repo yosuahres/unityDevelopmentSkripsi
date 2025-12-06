@@ -71,6 +71,11 @@ namespace Assets.Scripts.Scripts
                     return; 
                 }
 
+                if(command == "TriggerHomeScene")
+                {
+                    SceneManager.LoadScene("WindowedListScene");
+                }
+
                 if (command == "TriggerRight")
                 {
                     GameObject rightFrag = slicer.GetRightFragment();
