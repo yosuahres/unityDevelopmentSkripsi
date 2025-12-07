@@ -445,11 +445,11 @@ MonoBehaviour:
     onCompleted:
       m_PersistentCalls:
         m_Calls: []
-  gizmoPrefabZ: {fileID: 919132149155446097, guid: 2646cf277bc3248c38a74c7b81ef2ea4, type: 3}
-  gizmoColorZ: {r: 1, g: 0, b: 0, a: 1}
+  gizmoPrefabZ: {fileID: 7549735976030008896, guid: bfe01327708164be98a58e923767f53c, type: 3}
+  gizmoColorZ: {r: 1, g: 0, b: 0, a: 0.39215687}
   gizmoZRotation: 90
-  gizmoPrefabX: {fileID: 919132149155446097, guid: 2646cf277bc3248c38a74c7b81ef2ea4, type: 3}
-  gizmoColorX: {r: 0, g: 1, b: 0, a: 1}
+  gizmoPrefabX: {fileID: 7549735976030008896, guid: bfe01327708164be98a58e923767f53c, type: 3}
+  gizmoColorX: {r: 0, g: 1, b: 0, a: 0.39215687}
   gizmoXRotation: 0
   gizmoScaleFactor: 45
   gizmoViewOffsetX_ZAxis: 65

@@ -1,4 +1,4 @@
-
+//controlimmersiveview.swift
 import SwiftUI
 import RealityKit
 import UnityFramework
@@ -45,6 +45,8 @@ struct ControlImmersiveView: View {
 
 
                     VStack(alignment: .leading, spacing: 60) {
+                        
+                        
                         HStack(spacing: 40) {
                             Image(systemName: "ruler.fill")
                                 .font(.system(size: 80))
@@ -59,6 +61,7 @@ struct ControlImmersiveView: View {
                             }
                         }
 
+                        
                         HStack(spacing: 40) {
                             Image(systemName: "square.fill")
                                 .font(.system(size: 80))
@@ -70,6 +73,23 @@ struct ControlImmersiveView: View {
                                 Image(systemName: appState.isPlaneVisible ? "eye.fill" : "eye.slash.fill")
                                     .font(.system(size: 80))
                                     .foregroundColor(appState.isPlaneVisible ? .green : .red)
+                            }
+                        }
+                        
+                        
+                        HStack(spacing: 40) {
+                            
+                            Image(systemName: "rotate.3d") 
+                                .font(.system(size: 80))
+
+                            Button(action: {
+                                appState.isGizmoVisible.toggle()
+                                
+                                CallCSharpCallback("SetGizmoVisibility", appState.isGizmoVisible ? 1 : 0)
+                            }) {
+                                Image(systemName: appState.isGizmoVisible ? "eye.fill" : "eye.slash.fill")
+                                    .font(.system(size: 80))
+                                    .foregroundColor(appState.isGizmoVisible ? .green : .red)
                             }
                         }
                     }
@@ -151,13 +171,19 @@ struct ControlImmersiveView: View {
                                 hasPerformedSlice = false
                                 appState.isPlaneVisible = true
                                 appState.isRulerVisible = true
+                                
+                                appState.isGizmoVisible = true 
                                 CallCSharpCallback("SetPlaneVisibility", 1)
                                 CallCSharpCallback("SetRulerVisibility", 1)
+                                CallCSharpCallback("SetGizmoVisibility", 1) 
                             } else {
                                 CallCSharpCallback("TriggerSliceModel")
                                 hasPerformedSlice = true
                                 appState.isPlaneVisible = false
                                 appState.isRulerVisible = false
+                                
+                                appState.isGizmoVisible = false 
+                                CallCSharpCallback("SetGizmoVisibility", 0) 
                             }
                         }
                         .font(.system(size: 80))

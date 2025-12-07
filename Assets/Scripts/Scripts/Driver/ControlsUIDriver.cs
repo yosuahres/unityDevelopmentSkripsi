@@ -1,4 +1,3 @@
-//mark 4 november
 //controlsuidriver.cs
 using System;
 using System.Collections.Generic;
@@ -89,6 +88,13 @@ namespace Assets.Scripts.Scripts
                     bool isVisible = (value == 1);
                     TouchInput.SetRulerVisibility(isVisible);
                     Debug.Log($"[ControlsUIDriver] Received command 'SetRulerVisibility' with value: {value}. Rulers visibility set to: {isVisible}");
+                }
+                else if (command == "SetGizmoVisibility")
+                {
+                    bool isVisible = (value == 1);
+                    var osteotomyPlanLogic = FindFirstObjectByType<OsteotomyPlanLogic>();   
+                    osteotomyPlanLogic.SetGizmoVisibility(isVisible);
+                    Debug.Log($"[ControlsUIDriver] Received command 'SetGizmoVisibility' with value: {value}. Gizmos visibility set to: {isVisible}");
                 }
                 else if (command == "SetMaxPlane")
                 {

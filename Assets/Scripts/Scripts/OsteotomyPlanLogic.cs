@@ -1,3 +1,4 @@
+//osteotomyplanlogic.cs
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -23,12 +24,14 @@ namespace Assets.Scripts.Scripts
         // === GIZMO FIELDS MODIFIED FOR COMPLETELY INDEPENDENT OFFSETS ===
         [Header("Gizmo Setup (Z-Axis Ring)")]
         public GameObject gizmoPrefabZ; 
-        public Color gizmoColorZ = Color.red; 
+        // MODIFIED: Lowered opacity to 50% (Alpha = 0.5f)
+        public Color gizmoColorZ = new Color(1.0f, 0f, 0f, 0.5f); 
         public float gizmoZRotation = 90f; 
 
         [Header("Gizmo Setup (X-Axis Ring)")]
         public GameObject gizmoPrefabX; 
-        public Color gizmoColorX = Color.green; 
+        // MODIFIED: Lowered opacity to 50% (Alpha = 0.5f)
+        public Color gizmoColorX = new Color(0f, 1.0f, 0f, 0.5f); 
         public float gizmoXRotation = 0f; 
 
         [Header("Common Gizmo Settings")]
@@ -168,11 +171,13 @@ namespace Assets.Scripts.Scripts
                 Material mat = gizmoRenderer.material;
                 if (mat.HasProperty("_BaseColor"))
                 {
-                    mat.SetColor("_BaseColor", color);
+                    // This sets the color, including the 0.5f alpha value defined in the field
+                    mat.SetColor("_BaseColor", color); 
                 }
                 else if (mat.HasProperty("_Color"))
                 {
-                    mat.SetColor("_Color", color);
+                    // This sets the color, including the 0.5f alpha value defined in the field
+                    mat.SetColor("_Color", color); 
                 }
                 else
                 {
@@ -342,6 +347,25 @@ namespace Assets.Scripts.Scripts
             }
 
             Debug.LogError("OsteotomyPlanLogic: Convex MeshCollider FAILED after all retries.");
+        }
+
+        /// <summary>
+        /// Toggles the active state of the loaded gizmo GameObjects.
+        /// </summary>
+        /// <param name="isVisible">True to show gizmos, false to hide them.</param>
+        [UnityEngine.Scripting.Preserve]
+        public void SetGizmoVisibility(bool isVisible)
+        {
+            if (m_LoadedGizmoZ != null)
+            {
+                m_LoadedGizmoZ.SetActive(isVisible);
+                Debug.Log($"OsteotomyPlanLogic: SetGizmoVisibility Z set to {isVisible}");
+            }
+            if (m_LoadedGizmoX != null)
+            {
+                m_LoadedGizmoX.SetActive(isVisible);
+                Debug.Log($"OsteotomyPlanLogic: SetGizmoVisibility X set to {isVisible}");
+            }
         }
 
 
