@@ -1,4 +1,4 @@
-//controlsuidriver.cs
+// controlsuidriver.cs 
 using System;
 using System.Collections.Generic;
 using AOT;
@@ -92,9 +92,15 @@ namespace Assets.Scripts.Scripts
                 else if (command == "SetGizmoVisibility")
                 {
                     bool isVisible = (value == 1);
-                    var osteotomyPlanLogic = FindFirstObjectByType<OsteotomyPlanLogic>();   
-                    osteotomyPlanLogic.SetGizmoVisibility(isVisible);
-                    Debug.Log($"[ControlsUIDriver] Received command 'SetGizmoVisibility' with value: {value}. Gizmos visibility set to: {isVisible}");
+                    var gizmoVisualizer = FindFirstObjectByType<GizmoVisualizer>();   
+                    if (gizmoVisualizer != null)
+                    {
+                        gizmoVisualizer.SetGizmoVisibility(isVisible);
+                    }
+                    else
+                    {
+                        Debug.LogWarning("[ControlsUIDriver] GizmoVisualizer not found in scene.");
+                    }
                 }
                 else if (command == "SetMaxPlane")
                 {

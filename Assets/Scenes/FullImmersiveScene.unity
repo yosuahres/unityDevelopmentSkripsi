@@ -349,6 +349,7 @@ GameObject:
   - component: {fileID: 424541893}
   - component: {fileID: 424541896}
   - component: {fileID: 424541897}
+  - component: {fileID: 424541900}
   - component: {fileID: 424541899}
   - component: {fileID: 424541898}
   m_Layer: 0
@@ -445,19 +446,7 @@ MonoBehaviour:
     onCompleted:
       m_PersistentCalls:
         m_Calls: []
-  gizmoPrefabZ: {fileID: 7549735976030008896, guid: bfe01327708164be98a58e923767f53c, type: 3}
-  gizmoColorZ: {r: 1, g: 0, b: 0, a: 0.39215687}
-  gizmoZRotation: 90
-  gizmoPrefabX: {fileID: 7549735976030008896, guid: bfe01327708164be98a58e923767f53c, type: 3}
-  gizmoColorX: {r: 0, g: 1, b: 0, a: 0.39215687}
-  gizmoXRotation: 0
-  gizmoScaleFactor: 45
-  gizmoViewOffsetX_ZAxis: 65
-  gizmoViewOffsetY_ZAxis: 0
-  gizmoViewOffsetZ_ZAxis: 0
-  gizmoViewOffsetX_XAxis: 0
-  gizmoViewOffsetY_XAxis: -65
-  gizmoViewOffsetZ_XAxis: 0
+  gizmoVisualizer: {fileID: 424541900}
 --- !u!114 &424541898
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -485,6 +474,31 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GestureInput
   rotationSpeed: 0.3
+--- !u!114 &424541900
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 424541892}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 211a9733ff7be4940989301111f575e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Assets.Scripts.Scripts.GizmoVisualizer
+  gizmoPrefabZ: {fileID: 7549735976030008896, guid: bfe01327708164be98a58e923767f53c, type: 3}
+  gizmoColorZ: {r: 1, g: 0, b: 0, a: 0.5}
+  gizmoZRotation: 90
+  gizmoPrefabX: {fileID: 7549735976030008896, guid: bfe01327708164be98a58e923767f53c, type: 3}
+  gizmoColorX: {r: 0, g: 1, b: 0, a: 0.5}
+  gizmoXRotation: 0
+  gizmoScaleFactor: 45
+  gizmoViewOffsetX_ZAxis: 65
+  gizmoViewOffsetY_ZAxis: 0
+  gizmoViewOffsetZ_ZAxis: 0
+  gizmoViewOffsetX_XAxis: 0
+  gizmoViewOffsetY_XAxis: -65
+  gizmoViewOffsetZ_XAxis: 0
 --- !u!1 &1252617236
 GameObject:
   m_ObjectHideFlags: 0
