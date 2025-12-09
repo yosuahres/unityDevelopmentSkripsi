@@ -116,7 +116,7 @@ struct ControlImmersiveView: View {
                             })
 
                             Text(String(format: "%.2f", currentPlaneValue))
-                                .font(.system(size: 80, weight: .bold))
+                                .font(.system(size: 50, weight: .bold))
                                 .frame(minWidth: 100)
 
                             Button(action: {

@@ -24,12 +24,6 @@ namespace Assets.Scripts.Scripts
         
         [Header("Gizmo Component")]
         public GizmoVisualizer gizmoVisualizer; 
-
-        
-        
-        
-        
-
         private GameObject m_LoadedFragment;
         private GameObject m_WholeModel;
         private GameObject m_InitialFragmentPrefab;

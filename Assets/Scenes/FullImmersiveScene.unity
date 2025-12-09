@@ -486,12 +486,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 211a9733ff7be4940989301111f575e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Scripts.Scripts.GizmoVisualizer
-  gizmoPrefabZ: {fileID: 7549735976030008896, guid: bfe01327708164be98a58e923767f53c, type: 3}
+  gizmoPrefabZ: {fileID: 919132149155446097, guid: 2646cf277bc3248c38a74c7b81ef2ea4, type: 3}
   gizmoColorZ: {r: 1, g: 0, b: 0, a: 0.5}
   gizmoZRotation: 90
-  gizmoPrefabX: {fileID: 7549735976030008896, guid: bfe01327708164be98a58e923767f53c, type: 3}
+  gizmoPrefabX: {fileID: 919132149155446097, guid: 2646cf277bc3248c38a74c7b81ef2ea4, type: 3}
   gizmoColorX: {r: 0, g: 1, b: 0, a: 0.5}
   gizmoXRotation: 0
+  cylinderPrefab: {fileID: 1437054715619624019, guid: fcde0bdc53de047cbab97bea06a8094a, type: 3}
+  cylinderColorY: {r: 0.011764706, g: 1, b: 0, a: 1}
+  cylinderScale: 10
+  cylinderColorRotated: {r: 1, g: 0, b: 0, a: 1}
+  cylinderRotationAngle: 90
+  cylinderScaleRotated: 10
+  cylinderViewOffsetX_YAxis: 0
+  cylinderViewOffsetY_YAxis: 10
+  cylinderViewOffsetZ_YAxis: 0
+  cylinderViewOffsetX_Rotated: -20
+  cylinderViewOffsetY_Rotated: 0
+  cylinderViewOffsetZ_Rotated: 0
   gizmoScaleFactor: 45
   gizmoViewOffsetX_ZAxis: 65
   gizmoViewOffsetY_ZAxis: 0
