@@ -21,10 +21,16 @@ namespace Assets.Scripts.Scripts
         public float cylinderScale = 50f;
 
         
-        [Header("Cylinder Setup (Rotated 90 Deg)")]
+        [Header("Cylinder Setup (Rotated Z-Axis)")]
         public GameObject cylinderPrefabRotated; 
         public Color cylinderColorRotated = new Color(1.0f, 0.1f, 1.0f, 0.5f); 
-        public float cylinderRotationAngle = 90f; 
+        
+        [Tooltip("The Z-axis rotation angle for the cylinder when the 'left' fragment is selected.")]
+        public float LeftCylinderRotationAngle = 90f; 
+        
+        [Tooltip("The Z-axis rotation angle for the cylinder when the 'right' fragment is selected.")]
+        public float RightCylinderRotationAngle = -90f; 
+
         public float cylinderScaleRotated = 50f; 
         
         
@@ -33,10 +39,30 @@ namespace Assets.Scripts.Scripts
         public float cylinderViewOffsetY_YAxis = 0f;
         public float cylinderViewOffsetZ_YAxis = 0f;
 
-        [Header("Cylinder Rotated Offsets")]
-        public float cylinderViewOffsetX_Rotated = 0f;
-        public float cylinderViewOffsetY_Rotated = 0f;
-        public float cylinderViewOffsetZ_Rotated = 0f;
+        // --- MODIFICATION START ---
+        [Header("Cylinder Rotated Offsets (Left Fragment)")]
+        [Tooltip("X-offset for the rotated cylinder when the left fragment is active.")]
+        public float cylinderViewOffsetX_RotatedLeft = 0f;
+        [Tooltip("Y-offset for the rotated cylinder when the left fragment is active.")]
+        public float cylinderViewOffsetY_RotatedLeft = 0f;
+        [Tooltip("Z-offset for the rotated cylinder when the left fragment is active.")]
+        public float cylinderViewOffsetZ_RotatedLeft = 0f;
+        
+        [Header("Cylinder Rotated Offsets (Right Fragment)")]
+        [Tooltip("X-offset for the rotated cylinder when the right fragment is active.")]
+        public float cylinderViewOffsetX_RotatedRight = 0f;
+        [Tooltip("Y-offset for the rotated cylinder when the right fragment is active.")]
+        public float cylinderViewOffsetY_RotatedRight = 0f;
+        [Tooltip("Z-offset for the rotated cylinder when the right fragment is active.")]
+        public float cylinderViewOffsetZ_RotatedRight = 0f;
+        
+        // Removed original Cylinder Rotated Offsets
+        // [Header("Cylinder Rotated Offsets")]
+        // public float cylinderViewOffsetX_Rotated = 0f;
+        // public float cylinderViewOffsetY_Rotated = 0f;
+        // public float cylinderViewOffsetZ_Rotated = 0f;
+        // --- MODIFICATION END ---
+
 
         [Header("Common Gizmo Settings")]
         public float gizmoScaleFactor = 100f;
@@ -243,20 +269,56 @@ namespace Assets.Scripts.Scripts
             );
             
             
+            float finalCylinderRotationAngle = LeftCylinderRotationAngle; // Default 
+            float finalCylinderOffsetX = cylinderViewOffsetX_RotatedLeft;
+            float finalCylinderOffsetY = cylinderViewOffsetY_RotatedLeft;
+            float finalCylinderOffsetZ = cylinderViewOffsetZ_RotatedLeft;
+
+
+            // Check the selected side from DataManager and select the appropriate rotation and offset variables
+            if (DataManager.Instance != null)
+            {
+                switch (DataManager.Instance.SelectedSide)
+                {
+                    case "left":
+                        finalCylinderRotationAngle = LeftCylinderRotationAngle;
+                        finalCylinderOffsetX = cylinderViewOffsetX_RotatedLeft;
+                        finalCylinderOffsetY = cylinderViewOffsetY_RotatedLeft;
+                        finalCylinderOffsetZ = cylinderViewOffsetZ_RotatedLeft;
+                        Debug.Log($"GizmoVisualizer: Selected side is 'left'. Rotated cylinder rotation: {finalCylinderRotationAngle}, Offset: ({finalCylinderOffsetX}, {finalCylinderOffsetY}, {finalCylinderOffsetZ})");
+                        break;
+                    case "right":
+                        finalCylinderRotationAngle = RightCylinderRotationAngle;
+                        finalCylinderOffsetX = cylinderViewOffsetX_RotatedRight;
+                        finalCylinderOffsetY = cylinderViewOffsetY_RotatedRight;
+                        finalCylinderOffsetZ = cylinderViewOffsetZ_RotatedRight;
+                        Debug.Log($"GizmoVisualizer: Selected side is 'right'. Rotated cylinder rotation: {finalCylinderRotationAngle}, Offset: ({finalCylinderOffsetX}, {finalCylinderOffsetY}, {finalCylinderOffsetZ})");
+                        break;
+                    default:
+                        Debug.LogWarning($"GizmoVisualizer: DataManager SelectedSide is not set/recognized ('{DataManager.Instance.SelectedSide}'). Using default Left settings.");
+                        break;
+                }
+            }
+            else
+            {
+                Debug.LogError("GizmoVisualizer: DataManager Instance is null. Cannot determine selected side for cylinder setup.");
+            }
             
+            // Initialize the rotated cylinder using the calculated rotation and offsets
             InitializeAndPositionCylinder(
                 cylinderPrefabRotated, 
                 ref m_LoadedCylinderRotated, 
                 fragment,
                 cylinderColorRotated, 
                 cylinderScaleRotated, 
-                cylinderViewOffsetX_Rotated, 
-                cylinderViewOffsetY_Rotated, 
-                cylinderViewOffsetZ_Rotated, 
+                finalCylinderOffsetX, // Use calculated X-offset
+                finalCylinderOffsetY, // Use calculated Y-offset
+                finalCylinderOffsetZ, // Use calculated Z-offset
                 0f, 
                 0f, 
-                cylinderRotationAngle 
+                finalCylinderRotationAngle // Use calculated Z-rotation
             );
+
 
             // FIX: Removed SetCylinderVisibility(true) from here.
             // The cylinder's visibility is managed by the Swift lock button state.

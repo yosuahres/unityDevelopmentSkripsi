@@ -497,14 +497,18 @@ MonoBehaviour:
   cylinderScale: 10
   cylinderPrefabRotated: {fileID: 1437054715619624019, guid: fcde0bdc53de047cbab97bea06a8094a, type: 3}
   cylinderColorRotated: {r: 1, g: 0, b: 0, a: 1}
-  cylinderRotationAngle: 90
+  LeftCylinderRotationAngle: 90
+  RightCylinderRotationAngle: 90
   cylinderScaleRotated: 10
   cylinderViewOffsetX_YAxis: 0
   cylinderViewOffsetY_YAxis: 10
   cylinderViewOffsetZ_YAxis: 0
-  cylinderViewOffsetX_Rotated: -20
-  cylinderViewOffsetY_Rotated: 0
-  cylinderViewOffsetZ_Rotated: 0
+  cylinderViewOffsetX_RotatedLeft: -20
+  cylinderViewOffsetY_RotatedLeft: 0
+  cylinderViewOffsetZ_RotatedLeft: 0
+  cylinderViewOffsetX_RotatedRight: 25
+  cylinderViewOffsetY_RotatedRight: 0
+  cylinderViewOffsetZ_RotatedRight: 0
   gizmoScaleFactor: 45
   gizmoViewOffsetX_ZAxis: 65
   gizmoViewOffsetY_ZAxis: 0

@@ -82,17 +82,14 @@ namespace Assets.Scripts.Scripts
                     if (rightFrag != null)
                     {
                         DataManager.Instance.SelectedFragment = rightFrag;
-                        rightFrag.tag = TouchInput.SPAWNABLE_TAG; // Ensure tag is set
-                        Debug.Log($"GUIDriver: SelectedFragment '{rightFrag.name}' tag set to '{rightFrag.tag}' before DontDestroyOnLoad.");
-
+                        rightFrag.tag = TouchInput.SPAWNABLE_TAG; 
+                        DataManager.Instance.SelectedSide = "right";
                         DontDestroyOnLoad(rightFrag);
-
                         if (slicer.GetLeftFragment() != null) Destroy(slicer.GetLeftFragment());
                         if (slicer.loadedInstance != null) Destroy(slicer.loadedInstance);
                     }
 
-                    Debug.Log("GUIDriver: Stored Right Fragment in DataManager. Loading immersive scene.");
-                    Destroy(slicer.gameObject); // Destroy the slicer object before loading the new scene
+                    Destroy(slicer.gameObject); 
                     self.TriggerImmersiveScene();
                 }
                 
@@ -102,16 +99,13 @@ namespace Assets.Scripts.Scripts
                     if (leftFrag != null)
                     {
                         DataManager.Instance.SelectedFragment = leftFrag;
-                        leftFrag.tag = TouchInput.SPAWNABLE_TAG; // Ensure tag is set
-                        Debug.Log($"GUIDriver: SelectedFragment '{leftFrag.name}' tag set to '{leftFrag.tag}' before DontDestroyOnLoad.");
-
+                        leftFrag.tag = TouchInput.SPAWNABLE_TAG; 
+                        DataManager.Instance.SelectedSide = "left"; 
                         DontDestroyOnLoad(leftFrag);
-
                         if (slicer.GetRightFragment() != null) Destroy(slicer.GetRightFragment());
                         if (slicer.loadedInstance != null) Destroy(slicer.loadedInstance);
                     }
 
-                    Debug.Log("GUIDriver: Stored Left Fragment in DataManager. Loading immersive scene.");
                     Destroy(slicer.gameObject); // Destroy the slicer object before loading the new scene
                     self.TriggerImmersiveScene();
                 }
