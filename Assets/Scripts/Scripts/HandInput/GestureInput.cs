@@ -18,7 +18,9 @@ public class GestureInput : MonoBehaviour
     
     
     private const string ROTATION_ONLY_TAG = "ROTATEONLY"; 
-    private const string SPAWNABLE_TAG = "SPAWNABLE"; 
+    private const string SPAWNABLE_TAG = "SPAWNABLE";
+    
+    private const string CYLINDER_TAG = "CYLINDER"; 
 
     void OnEnable() 
     {
@@ -36,11 +38,26 @@ public class GestureInput : MonoBehaviour
             {
                 if (touch.phase == TouchPhase.Began)
                 {
+                    
+                    if (touchData.targetObject.CompareTag(CYLINDER_TAG))
+                    {
+                        Debug.Log($"[GestureInput] Cannot select {CYLINDER_TAG} object for movement/rotation.");
+                        selectedObject = null; 
+                        return; 
+                    }
+                    
                     selectedObject = touchData.targetObject;
                     lastInputDeviceRotation = touchData.inputDeviceRotation; 
                 }
                 else if (touch.phase == TouchPhase.Moved && selectedObject != null)
                 {
+                    
+                    
+                    if (selectedObject.CompareTag(CYLINDER_TAG))
+                    {
+                         return; 
+                    }
+                    
                     if (touchData.Kind == SpatialPointerKind.IndirectPinch)
                     {
                         UnityEngine.Vector3 deltaPosition = touchData.deltaInteractionPosition;
@@ -84,12 +101,24 @@ public class GestureInput : MonoBehaviour
 
                 if (touch1.phase == TouchPhase.Began || touch2.phase == TouchPhase.Began)
                 {
+                    
+                    if (touchData1.targetObject.CompareTag(CYLINDER_TAG))
+                    {
+                        selectedObject = null; 
+                        return; 
+                    }
+                    
                     selectedObject = touchData1.targetObject;
                     lastTwoFingerAngle = currentAngle;
                     lastTwoFingerCenterY = currentCenterY; 
                 }
                 else if ((touch1.phase == TouchPhase.Moved || touch2.phase == TouchPhase.Moved) && selectedObject != null)
                 {
+                    if (selectedObject.CompareTag(CYLINDER_TAG))
+                    {
+                        return;
+                    }
+                    
                     
                     float deltaAngle = Mathf.DeltaAngle(lastTwoFingerAngle, currentAngle);
                     

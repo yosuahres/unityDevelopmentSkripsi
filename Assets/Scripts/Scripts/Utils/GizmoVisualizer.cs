@@ -1,4 +1,4 @@
-//gizmovisualizer.cs
+
 using UnityEngine;
 
 namespace Assets.Scripts.Scripts
@@ -8,13 +8,11 @@ namespace Assets.Scripts.Scripts
         
         [Header("Gizmo Setup (Z-Axis Ring)")]
         public GameObject gizmoPrefabZ;
-        
         public Color gizmoColorZ = new Color(1.0f, 0f, 0f, 0.5f);
         public float gizmoZRotation = 90f;
 
         [Header("Gizmo Setup (X-Axis Ring)")]
         public GameObject gizmoPrefabX;
-        
         public Color gizmoColorX = new Color(0f, 1.0f, 0f, 0.5f);
         public float gizmoXRotation = 0f;
         
@@ -23,15 +21,13 @@ namespace Assets.Scripts.Scripts
         public Color cylinderColorY = new Color(0.1f, 0.1f, 1.0f, 0.5f); 
         public float cylinderScale = 50f;
 
-        // **MODIFIED/NEW CYLINDER 90-DEGREE SETUP**
-        [Header("Cylinder Setup (Rotated 90 Deg)")]
-        // Uses the same cylinderPrefab
-        public Color cylinderColorRotated = new Color(1.0f, 0.1f, 1.0f, 0.5f); // New color for distinction
-        public float cylinderRotationAngle = 90f; // New field for the rotation angle
-        public float cylinderScaleRotated = 50f; // Separate scale for the rotated cylinder
-        // **END MODIFIED/NEW**
         
-        // **MODIFIED: Cylinder Specific Offsets (Split into two sets)**
+        [Header("Cylinder Setup (Rotated 90 Deg)")]
+        public Color cylinderColorRotated = new Color(1.0f, 0.1f, 1.0f, 0.5f); 
+        public float cylinderRotationAngle = 90f; 
+        public float cylinderScaleRotated = 50f; 
+        
+        
         [Header("Cylinder Y-Axis Offsets")]
         public float cylinderViewOffsetX_YAxis = 0f;
         public float cylinderViewOffsetY_YAxis = 0f;
@@ -41,7 +37,6 @@ namespace Assets.Scripts.Scripts
         public float cylinderViewOffsetX_Rotated = 0f;
         public float cylinderViewOffsetY_Rotated = 0f;
         public float cylinderViewOffsetZ_Rotated = 0f;
-        // --- END MODIFIED ---
 
         [Header("Common Gizmo Settings")]
         public float gizmoScaleFactor = 100f;
@@ -61,6 +56,8 @@ namespace Assets.Scripts.Scripts
         
         private GameObject m_LoadedCylinderY; 
         private GameObject m_LoadedCylinderRotated; 
+        
+        
         
         
         private void InitializeAndPositionGizmo(GameObject gizmoPrefab, ref GameObject loadedGizmoInstance, GameObject fragment, Color color, float rotationAngle, string rotationAxis, float offsetX, float offsetY, float offsetZ)
@@ -83,22 +80,12 @@ namespace Assets.Scripts.Scripts
                 Material mat = gizmoRenderer.material;
                 if (mat.HasProperty("_BaseColor"))
                 {
-                    
                     mat.SetColor("_BaseColor", color);
                 }
                 else if (mat.HasProperty("_Color"))
                 {
-                    
                     mat.SetColor("_Color", color);
                 }
-                else
-                {
-                    Debug.LogWarning("Gizmo material does not have a recognized color property (_BaseColor or _Color). Color change may fail.");
-                }
-            }
-            else
-            {
-                Debug.LogWarning("Gizmo model is missing a MeshRenderer or Material. Cannot set color.");
             }
             
 
@@ -146,7 +133,9 @@ namespace Assets.Scripts.Scripts
             loadedGizmoInstance.SetActive(true);
         }
 
-        // **METHOD: Initialize and Position Cylinder (Unchanged)**
+        
+        
+        
         private void InitializeAndPositionCylinder(GameObject cylinderPrefab, ref GameObject loadedCylinderInstance, GameObject fragment, Color color, float scale, float offsetX, float offsetY, float offsetZ, float rotationX, float rotationY, float rotationZ)
         {
             if (cylinderPrefab == null)
@@ -159,9 +148,10 @@ namespace Assets.Scripts.Scripts
             {
                 loadedCylinderInstance = Instantiate(cylinderPrefab);
                 loadedCylinderInstance.name = "FragmentCylinder";
+                loadedCylinderInstance.tag = "CYLINDER"; 
             }
 
-            // Set Color
+            
             MeshRenderer cylinderRenderer = loadedCylinderInstance.GetComponentInChildren<MeshRenderer>();
             if (cylinderRenderer != null && cylinderRenderer.material != null)
             {
@@ -176,42 +166,44 @@ namespace Assets.Scripts.Scripts
                 }
             }
 
-            // Find Center of Fragment Model and apply Offsets
+            
             MeshRenderer fragmentRenderer = fragment.GetComponent<MeshRenderer>();
             Vector3 finalLocalPosition = Vector3.zero;
 
             if (fragmentRenderer != null)
             {
-                // World center of the fragment's bounding box
+                
                 Vector3 worldCenter = fragmentRenderer.bounds.center;
 
-                // Local center relative to the fragment's transform
+                
                 Vector3 localCenterOffset = fragment.transform.InverseTransformPoint(worldCenter);
                 
-                // APPLYING THE OFFSETS
+                
                 finalLocalPosition = localCenterOffset + new Vector3(offsetX, offsetY, offsetZ);
             }
             else
             {
-                // Fallback position uses only the offsets relative to the fragment's pivot
+                
                 finalLocalPosition = new Vector3(offsetX, offsetY, offsetZ); 
                 Debug.LogError("Fragment model is missing a MeshRenderer. Cylinder using pivot fallback.");
             }
 
-            // Apply Transform
+            
             loadedCylinderInstance.transform.SetParent(fragment.transform, false);
             loadedCylinderInstance.transform.localPosition = finalLocalPosition;
             
-            // Scale and Orientation (Assuming the prefab is a standard Unity Cylinder along Y-axis)
-            // The 'scale' parameter is used for the radius, and scale * 2f for the height
+            
+            
             loadedCylinderInstance.transform.localScale = new Vector3(scale, scale * 2f, scale); 
             
-            // **APPLY ROTATION**
+            
             loadedCylinderInstance.transform.localRotation = Quaternion.Euler(rotationX, rotationY, rotationZ); 
 
             loadedCylinderInstance.SetActive(true);
         }
-        // **END METHOD**
+        
+        
+        
         
         public void SetupAndCenterGizmo(GameObject fragment)
         {
@@ -221,7 +213,7 @@ namespace Assets.Scripts.Scripts
                 return;
             }
 
-            // Initialize Z-Axis Gizmo
+            
             InitializeAndPositionGizmo(
                 gizmoPrefabZ,
                 ref m_LoadedGizmoZ,
@@ -234,7 +226,7 @@ namespace Assets.Scripts.Scripts
                 gizmoViewOffsetZ_ZAxis
             );
 
-            // Initialize X-Axis Gizmo
+            
             InitializeAndPositionGizmo(
                 gizmoPrefabX,
                 ref m_LoadedGizmoX,
@@ -247,32 +239,32 @@ namespace Assets.Scripts.Scripts
                 gizmoViewOffsetZ_XAxis
             );
 
-            // **Y-Axis Cylinder (Original)**
+            
             InitializeAndPositionCylinder(
                 cylinderPrefab,
                 ref m_LoadedCylinderY, 
                 fragment,
                 cylinderColorY, 
                 cylinderScale, 
-                cylinderViewOffsetX_YAxis, // **Uses Y-Axis Offset X**
-                cylinderViewOffsetY_YAxis, // **Uses Y-Axis Offset Y**
-                cylinderViewOffsetZ_YAxis, // **Uses Y-Axis Offset Z**
-                0f, 0f, 0f // No rotation for the default cylinder (Y-axis)
+                cylinderViewOffsetX_YAxis, 
+                cylinderViewOffsetY_YAxis, 
+                cylinderViewOffsetZ_YAxis, 
+                0f, 0f, 0f 
             );
             
-            // **Rotated Cylinder (90 Degrees)**
+            
             InitializeAndPositionCylinder(
                 cylinderPrefab,
                 ref m_LoadedCylinderRotated, 
                 fragment,
                 cylinderColorRotated, 
                 cylinderScaleRotated, 
-                cylinderViewOffsetX_Rotated, // **Uses Rotated Offset X**
-                cylinderViewOffsetY_Rotated, // **Uses Rotated Offset Y**
-                cylinderViewOffsetZ_Rotated, // **Uses Rotated Offset Z**
+                cylinderViewOffsetX_Rotated, 
+                cylinderViewOffsetY_Rotated, 
+                cylinderViewOffsetZ_Rotated, 
                 0f, 
                 0f, 
-                cylinderRotationAngle  // Rotate around Y and Z for 90-degree orientation
+                cylinderRotationAngle 
             );
 
             SetCylinderVisibility(true);
