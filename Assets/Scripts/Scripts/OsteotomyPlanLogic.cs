@@ -114,6 +114,12 @@ namespace Assets.Scripts.Scripts
             
             gizmoVisualizer.SetupAndCenterGizmo(m_LoadedFragment);
             
+            // --- MODIFICATION: Set gizmo visibility to false by default on Start ---
+            if (gizmoVisualizer != null)
+            {
+                gizmoVisualizer.SetGizmoVisibility(false); 
+            }
+            // ----------------------------------------------------------------------
 
 
             if (wholeModelPrefab != null)
@@ -381,6 +387,7 @@ namespace Assets.Scripts.Scripts
             {
                 
                 gizmoVisualizer.SetupAndCenterGizmo(m_ActiveFragments[0]);
+                gizmoVisualizer.SetGizmoVisibility(false); // Gizmo hidden after slice
             }
             else
             {
@@ -486,6 +493,7 @@ namespace Assets.Scripts.Scripts
             if (gizmoVisualizer != null)
             {
                 gizmoVisualizer.SetupAndCenterGizmo(m_LoadedFragment);
+                gizmoVisualizer.SetGizmoVisibility(false); // Gizmo remains hidden after revert, unless Swift enables it.
             }
             
 

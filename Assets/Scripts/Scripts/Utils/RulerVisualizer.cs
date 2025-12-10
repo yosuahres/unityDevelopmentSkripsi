@@ -53,11 +53,9 @@ public class RulerVisualizer : MonoBehaviour
                 textObj.transform.SetParent(transform);
                 textMeshPro = textObj.AddComponent<TextMeshPro>();
                 
-                // --- MODIFICATIONS FOR SIZE AND BOLDNESS ---
                 textMeshPro.fontSize = 0.1f; 
-                textMeshPro.fontStyle = FontStyles.Bold; // *** Added this line to make the text bold ***
+                textMeshPro.fontStyle = FontStyles.Bold; 
                 textMeshPro.rectTransform.sizeDelta = new Vector2(0.4f, 0.2f); 
-                // ------------------------------------------
 
                 textMeshPro.color = Color.white;
                 textMeshPro.alignment = TextAlignmentOptions.Center;
@@ -117,12 +115,8 @@ public class RulerVisualizer : MonoBehaviour
     void UpdateMeasurementText(float distance)
     {
         float distanceInMm = distance * 1000f; 
-        textMeshPro.text = $"{distanceInMm:F1} mm"; 
-
+        textMeshPro.text = $"{distanceInMm:F1}mm"; 
         textMeshPro.rectTransform.position = (startPoint.position + endPoint.position) / 2f;
-        
-        
-        
         textMeshPro.rectTransform.rotation = Quaternion.LookRotation((startPoint.position - endPoint.position).normalized);
         textMeshPro.rectTransform.Rotate(0, 90, 0); 
     }

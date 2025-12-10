@@ -16,7 +16,7 @@ public class GestureInput : MonoBehaviour
     private float lastTwoFingerAngle; 
     private float lastTwoFingerCenterY; 
     
-    // Perhatikan: Konstantra ini harus sama dengan yang didefinisikan di OsteotomyPlanLogic.cs
+    
     private const string ROTATION_ONLY_TAG = "ROTATEONLY"; 
     private const string SPAWNABLE_TAG = "SPAWNABLE"; 
 
@@ -44,7 +44,7 @@ public class GestureInput : MonoBehaviour
                     if (touchData.Kind == SpatialPointerKind.IndirectPinch)
                     {
                         UnityEngine.Vector3 deltaPosition = touchData.deltaInteractionPosition;
-                        // Diasumsikan DataManager.Instance ada dan memiliki properti IsPositionLocked
+                        
                         bool isPositionLockedForThisObject = selectedObject.CompareTag(SPAWNABLE_TAG) && DataManager.Instance.IsPositionLocked; 
                         if (!selectedObject.CompareTag(ROTATION_ONLY_TAG) && !isPositionLockedForThisObject)
                         {
@@ -90,12 +90,12 @@ public class GestureInput : MonoBehaviour
                 }
                 else if ((touch1.phase == TouchPhase.Moved || touch2.phase == TouchPhase.Moved) && selectedObject != null)
                 {
-                    // twist motion (Rotasi Y - Yaw)
+                    
                     float deltaAngle = Mathf.DeltaAngle(lastTwoFingerAngle, currentAngle);
                     
-                    // --- MODIFIKASI TERAKHIR UNTUK MENGHILANGKAN ROTASI ORBITAL ---
                     
-                    // 1. Tentukan Pusat Rotasi (Gunakan Bounding Box Center)
+                    
+                    
                     UnityEngine.Vector3 rotationCenter;
                     Renderer rend = selectedObject.GetComponent<Renderer>();
                     
@@ -105,27 +105,27 @@ public class GestureInput : MonoBehaviour
                     }
                     else
                     {
-                        // Fallback ke posisi pivot jika tidak ada Renderer
+                        
                         rotationCenter = selectedObject.transform.position;
                     }
                     
-                    // 2. Tentukan Sumbu Rotasi (Gunakan Sumbu Y DUNIA/World Up)
-                    // Ini memastikan rotasi selalu tegak lurus, terlepas dari orientasi objek (LookAt)
+                    
+                    
                     UnityEngine.Vector3 rotationAxis = UnityEngine.Vector3.up; 
 
-                    // Melakukan rotasi di tempat (self-rotation)
+                    
                     selectedObject.transform.RotateAround(rotationCenter, rotationAxis, -deltaAngle * rotationSpeed);
                     
-                    // -------------------------------------------------------------------
                     
-                    // Rotasi Vertikal (Rotasi X - Pitch)
+                    
+                    
                     float deltaCenterY = currentCenterY - lastTwoFingerCenterY;
                     
                     const float verticalSensitivityMultiplier = 3f; 
                     float verticalRotationAmount = deltaCenterY * rotationSpeed * verticalSensitivityMultiplier; 
                     
-                    // upward gesture rotates up, downward gesture rotates motion.
-                    // Ini tetap menggunakan Space.Self, yang benar untuk Pitch.
+                    
+                    
                     selectedObject.transform.Rotate(UnityEngine.Vector3.right, verticalRotationAmount, Space.Self);
                     
                     lastTwoFingerAngle = currentAngle;

@@ -1,4 +1,4 @@
-// controlsuidriver.cs 
+//controlsuidriver.cs
 using System;
 using System.Collections.Generic;
 using AOT;
@@ -91,7 +91,9 @@ namespace Assets.Scripts.Scripts
                 }
                 else if (command == "SetGizmoVisibility")
                 {
+                    // --- MODIFICATION: Set isVisible to true if value is 1 ---
                     bool isVisible = (value == 1);
+                    // --------------------------------------------------------
                     var gizmoVisualizer = FindFirstObjectByType<GizmoVisualizer>();   
                     if (gizmoVisualizer != null)
                     {
@@ -102,6 +104,19 @@ namespace Assets.Scripts.Scripts
                         Debug.LogWarning("[ControlsUIDriver] GizmoVisualizer not found in scene.");
                     }
                 }
+                else if(command == "SetCylinderVisibility")
+                {
+                    bool isVisible = (value == 1);
+                    var gizmoVisualizer = FindFirstObjectByType<GizmoVisualizer>();   
+                    if (gizmoVisualizer != null)
+                    {
+                        gizmoVisualizer.SetCylinderVisibility(isVisible);
+                    }
+                    else
+                    {
+                        Debug.LogWarning("[ControlsUIDriver] GizmoVisualizer not found in scene.");
+                    }
+                }   
                 else if (command == "SetMaxPlane")
                 {
                     int maxPlanes = value;

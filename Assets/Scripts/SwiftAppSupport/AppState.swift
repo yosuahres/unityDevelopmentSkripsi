@@ -12,7 +12,7 @@ final class AppState: ObservableObject {
     @Published var selectedSide: String? = nil
     @Published var isPlaneVisible: Bool = true  
     @Published var isRulerVisible: Bool = true
-    @Published var isGizmoVisible: Bool = true
+    @Published var isGizmoVisible: Bool = false
     @Published var isLocked: Bool = false
 
     static let shared = AppState()

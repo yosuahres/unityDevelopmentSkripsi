@@ -1,3 +1,4 @@
+//gizmovisualizer.cs
 using UnityEngine;
 
 namespace Assets.Scripts.Scripts
@@ -17,10 +18,9 @@ namespace Assets.Scripts.Scripts
         public Color gizmoColorX = new Color(0f, 1.0f, 0f, 0.5f);
         public float gizmoXRotation = 0f;
         
-        // --- MODIFIED: Cylinder Setup with Offsets ---
-        [Header("Cylinder Setup (Y-Axis)")] // Renamed for clarity
+        [Header("Cylinder Setup (Y-Axis)")] 
         public GameObject cylinderPrefab;
-        public Color cylinderColorY = new Color(0.1f, 0.1f, 1.0f, 0.5f); // Renamed color field
+        public Color cylinderColorY = new Color(0.1f, 0.1f, 1.0f, 0.5f); 
         public float cylinderScale = 50f;
 
         // **MODIFIED/NEW CYLINDER 90-DEGREE SETUP**
@@ -274,6 +274,8 @@ namespace Assets.Scripts.Scripts
                 0f, 
                 cylinderRotationAngle  // Rotate around Y and Z for 90-degree orientation
             );
+
+            SetCylinderVisibility(true);
         }
 
         
@@ -290,7 +292,11 @@ namespace Assets.Scripts.Scripts
                 m_LoadedGizmoX.SetActive(isVisible);
                 Debug.Log($"GizmoVisualizer: SetGizmoVisibility X set to {isVisible}");
             }
-            // **Cylinder Visibility Updates**
+        }
+
+        [UnityEngine.Scripting.Preserve]
+        public void SetCylinderVisibility(bool isVisible)
+        {
             if (m_LoadedCylinderY != null) 
             {
                 m_LoadedCylinderY.SetActive(isVisible);
@@ -301,7 +307,6 @@ namespace Assets.Scripts.Scripts
                 m_LoadedCylinderRotated.SetActive(isVisible);
                 Debug.Log($"GizmoVisualizer: SetCylinderVisibility Rotated set to {isVisible}");
             }
-            // **END Cylinder Visibility Updates**
         }
     }
 }

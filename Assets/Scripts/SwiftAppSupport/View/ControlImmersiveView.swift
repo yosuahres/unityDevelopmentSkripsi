@@ -1,4 +1,3 @@
-//controlimmersiveview.swift
 import SwiftUI
 import RealityKit
 import UnityFramework
@@ -12,6 +11,9 @@ struct ControlImmersiveView: View {
     @State private var hasPerformedSlice: Bool = false
 
     init(appState: AppState = AppState.shared) {
+        // --- MODIFICATION: Set initial gizmo visibility to false ---
+        appState.isGizmoVisible = false 
+        // ----------------------------------------------------------
         _appState = ObservedObject(wrappedValue: appState)
     }
 
@@ -85,7 +87,9 @@ struct ControlImmersiveView: View {
                             Button(action: {
                                 appState.isGizmoVisible.toggle()
                                 
+                                // --- MODIFICATION: Use 1 for visible (true) and 0 for not visible (false) ---
                                 CallCSharpCallback("SetGizmoVisibility", appState.isGizmoVisible ? 1 : 0)
+                                // ----------------------------------------------------------------------------
                             }) {
                                 Image(systemName: appState.isGizmoVisible ? "eye.fill" : "eye.slash.fill")
                                     .font(.system(size: 80))
@@ -167,16 +171,24 @@ struct ControlImmersiveView: View {
 
                         Button(hasPerformedSlice ? "Adjust" : "Slice") {
                             if hasPerformedSlice {
+                                //state adjust
                                 CallCSharpCallback("RevertToUncutModel")
                                 hasPerformedSlice = false
                                 appState.isPlaneVisible = true
                                 appState.isRulerVisible = true
                                 
-                                appState.isGizmoVisible = true 
+                                // FIX: Ensure Gizmo visibility matches the toggle state after model revert
+                                CallCSharpCallback("SetGizmoVisibility", appState.isGizmoVisible ? 1 : 0)
+                                
                                 CallCSharpCallback("SetPlaneVisibility", 1)
                                 CallCSharpCallback("SetRulerVisibility", 1)
-                                CallCSharpCallback("SetGizmoVisibility", 1) 
+                                
+                                // --- START MODIFICATION: Show Cylinders when reverting/adjusting ---
+                                CallCSharpCallback("SetCylinderVisibility", 1) 
+                                // --- END MODIFICATION ---
+
                             } else {
+                                // state slice
                                 CallCSharpCallback("TriggerSliceModel")
                                 hasPerformedSlice = true
                                 appState.isPlaneVisible = false
@@ -184,6 +196,10 @@ struct ControlImmersiveView: View {
                                 
                                 appState.isGizmoVisible = false 
                                 CallCSharpCallback("SetGizmoVisibility", 0) 
+                                
+                                // --- START MODIFICATION: Hide Cylinders when slicing ---
+                                CallCSharpCallback("SetCylinderVisibility", 0) 
+                                // --- END MODIFICATION ---
                             }
                         }
                         .font(.system(size: 80))
@@ -203,6 +219,9 @@ struct ControlImmersiveView: View {
                                 appState.isLocked.toggle()
                                 print("appState.isLocked: \(appState.isLocked)")
                                 CallCSharpCallback("SetLockPosition", appState.isLocked ? 1 : 0)
+                                let isVisible = appState.isLocked ? 0 : 1
+
+                                CallCSharpCallback("SetCylinderVisibility",Int32(isVisible))
                             }) {
                                 Text(appState.isLocked ? "Position Locked" : "Position Unlocked")
                                     .font(.system(size: 40))
