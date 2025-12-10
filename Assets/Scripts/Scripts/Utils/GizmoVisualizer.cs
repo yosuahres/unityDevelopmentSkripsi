@@ -187,7 +187,9 @@ namespace Assets.Scripts.Scripts
             
             loadedCylinderInstance.transform.localRotation = Quaternion.Euler(rotationX, rotationY, rotationZ); 
 
-            loadedCylinderInstance.SetActive(true);
+            // FIX: Removed SetActive(true). The cylinder visibility must be controlled solely by SetCylinderVisibility 
+            // called by the Lock button in Swift.
+            // loadedCylinderInstance.SetActive(true);
         }
         
         
@@ -256,7 +258,8 @@ namespace Assets.Scripts.Scripts
                 cylinderRotationAngle 
             );
 
-            SetCylinderVisibility(true);
+            // FIX: Removed SetCylinderVisibility(true) from here.
+            // The cylinder's visibility is managed by the Swift lock button state.
         }
 
         

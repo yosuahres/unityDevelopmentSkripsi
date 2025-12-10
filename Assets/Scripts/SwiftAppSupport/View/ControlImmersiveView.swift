@@ -87,9 +87,8 @@ struct ControlImmersiveView: View {
                             Button(action: {
                                 appState.isGizmoVisible.toggle()
                                 
-                                // --- MODIFICATION: Use 1 for visible (true) and 0 for not visible (false) ---
                                 CallCSharpCallback("SetGizmoVisibility", appState.isGizmoVisible ? 1 : 0)
-                                // ----------------------------------------------------------------------------
+                                
                             }) {
                                 Image(systemName: appState.isGizmoVisible ? "eye.fill" : "eye.slash.fill")
                                     .font(.system(size: 80))
@@ -171,7 +170,7 @@ struct ControlImmersiveView: View {
 
                         Button(hasPerformedSlice ? "Adjust" : "Slice") {
                             if hasPerformedSlice {
-                                //state adjust
+                                // state adjust
                                 CallCSharpCallback("RevertToUncutModel")
                                 hasPerformedSlice = false
                                 appState.isPlaneVisible = true
@@ -183,9 +182,7 @@ struct ControlImmersiveView: View {
                                 CallCSharpCallback("SetPlaneVisibility", 1)
                                 CallCSharpCallback("SetRulerVisibility", 1)
                                 
-                                // --- START MODIFICATION: Show Cylinders when reverting/adjusting ---
-                                CallCSharpCallback("SetCylinderVisibility", 1) 
-                                // --- END MODIFICATION ---
+                                // --- FIX: Removed CallCSharpCallback("SetCylinderVisibility", 1) ---
 
                             } else {
                                 // state slice
@@ -197,9 +194,7 @@ struct ControlImmersiveView: View {
                                 appState.isGizmoVisible = false 
                                 CallCSharpCallback("SetGizmoVisibility", 0) 
                                 
-                                // --- START MODIFICATION: Hide Cylinders when slicing ---
-                                CallCSharpCallback("SetCylinderVisibility", 0) 
-                                // --- END MODIFICATION ---
+                                // --- FIX: Removed CallCSharpCallback("SetCylinderVisibility", 0) ---
                             }
                         }
                         .font(.system(size: 80))
@@ -219,8 +214,9 @@ struct ControlImmersiveView: View {
                                 appState.isLocked.toggle()
                                 print("appState.isLocked: \(appState.isLocked)")
                                 CallCSharpCallback("SetLockPosition", appState.isLocked ? 1 : 0)
+                                
+                                // Cylinder visibility is controlled only here:
                                 let isVisible = appState.isLocked ? 0 : 1
-
                                 CallCSharpCallback("SetCylinderVisibility",Int32(isVisible))
                             }) {
                                 Text(appState.isLocked ? "Position Locked" : "Position Unlocked")

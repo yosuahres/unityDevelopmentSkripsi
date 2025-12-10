@@ -1,4 +1,3 @@
-//osteotomyplanlogic.cs
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -118,6 +117,7 @@ namespace Assets.Scripts.Scripts
             if (gizmoVisualizer != null)
             {
                 gizmoVisualizer.SetGizmoVisibility(false); 
+                // FIX: Removed the cylinder visibility call from here. It is now controlled solely by the Lock button.
             }
             // ----------------------------------------------------------------------
 
@@ -388,6 +388,7 @@ namespace Assets.Scripts.Scripts
                 
                 gizmoVisualizer.SetupAndCenterGizmo(m_ActiveFragments[0]);
                 gizmoVisualizer.SetGizmoVisibility(false); // Gizmo hidden after slice
+                // Cylinder visibility remains unchanged, relying on the Lock button state
             }
             else
             {
@@ -494,6 +495,7 @@ namespace Assets.Scripts.Scripts
             {
                 gizmoVisualizer.SetupAndCenterGizmo(m_LoadedFragment);
                 gizmoVisualizer.SetGizmoVisibility(false); // Gizmo remains hidden after revert, unless Swift enables it.
+                // Cylinder visibility remains unchanged, relying on the Lock button state
             }
             
 
