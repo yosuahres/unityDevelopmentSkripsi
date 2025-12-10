@@ -492,9 +492,10 @@ MonoBehaviour:
   gizmoPrefabX: {fileID: 919132149155446097, guid: 2646cf277bc3248c38a74c7b81ef2ea4, type: 3}
   gizmoColorX: {r: 0, g: 1, b: 0, a: 0.5}
   gizmoXRotation: 0
-  cylinderPrefab: {fileID: 1437054715619624019, guid: fcde0bdc53de047cbab97bea06a8094a, type: 3}
+  cylinderPrefabY: {fileID: 1437054715619624019, guid: 3ba6944c6441548b5b202b0b978963a1, type: 3}
   cylinderColorY: {r: 0.011764706, g: 1, b: 0, a: 1}
   cylinderScale: 10
+  cylinderPrefabRotated: {fileID: 1437054715619624019, guid: fcde0bdc53de047cbab97bea06a8094a, type: 3}
   cylinderColorRotated: {r: 1, g: 0, b: 0, a: 1}
   cylinderRotationAngle: 90
   cylinderScaleRotated: 10

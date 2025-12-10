@@ -1,4 +1,3 @@
-
 using UnityEngine;
 
 namespace Assets.Scripts.Scripts
@@ -17,12 +16,13 @@ namespace Assets.Scripts.Scripts
         public float gizmoXRotation = 0f;
         
         [Header("Cylinder Setup (Y-Axis)")] 
-        public GameObject cylinderPrefab;
+        public GameObject cylinderPrefabY; 
         public Color cylinderColorY = new Color(0.1f, 0.1f, 1.0f, 0.5f); 
         public float cylinderScale = 50f;
 
         
         [Header("Cylinder Setup (Rotated 90 Deg)")]
+        public GameObject cylinderPrefabRotated; 
         public Color cylinderColorRotated = new Color(1.0f, 0.1f, 1.0f, 0.5f); 
         public float cylinderRotationAngle = 90f; 
         public float cylinderScaleRotated = 50f; 
@@ -152,19 +152,7 @@ namespace Assets.Scripts.Scripts
             }
 
             
-            MeshRenderer cylinderRenderer = loadedCylinderInstance.GetComponentInChildren<MeshRenderer>();
-            if (cylinderRenderer != null && cylinderRenderer.material != null)
-            {
-                Material mat = cylinderRenderer.material;
-                if (mat.HasProperty("_BaseColor"))
-                {
-                    mat.SetColor("_BaseColor", color);
-                }
-                else if (mat.HasProperty("_Color"))
-                {
-                    mat.SetColor("_Color", color);
-                }
-            }
+           
 
             
             MeshRenderer fragmentRenderer = fragment.GetComponent<MeshRenderer>();
@@ -241,7 +229,7 @@ namespace Assets.Scripts.Scripts
 
             
             InitializeAndPositionCylinder(
-                cylinderPrefab,
+                cylinderPrefabY, 
                 ref m_LoadedCylinderY, 
                 fragment,
                 cylinderColorY, 
@@ -253,8 +241,9 @@ namespace Assets.Scripts.Scripts
             );
             
             
+            
             InitializeAndPositionCylinder(
-                cylinderPrefab,
+                cylinderPrefabRotated, 
                 ref m_LoadedCylinderRotated, 
                 fragment,
                 cylinderColorRotated, 
