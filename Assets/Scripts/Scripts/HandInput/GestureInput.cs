@@ -13,7 +13,11 @@ public class GestureInput : MonoBehaviour
 
     [SerializeField]
     private float rotationSpeed = 0.005f;
+    
+    // This variable will still be updated, but only used for Y-axis rotation (left/right)
     private float lastTwoFingerAngle; 
+    
+    // This variable is no longer needed for rotation logic, but retained for completeness if required elsewhere.
     private float lastTwoFingerCenterY; 
     
     
@@ -29,6 +33,7 @@ public class GestureInput : MonoBehaviour
 
     void Update()
     {
+        // --- 1. SINGLE TOUCH HANDLING (Movement/Direct Rotation) ---
         if (Touch.activeTouches.Count == 1)
         {
             var touch = Touch.activeTouches[0];
@@ -60,6 +65,7 @@ public class GestureInput : MonoBehaviour
                     
                     if (touchData.Kind == SpatialPointerKind.IndirectPinch)
                     {
+                        // Handle Indirect Pinch (Translation/Movement)
                         UnityEngine.Vector3 deltaPosition = touchData.deltaInteractionPosition;
                         
                         bool isPositionLockedForThisObject = selectedObject.CompareTag(SPAWNABLE_TAG) && DataManager.Instance.IsPositionLocked; 
@@ -77,6 +83,7 @@ public class GestureInput : MonoBehaviour
                     
                     else if (touchData.Kind == SpatialPointerKind.DirectPinch)
                     {
+                        // Handle Direct Pinch (Rotation based on device/hand orientation)
                         Quaternion deltaRotation = Quaternion.Inverse(lastInputDeviceRotation) * touchData.inputDeviceRotation;
                         selectedObject.transform.localRotation *= deltaRotation;
                         lastInputDeviceRotation = touchData.inputDeviceRotation;
@@ -85,6 +92,7 @@ public class GestureInput : MonoBehaviour
             }
         }
         
+        // --- 2. TWO TOUCH HANDLING (2D Screen Rotation - Only Yaw/Y-axis) ---
         else if (Touch.activeTouches.Count == 2)
         {
             var touch1 = Touch.activeTouches[0];
@@ -124,7 +132,7 @@ public class GestureInput : MonoBehaviour
                     
                     
                     
-                    
+                    // Determine rotation center
                     UnityEngine.Vector3 rotationCenter;
                     Renderer rend = selectedObject.GetComponent<Renderer>();
                     
@@ -139,29 +147,24 @@ public class GestureInput : MonoBehaviour
                     }
                     
                     
-                    
+                    // Perform rotation around the Y-axis (Up)
                     UnityEngine.Vector3 rotationAxis = UnityEngine.Vector3.up; 
 
                     
                     selectedObject.transform.RotateAround(rotationCenter, rotationAxis, -deltaAngle * rotationSpeed);
                     
                     
+                    // --- REMOVED UP/DOWN ROTATION LOGIC ---
+                    // The original code rotated based on deltaCenterY here. This has been removed.
                     
-                    
-                    float deltaCenterY = currentCenterY - lastTwoFingerCenterY;
-                    
-                    const float verticalSensitivityMultiplier = 3f; 
-                    float verticalRotationAmount = deltaCenterY * rotationSpeed * verticalSensitivityMultiplier; 
-                    
-                    
-                    
-                    selectedObject.transform.Rotate(UnityEngine.Vector3.right, verticalRotationAmount, Space.Self);
                     
                     lastTwoFingerAngle = currentAngle;
                     lastTwoFingerCenterY = currentCenterY;
                 }
             }
         }
+        
+        // --- 3. NO TOUCH / RELEASED HANDLING ---
         else
         {
             selectedObject = null;

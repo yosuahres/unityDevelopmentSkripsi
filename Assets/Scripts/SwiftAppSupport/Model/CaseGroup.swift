@@ -3,9 +3,15 @@ import Foundation
 import RealityKit
 
 struct CaseGroup: Identifiable, Hashable {
-    var usdzModelNames: [String]
-    var name: String
-    var description: String
-    var id: String { primaryModel } 
-    var primaryModel: String { usdzModelNames.first ?? "" }
+    let id: UUID
+    let usdzModelNames: [String]
+    let name: String
+    let description: String
+}
+
+struct LoadedCaseGroup: Identifiable {
+    let id: UUID
+    let group: CaseGroup
+    let usdzURLs: [URL]
+    let usdzEntities: [Entity?]
 }

@@ -14,12 +14,12 @@ public class TouchInput : MonoBehaviour {
     public GameObject planeFragmentPrefab;
     public GameObject rulerPrefab;
 
-    public static float currentPlaneScale = 0.2f; 
-    public static readonly float minPlaneScale = 0.2f;
+    public static float currentPlaneScale = 0.1f; 
+    public static readonly float minPlaneScale = 0.1f;
     public static readonly float maxPlaneScale = 0.5f;
 
     
-    public static int maxCuttingPlanes = 3; 
+    public static int maxCuttingPlanes = 1; 
 
     public static List<GameObject> currentCuttingPlanes { get; private set; } = new List<GameObject>();
     private List<GameObject> activeRulers = new List<GameObject>();
@@ -149,8 +149,8 @@ public class TouchInput : MonoBehaviour {
         SpatialPointerState touchData = EnhancedSpatialPointerSupport.GetPointerState(touch);
 
         //kalau ke device, pakai pointedKind.Touch aja.
-        if (touchData.targetObject != null && 
-            (touchData.Kind == SpatialPointerKind.Touch || touchData.Kind == SpatialPointerKind.IndirectPinch))
+        // || touchData.Kind == SpatialPointerKind.IndirectPinch
+        if (touchData.targetObject != null && touchData.Kind == SpatialPointerKind.Touch)
         {
             ISpatialTouchable touchable = touchData.targetObject.GetComponent<ISpatialTouchable>();
             bool isSpawnable = touchData.targetObject.CompareTag(SPAWNABLE_TAG);

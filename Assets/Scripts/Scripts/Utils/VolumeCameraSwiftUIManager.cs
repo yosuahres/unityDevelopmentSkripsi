@@ -37,8 +37,6 @@ namespace Assets.Scripts.Scripts
             if (volumeCamera != m_VolumeCamera)
                 return;
 
-            // our volume camera containing the main content in the scene has been closed, we should force close
-            // the SwiftUI window to make sure the scene property reloads when closed and reopened
             if (windowState.WindowEvent == VolumeCamera.WindowEvent.Closed)
             {
                 if (m_SwiftUIDriver != null)

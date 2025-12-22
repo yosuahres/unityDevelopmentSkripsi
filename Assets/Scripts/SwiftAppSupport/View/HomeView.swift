@@ -1,37 +1,52 @@
 //homeview.swift
-//mark 1 november
 import SwiftUI
 import RealityKit
-import UnityFramework 
+import UnityFramework
 import PolySpatialRealityKit
 import UIKit 
 
 struct HomeView: View {
-    
-    @State private var models: [CaseGroup] = []
-    @State private var selection: String? = nil
+    @State private var models: [LoadedCaseGroup] = []
+    @State private var selection: UUID? = nil
     @State private var searchText: String = ""
-    @ObservedObject var appState: AppState   
+
+    var appState: AppState   
 
     init(appState: AppState = AppState.shared) {
-        _appState = ObservedObject(wrappedValue: appState)
+        self.appState = appState
     }
     
-    var filteredCaseGroups: [CaseGroup] {
+    var selectedLoadedGroup: LoadedCaseGroup? {
+        models.first { $0.id == selection }
+    }
+    
+    var primaryUsdzUrl: URL? {
+        selectedLoadedGroup?.usdzURLs.first
+    }
+    
+    var primaryModelName: String? {
+        selectedLoadedGroup?.group.usdzModelNames.first
+    }
+    
+    var filteredCaseGroups: [LoadedCaseGroup] {
         if searchText.isEmpty {
             return models
         } else {
-            return models.filter { group in
-                group.name.localizedCaseInsensitiveContains(searchText)
-                || group.description.localizedCaseInsensitiveContains(searchText)
-                || group.usdzModelNames.contains { $0.localizedCaseInsensitiveContains(searchText) }
+            return models.filter { loadedGroup in
+                
+                loadedGroup.group.name.localizedCaseInsensitiveContains(searchText)
+                || loadedGroup.group.description.localizedCaseInsensitiveContains(searchText)
+                || loadedGroup.group.usdzModelNames.contains { $0.localizedCaseInsensitiveContains(searchText) }
             }
         }
     }
 
     var body: some View {
+        @Bindable var state = appState
+        
         NavigationSplitView {
-            List(filteredCaseGroups, id: \.primaryModel, selection: $selection) { group in
+            
+            List(filteredCaseGroups, selection: $selection) { loadedGroup in
                 HStack(spacing: 8) {
                     if let image = loadImageFromDataRaw(named: "glyph") { 
                         image
@@ -43,15 +58,16 @@ struct HomeView: View {
                     }
                     
                     VStack(alignment: .leading) {
-                        Text(group.name)
+                        Text(loadedGroup.group.name)
                             .lineLimit(1)
-                        if !group.description.isEmpty {
-                            Text(group.description)
+                        if !loadedGroup.group.description.isEmpty {
+                            Text(loadedGroup.group.description)
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                                 .lineLimit(2)
                         }
-                        Text(group.primaryModel)
+                        
+                        Text(loadedGroup.group.usdzModelNames.first ?? "N/A")
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
@@ -60,34 +76,34 @@ struct HomeView: View {
             .navigationTitle("Session")
             .onAppear(perform: loadModelList)
             .searchable(text: $searchText, prompt: "Search groups")
-            .onChange(of: selection) { newSelection in
-                appState.selectedModel = newSelection
+            .onChange(of: selection) { _ in
+                state.selectedModel = primaryModelName
             }
             
         } detail: {
             VStack {
-                if let modelName = selection {
-                    if let resourceRoot = Bundle.main.resourceURL,
-                       let url = URL(string: "Data/Raw/\(modelName)", relativeTo: resourceRoot) {
-                        Model3D(url: url) { model in
-                            model
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .scaleEffect(0.4) 
-                                .offset(y: -50)  
-                        } placeholder: {
-                            ProgressView("Loading \(modelName)...")
-                        }
-                        
-                    } else {
-                        Text("Error: Could not find or access model file: \(modelName)")
-                            .foregroundColor(.red)
-                            .padding()
+                
+                if let url = primaryUsdzUrl,
+                   let modelName = primaryModelName {
+                    
+                    Model3D(url: url) { model in
+                        model
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .scaleEffect(0.4) 
+                            .offset(y: -50)  
+                    } placeholder: {
+                        ProgressView("Loading \(modelName)...")
                     }
                     
+                } else if selection != nil {
+                    
+                    Text("Error: Could not find model URL for selected group.")
+                        .foregroundColor(.red)
+                        .padding()
                 } else {
                     Text("No Object Selected")
-                        .foregroundColor(.secondary)
+                    .foregroundColor(.secondary)
                 }
             }
         }
@@ -123,19 +139,52 @@ struct HomeView: View {
         return Image(uiImage: uiImage)
     }
     
+    
     func loadModelList() {
-        var groups = DummyFragmentData.caseGroups
+        var groups: [CaseGroup] = []
 
+        
+        var baseGroups = DummyFragmentData.caseGroups
+
+        
         if let urls = Bundle.main.urls(forResourcesWithExtension: "usdz", subdirectory: "Data/Raw") {
             let filenames = urls.map { $0.lastPathComponent }
             for fname in filenames {
-                let alreadyIncluded = groups.contains { $0.usdzModelNames.contains(fname) }
+                let alreadyIncluded = baseGroups.contains { $0.usdzModelNames.contains(fname) }
                 if !alreadyIncluded {
-                    groups.append(CaseGroup(usdzModelNames: [fname], name: fname, description: ""))
+                    
+                    let newGroup = CaseGroup(id: UUID(), usdzModelNames: [fname], name: fname, description: "")
+                    baseGroups.append(newGroup)
                 }
             }
         }
+        
+        
+        groups = baseGroups.filter { !$0.usdzModelNames.isEmpty }
+        let sortedGroups = groups.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+        
+        
+        let resourceRoot = Bundle.main.resourceURL
+        
+        let loadedGroups: [LoadedCaseGroup] = sortedGroups.map { group in
+            
+            
+            let urls: [URL] = group.usdzModelNames.compactMap { modelName in
+                guard let root = resourceRoot else { return nil }
+                return URL(string: "Data/Raw/\(modelName)", relativeTo: root)
+            }
+            
+            
+            let entities: [Entity?] = Array(repeating: nil, count: urls.count)
 
-        self.models = groups.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+            return LoadedCaseGroup(
+                id: UUID(), 
+                group: group,
+                usdzURLs: urls,
+                usdzEntities: entities
+            )
+        }
+        
+        self.models = loadedGroups
     }
 }

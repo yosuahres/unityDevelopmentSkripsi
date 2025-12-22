@@ -1,21 +1,27 @@
-//rulervisualizer.cs
+
 using UnityEngine;
 using TMPro; 
 using System.Collections.Generic;
 
 public class RulerVisualizer : MonoBehaviour
 {
+    [Header("Ruler Endpoints")]
     public Transform startPoint;
     public Transform endPoint;
+
+    [Header("Visual Settings")]
     public LineRenderer lineRenderer;
     public TextMeshPro textMeshPro; 
-
-    public float rulerWidth = 0.01f; 
+    public float rulerWidth = 1f; 
     public Material lineMaterial; 
+
+    [Header("Text Offset & Orientation")]
+    [Tooltip("Distance the measurement text is offset towards the main camera.")]
+    public float textOffsetTowardsCamera = 0.01f; 
+    [Tooltip("If true, the text will always face the camera. If false, it will be aligned with the ruler line.")]
+    public bool alwaysFaceCamera = true; 
     
-    
-    private float updateThreshold = 0.001f; 
-    private float lastMeasuredDistance = -1f;
+    private const float MillimetersPerUnit = 1000f; 
 
     void Start()
     {
@@ -23,13 +29,8 @@ public class RulerVisualizer : MonoBehaviour
         UpdateRuler();
     }
 
-    // void Update()
-    // {
-        
-    //     UpdateRuler();
-    // }
-
-    void LateUpdate() {
+    void LateUpdate() 
+    {
         UpdateRuler();
     }
 
@@ -37,12 +38,22 @@ public class RulerVisualizer : MonoBehaviour
     {
         if (lineRenderer == null)
         {
-            lineRenderer = GetComponent<LineRenderer>();
-            if (lineRenderer == null)
-            {
-                lineRenderer = gameObject.AddComponent<LineRenderer>();
-            }
+            lineRenderer = GetComponent<LineRenderer>() ?? gameObject.AddComponent<LineRenderer>();
         }
+
+        if (lineMaterial != null)
+        {
+            lineRenderer.material = lineMaterial;
+        }
+        else
+        {
+            Material defaultMat = new Material(Shader.Find("Sprites/Default"));
+            defaultMat.color = Color.yellow;
+            lineRenderer.material = defaultMat;
+        }
+        lineRenderer.startWidth = rulerWidth;
+        lineRenderer.endWidth = rulerWidth;
+        lineRenderer.positionCount = 2; 
 
         if (textMeshPro == null)
         {
@@ -56,34 +67,12 @@ public class RulerVisualizer : MonoBehaviour
                 textMeshPro.fontSize = 0.1f; 
                 textMeshPro.fontStyle = FontStyles.Bold; 
                 textMeshPro.rectTransform.sizeDelta = new Vector2(0.4f, 0.2f); 
-
                 textMeshPro.color = Color.white;
                 textMeshPro.alignment = TextAlignmentOptions.Center;
                 textMeshPro.rectTransform.localPosition = Vector3.zero;
                 textMeshPro.rectTransform.localRotation = Quaternion.identity;
             }
         }
-
-        if (lineMaterial != null)
-        {
-            lineRenderer.material = lineMaterial;
-        }
-        else
-        {
-            lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
-            lineRenderer.startColor = Color.yellow;
-            lineRenderer.endColor = Color.yellow;
-        }
-        lineRenderer.startWidth = rulerWidth;
-        lineRenderer.endWidth = rulerWidth;
-        lineRenderer.positionCount = 2; 
-    }
-
-    public void SetPoints(Transform p1, Transform p2)
-    {
-        startPoint = p1;
-        endPoint = p2;
-        UpdateRuler();
     }
 
     void UpdateRuler()
@@ -105,24 +94,54 @@ public class RulerVisualizer : MonoBehaviour
         lineRenderer.SetPosition(1, p2Pos);
 
         float currentDistance = Vector3.Distance(p1Pos, p2Pos);
-
         
-        
-        lastMeasuredDistance = currentDistance;
-        UpdateMeasurementText(currentDistance);
+        UpdateMeasurementText(p1Pos, p2Pos, currentDistance);
     }
 
-    void UpdateMeasurementText(float distance)
+    void UpdateMeasurementText(Vector3 p1Pos, Vector3 p2Pos, float distance)
     {
-        float distanceInMm = distance * 1000f; 
+        
+        Vector3 midpoint = (p1Pos + p2Pos) / 2f;
+        
+        
+        Camera mainCamera = Camera.main;
+
+        
+        Vector3 finalPosition = midpoint;
+        if (mainCamera != null && textOffsetTowardsCamera != 0f)
+        {
+            
+            Vector3 directionToMidpoint = (midpoint - mainCamera.transform.position).normalized;
+            
+            
+            finalPosition = midpoint + directionToMidpoint * textOffsetTowardsCamera;
+        }
+
+        textMeshPro.rectTransform.position = finalPosition;
+        
+        
+        if (mainCamera != null && alwaysFaceCamera)
+        {
+             
+             textMeshPro.rectTransform.rotation = mainCamera.transform.rotation;
+        }
+        else
+        {
+             
+             Quaternion rotation = Quaternion.LookRotation((p1Pos - p2Pos).normalized);
+             
+             textMeshPro.rectTransform.rotation = rotation * Quaternion.Euler(0, 90, 0); 
+        }
+
+        
+        float distanceInMm = distance * MillimetersPerUnit; 
         textMeshPro.text = $"{distanceInMm:F1}mm"; 
-        textMeshPro.rectTransform.position = (startPoint.position + endPoint.position) / 2f;
-        textMeshPro.rectTransform.rotation = Quaternion.LookRotation((startPoint.position - endPoint.position).normalized);
-        textMeshPro.rectTransform.Rotate(0, 90, 0); 
     }
 
-    void OnDestroy()
+    public void SetPoints(Transform p1, Transform p2)
     {
-        
+        startPoint = p1;
+        endPoint = p2;
+        UpdateRuler();
     }
 }

@@ -1,112 +1,97 @@
+//controlimmersiveview.swift
 import SwiftUI
 import RealityKit
 import UnityFramework
 import PolySpatialRealityKit
 
 struct ControlImmersiveView: View {
-
-    @ObservedObject var appState: AppState
-    @State private var currentPlaneValue: Float = 0.2
-    @State private var currentMaxPlaneValue: Int = 3
+    var appState: AppState
+    @State private var currentPlaneValue: Float = 0.1
+    @State private var currentMaxPlaneValue: Int = 1 
     @State private var hasPerformedSlice: Bool = false
 
     init(appState: AppState = AppState.shared) {
-        // --- MODIFICATION: Set initial gizmo visibility to false ---
         appState.isGizmoVisible = false 
-        // ----------------------------------------------------------
-        _appState = ObservedObject(wrappedValue: appState)
+        self.appState = appState
     }
 
     var body: some View {
+        @Bindable var state = appState
         ZStack {
-
             VStack (spacing: 20){
                 HStack {
                     Spacer()
                     VStack(alignment: .trailing, spacing: 4) {
-                        Text(appState.selectedModel ?? "No model selected")
+                        Text(state.selectedModel ?? "No model selected")
                             .font(.extraLargeTitle2)
 
-                        if let side = appState.selectedSide {
+                        if let side = state.selectedSide {
                             Text("Side: \(side)")
                                 .font(.title2)
                                 .foregroundColor(.secondary)
                         }
-
                     }
                     .padding(.horizontal)
                 }
                 Spacer()
             }
 
-
             VStack {
                 Spacer()
-
                 HStack(alignment: .top, spacing: 80) {
-
-
                     VStack(alignment: .leading, spacing: 60) {
-                        
-                        
                         HStack(spacing: 40) {
                             Image(systemName: "ruler.fill")
                                 .font(.system(size: 80))
-
                             Button(action: {
-                                appState.isRulerVisible.toggle()
-                                CallCSharpCallback("SetRulerVisibility", appState.isRulerVisible ? 1 : 0)
+                                state.isRulerVisible.toggle() 
+                                CallCSharpCallback("SetRulerVisibility", state.isRulerVisible ? 1 : 0)
                             }) {
-                                Image(systemName: appState.isRulerVisible ? "eye.fill" : "eye.slash.fill")
+                                Image(systemName: state.isRulerVisible ? "eye.fill" : "eye.slash.fill")
                                     .font(.system(size: 80))
-                                    .foregroundColor(appState.isRulerVisible ? .green : .red)
+                                    .foregroundColor(state.isRulerVisible ? .green : .red)
                             }
                         }
-
                         
                         HStack(spacing: 40) {
                             Image(systemName: "square.fill")
                                 .font(.system(size: 80))
 
                             Button(action: {
-                                appState.isPlaneVisible.toggle()
-                                CallCSharpCallback("SetPlaneVisibility", appState.isPlaneVisible ? 1 : 0)
+                                state.isPlaneVisible.toggle() 
+                                CallCSharpCallback("SetPlaneVisibility", state.isPlaneVisible ? 1 : 0)
                             }) {
-                                Image(systemName: appState.isPlaneVisible ? "eye.fill" : "eye.slash.fill")
+                                Image(systemName: state.isPlaneVisible ? "eye.fill" : "eye.slash.fill")
                                     .font(.system(size: 80))
-                                    .foregroundColor(appState.isPlaneVisible ? .green : .red)
+                                    .foregroundColor(state.isPlaneVisible ? .green : .red)
                             }
                         }
                         
                         
                         HStack(spacing: 40) {
-                            
                             Image(systemName: "rotate.3d") 
                                 .font(.system(size: 80))
 
                             Button(action: {
-                                appState.isGizmoVisible.toggle()
-                                
-                                CallCSharpCallback("SetGizmoVisibility", appState.isGizmoVisible ? 1 : 0)
-                                
+                                state.isGizmoVisible.toggle() 
+                                CallCSharpCallback("SetGizmoVisibility", state.isGizmoVisible ? 1 : 0)
                             }) {
-                                Image(systemName: appState.isGizmoVisible ? "eye.fill" : "eye.slash.fill")
+                                Image(systemName: state.isGizmoVisible ? "eye.fill" : "eye.slash.fill")
                                     .font(.system(size: 80))
-                                    .foregroundColor(appState.isGizmoVisible ? .green : .red)
+                                    .foregroundColor(state.isGizmoVisible ? .green : .red)
                             }
                         }
                     }
 
-
+                    
                     VStack(alignment: .center, spacing: 60) {
-                        
-                        
                         Text("Set Plane Width")
                             .font(.title)
+                            .fixedSize(horizontal: false, vertical: true) 
 
                         HStack(spacing: 20) {
                             Button(action: {
-                                currentPlaneValue = max(0.2, currentPlaneValue - 0.05)
+                                currentPlaneValue = max(0.1, currentPlaneValue - 0.05) 
                                 CallCSharpCallback("SetPlaneScale", Int32(currentPlaneValue * 100))
                             }) {
                                 Image(systemName: "minus.circle.fill")
@@ -114,7 +99,7 @@ struct ControlImmersiveView: View {
                             }
                             .buttonStyle(.plain)
                             .simultaneousGesture(LongPressGesture().onEnded { _ in
-                                currentPlaneValue = 0.2
+                                currentPlaneValue = 0.1 
                                 CallCSharpCallback("SetPlaneScale", Int32(currentPlaneValue * 100))
                             })
 
@@ -135,6 +120,7 @@ struct ControlImmersiveView: View {
                         
                         Text("Set Max Planes")
                             .font(.title)
+                            .fixedSize(horizontal: false, vertical: true) 
 
                         HStack(spacing: 20) {
                             Button(action: {
@@ -146,7 +132,7 @@ struct ControlImmersiveView: View {
                             }
                             .buttonStyle(.plain)
                             .simultaneousGesture(LongPressGesture().onEnded { _ in
-                                currentMaxPlaneValue = 3
+                                currentMaxPlaneValue = 1 
                                 CallCSharpCallback("SetMaxPlane", Int32(currentMaxPlaneValue))
                             })
 
@@ -165,36 +151,26 @@ struct ControlImmersiveView: View {
                         }
                     }
 
-
+                    
                     VStack(alignment: .trailing, spacing: 60) {
 
                         Button(hasPerformedSlice ? "Adjust" : "Slice") {
                             if hasPerformedSlice {
-                                // state adjust
                                 CallCSharpCallback("RevertToUncutModel")
                                 hasPerformedSlice = false
-                                appState.isPlaneVisible = true
-                                appState.isRulerVisible = true
-                                
-                                // FIX: Ensure Gizmo visibility matches the toggle state after model revert
-                                CallCSharpCallback("SetGizmoVisibility", appState.isGizmoVisible ? 1 : 0)
-                                
+                                state.isPlaneVisible = true 
+                                state.isRulerVisible = true 
+                                CallCSharpCallback("SetGizmoVisibility", state.isGizmoVisible ? 1 : 0)
                                 CallCSharpCallback("SetPlaneVisibility", 1)
                                 CallCSharpCallback("SetRulerVisibility", 1)
-                                
-                                // --- FIX: Removed CallCSharpCallback("SetCylinderVisibility", 1) ---
-
                             } else {
-                                // state slice
+                                
                                 CallCSharpCallback("TriggerSliceModel")
                                 hasPerformedSlice = true
-                                appState.isPlaneVisible = false
-                                appState.isRulerVisible = false
-                                
-                                appState.isGizmoVisible = false 
+                                state.isPlaneVisible = false 
+                                state.isRulerVisible = false 
+                                state.isGizmoVisible = false
                                 CallCSharpCallback("SetGizmoVisibility", 0) 
-                                
-                                // --- FIX: Removed CallCSharpCallback("SetCylinderVisibility", 0) ---
                             }
                         }
                         .font(.system(size: 80))
@@ -204,22 +180,21 @@ struct ControlImmersiveView: View {
                         .controlSize(.extraLarge)
                         .hoverEffect()
 
-
                         HStack(spacing: 40) {
-                            Image(systemName: appState.isLocked ? "lock.fill" : "lock.open.fill")
+                            Image(systemName: state.isLocked ? "lock.fill" : "lock.open.fill") 
                                 .font(.system(size: 60))
-                                .foregroundColor(appState.isLocked ? .yellow : .blue)
+                                .foregroundColor(state.isLocked ? .yellow : .blue)
 
                             Button(action: {
-                                appState.isLocked.toggle()
-                                print("appState.isLocked: \(appState.isLocked)")
-                                CallCSharpCallback("SetLockPosition", appState.isLocked ? 1 : 0)
+                                state.isLocked.toggle() 
+                                print("appState.isLocked: \(state.isLocked)")
+                                CallCSharpCallback("SetLockPosition", state.isLocked ? 1 : 0)
                                 
-                                // Cylinder visibility is controlled only here:
-                                let isVisible = appState.isLocked ? 0 : 1
+                                
+                                let isVisible = state.isLocked ? 0 : 1
                                 CallCSharpCallback("SetCylinderVisibility",Int32(isVisible))
                             }) {
-                                Text(appState.isLocked ? "Position Locked" : "Position Unlocked")
+                                Text(state.isLocked ? "Position Locked" : "Position Unlocked")
                                     .font(.system(size: 40))
                                     .padding(20)
                             }
@@ -233,6 +208,7 @@ struct ControlImmersiveView: View {
                 Spacer()
 
 
+                
                 HStack{
                     Button("Return") {
                         CallCSharpCallback("TriggerHomeScene")

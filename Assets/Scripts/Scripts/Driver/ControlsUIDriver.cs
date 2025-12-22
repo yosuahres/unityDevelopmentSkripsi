@@ -91,9 +91,7 @@ namespace Assets.Scripts.Scripts
                 }
                 else if (command == "SetGizmoVisibility")
                 {
-                    // --- MODIFICATION: Set isVisible to true if value is 1 ---
                     bool isVisible = (value == 1);
-                    // --------------------------------------------------------
                     var gizmoVisualizer = FindFirstObjectByType<GizmoVisualizer>();   
                     if (gizmoVisualizer != null)
                     {

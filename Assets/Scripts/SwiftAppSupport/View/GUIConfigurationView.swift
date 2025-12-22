@@ -9,19 +9,27 @@ enum SideSelection {
 }
 
 struct GUIConfigurationView: View {
-    
     @State private var sideSelection: SideSelection? = nil
-    @ObservedObject var appState: AppState
+    var appState: AppState
 
     init(appState: AppState = AppState.shared) {
-        _appState = ObservedObject(wrappedValue: appState)
+        self.appState = appState
     }
     
+    var modelURL: URL? {
+        guard let modelName = appState.selectedModel,
+              let resourceRoot = Bundle.main.resourceURL else {
+            return nil
+        }
+        
+        return URL(string: "Data/Raw/\(modelName)", relativeTo: resourceRoot)
+    }
+
     var body: some View {
-        VStack { 
+        @Bindable var state = appState
+        
+        VStack {
             HStack {
-                
-                
                 VStack {
                     Button {
                         CallCSharpCallback("TriggerHomeScene")
@@ -35,7 +43,6 @@ struct GUIConfigurationView: View {
                 }
                 .padding(.leading, 20)
 
-
                 VStack(alignment: .leading) {
                     Text("RIGHT SIDE")
                         .font(.title2)
@@ -44,38 +51,30 @@ struct GUIConfigurationView: View {
                         .padding(.leading, 20)
                     Spacer()
                 }
-                
-                Spacer() 
-                
-                
-                if let modelName = appState.selectedModel {
-                    
-                    if let resourceRoot = Bundle.main.resourceURL,
-                       let url = URL(string: "Data/Raw/\(modelName)", relativeTo: resourceRoot) {
-                        
-                        Model3D(url: url) { model in
-                            model
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .scaleEffect(0.5) 
-                                .offset(y: -50)  
-                        } placeholder: {
-                            ProgressView("Loading \(modelName)...")
-                        }
-                        
-                    } else {
-                        Text("Error: Could not find or access model file: \(modelName)")
-                            .foregroundColor(.red)
-                            .padding()
+                Spacer()
+                if let modelName = state.selectedModel, let url = modelURL {
+                    Model3D(url: url) { model in
+                        model
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .scaleEffect(0.5)
+                            .offset(y: -50)
+                    } placeholder: {
+                        ProgressView("Loading \(modelName)...")
                     }
-                    
-                } else {
+
+                } else if state.selectedModel != nil {
+                    Text("Error: Could not find or access model file: \(state.selectedModel!)")
+                        .foregroundColor(.red)
+                        .padding()
+                }
+                else {
                     Text("No model was selected from the Home screen.")
                         .foregroundColor(.secondary)
                         .padding()
                 }
-                
-                Spacer() 
+
+                Spacer()
 
                 VStack(alignment: .trailing) {
                     Text("LEFT SIDE")
@@ -86,17 +85,16 @@ struct GUIConfigurationView: View {
                     Spacer()
                 }
             }
-            
-            
         }
         .onAppear {
-            if let modelName = appState.selectedModel {
+            if let modelName = state.selectedModel { 
                 CallCSharpCallback("LoadModel:\(modelName)")
             }
         }
+        
         .toolbar {
             ToolbarItem(placement: .bottomOrnament) {
-                
+
                 VStack(spacing: 12) {
                     HStack {
                         Button("Right") {
@@ -110,7 +108,7 @@ struct GUIConfigurationView: View {
                             in: .rect(cornerRadius: 10),
                             displayMode: sideSelection == .right ? .always : .implicit
                         )
-                        
+
                         Button("Left") {
                             sideSelection = .left
                         }
@@ -123,14 +121,13 @@ struct GUIConfigurationView: View {
                             displayMode: sideSelection == .left ? .always : .implicit
                         )
                     }
-                    
+
                     Button("Continue") {
                         if sideSelection == .left {
-                            appState.selectedSide = "Left"
-                            
+                            state.selectedSide = "Left" 
                             CallCSharpCallback("TriggerLeft")
                         } else if sideSelection == .right {
-                            appState.selectedSide = "Right"
+                            state.selectedSide = "Right" 
                             CallCSharpCallback("TriggerRight")
                         }
                     }
