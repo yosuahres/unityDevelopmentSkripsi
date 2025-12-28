@@ -1,0 +1,206 @@
+﻿#include "pch-c.h"
+
+
+#include "codegen/il2cpp-codegen-metadata.h"
+
+
+
+
+
+extern void UnitySourceGeneratedAssemblyMonoScriptTypes_v1_Get_mCF960BE558BBC99350BAD502D030FA7C58C1AB8F (void);
+extern void UnitySourceGeneratedAssemblyMonoScriptTypes_v1__ctor_m21D4B6C681199D62E4728809795D41EC37E2E67C (void);
+extern void ObjectBridge_FindObjectFromInstanceID_mE785076FD59EA2F1FC9DCD54228E6ADEFF456A7E (void);
+extern void ObjectBridge_FindObjectFromInstanceID_m8F1103A8729D58623B33C78E54FBD3772140095C (void);
+extern void ObjectBridge_MarkDirty_m8B625FDE68B39995EEF9DEE918BCE0EAF741EFCB (void);
+extern void ObjectDispatcherProxy__ctor_m7761C7A86C5BC812BD9534F08464B78029E6D19E (void);
+extern void ObjectDispatcherProxy__ctor_mE1AEC5F6F143E8AE230DF29C028FB91FE78738CE (void);
+extern void ObjectDispatcherProxy__ctor_m594FE639F23D802EAB23C4AFCF52B80791894C12 (void);
+extern void ObjectDispatcherProxy_Dispose_m3206E97755F8E0AE5B9D02C6615306B16EEA4F13 (void);
+extern void ObjectDispatcherProxy_EnableTypeTracking_mCC4595855A018C56AE7B8DB0BB22AEEA25264A1D (void);
+extern void ObjectDispatcherProxy_DisableTypeTracking_mAD57E5D980C866A20EBFC09E248B008556CDC5C7 (void);
+extern void ObjectDispatcherProxy_EnableTransformTracking_mDE304AF83BDCD065ECD16FFA90526A2087703666 (void);
+extern void ObjectDispatcherProxy_DisableTransformTracking_m353C6E92EC518B1F8CC77349EA3D424A0A2D1D52 (void);
+extern void ObjectDispatcherProxy_DispatchTypeChangesAndClear_m691A3C1361164CA56F425D7289CD8DF4B5473B48 (void);
+extern void ObjectDispatcherProxy_GetTypeChangesAndClear_m1C0128E4406F8FDB3F7778113263EEA7EC7BECD3 (void);
+extern void ObjectDispatcherProxy_DispatchTransformChangesAndClear_m8FE3172B44201673B01F6BA9A857E91DAE900CE6 (void);
+extern void ObjectDispatcherProxy_DispatchTypeChangesAndClear_mB008F7EF809274AD623569B0C081FEC0093E517A (void);
+extern void ObjectDispatcherProxy_DispatchTransformHierarchyChangesAndClear_mCFA18AA8E8C12DB93FA3D412C545A9705CCE28D7 (void);
+extern void ObjectDispatcherProxy_DispatchTransformLocalTRSChangesAndClear_m77EB191C7999840BDAE9146BA7F7C0575874D25B (void);
+extern void ObjectDispatcherProxy__cctor_mC76AE53B2E42C5AA4A4C4F5B4097F68D6C617BAA (void);
+extern void TypeDispatchData_Dispose_m02A3B5A0D410D2B3E39EF079BAB261B58D8EC3B5 (void);
+extern void TransformDispatchData__ctor_mFFE94306547F67D8DBBDC0792E6539059F6EED16 (void);
+extern void TransformDispatchData_Dispose_m5EACCE8A7CC23DB430401F699A4D472E9CB72E66 (void);
+extern void TextureBridge_SetAllowReadingInEditor_mE885382A98D86ABA23ADF409EBB0890302CC1847 (void);
+extern void TextureBridge_GetAllowReadingInEditor_mB6757054574308D73A50175AFADB1B8D144C04CF (void);
+extern void RendererBridge_GetSortingKey_m01AAD856FD79DE2E1EEC6610A11741A94AC472C5 (void);
+extern void RendererBridge_GetSortingGroupId_m317E1F6DBE61B3D2B6A2F79D115B992001308371 (void);
+extern void RendererBridge_GetSortingGroupOrder_mB87572E395E192D95660CE76532625CDB2043FCC (void);
+extern void RendererBridge_GetSortingGroupKey_mD84301D0FD30954790FEE92331702C8EA5A68509 (void);
+extern void SortingGroupBridge_GetSortingGroupId_mDFC24B466313E73A6C943A6143C674723E20E47F (void);
+extern void SortingGroupBridge_GetSortingGroupOrder_mE4D078F17809B92A4B2DF3770D77BC5DD672234B (void);
+extern void SortingGroupBridge_GetIndex_mEAC9F99B688B84A71BDB44D827F609396EA490D1 (void);
+extern void SortingGroupBridge_GetSortingKey_mE0B2C89406912929CF0EC133C254484CA2BD7CD3 (void);
+extern void SpriteRendererBridge_GetCurrentMeshData_m77E4147E98D82DD4318BC98CE82A96D502482901 (void);
+extern void FontBridge_DefaultFont_mE881D34F8EE8B8C8301013A31E8324E7C934BB97 (void);
+extern void RenderPipelineManagerBridge_RecreateCurrentPipeline_m6713FD5BB3277BE05B7C0F93C15E03AEF95CC392 (void);
+extern void CubemapBridge_CreateExternalCubemap_m9D4DB591C3DB09174A46C40160B8C3A934824097 (void);
+extern void HaloBridge_get_HaloType_mDE7312DA8D7C988129FAF332F7AA96B9EDD295D9 (void);
+extern void HaloBridge_set_HaloType_m334D14C35C737357617DD07B25AD7570CD229583 (void);
+extern void HaloBridge__cctor_m607F3CD12AF4AB7DD5798C501565FD258876A151 (void);
+extern void SerializableAttributesTestType_get_NativeProperty_m7C8D8DA549373DA2DB39D5C6082D1DD5C84D9AFC (void);
+extern void SerializableAttributesTestType_set_NativeProperty_mE53F6B5054267B358CABE973BC98A5F096F86A7F (void);
+extern void SerializableAttributesTestType__ctor_m8D6A6ABB4EEE15402E2C3AE0A21046A1D7584B51 (void);
+static Il2CppMethodPointer s_methodPointers[47] = 
+{
+	UnitySourceGeneratedAssemblyMonoScriptTypes_v1_Get_mCF960BE558BBC99350BAD502D030FA7C58C1AB8F,
+	UnitySourceGeneratedAssemblyMonoScriptTypes_v1__ctor_m21D4B6C681199D62E4728809795D41EC37E2E67C,
+	ObjectBridge_FindObjectFromInstanceID_mE785076FD59EA2F1FC9DCD54228E6ADEFF456A7E,
+	ObjectBridge_FindObjectFromInstanceID_m8F1103A8729D58623B33C78E54FBD3772140095C,
+	NULL,
+	NULL,
+	ObjectBridge_MarkDirty_m8B625FDE68B39995EEF9DEE918BCE0EAF741EFCB,
+	ObjectDispatcherProxy__ctor_m7761C7A86C5BC812BD9534F08464B78029E6D19E,
+	ObjectDispatcherProxy__ctor_mE1AEC5F6F143E8AE230DF29C028FB91FE78738CE,
+	ObjectDispatcherProxy__ctor_m594FE639F23D802EAB23C4AFCF52B80791894C12,
+	ObjectDispatcherProxy_Dispose_m3206E97755F8E0AE5B9D02C6615306B16EEA4F13,
+	ObjectDispatcherProxy_EnableTypeTracking_mCC4595855A018C56AE7B8DB0BB22AEEA25264A1D,
+	ObjectDispatcherProxy_DisableTypeTracking_mAD57E5D980C866A20EBFC09E248B008556CDC5C7,
+	ObjectDispatcherProxy_EnableTransformTracking_mDE304AF83BDCD065ECD16FFA90526A2087703666,
+	ObjectDispatcherProxy_DisableTransformTracking_m353C6E92EC518B1F8CC77349EA3D424A0A2D1D52,
+	ObjectDispatcherProxy_DispatchTypeChangesAndClear_m691A3C1361164CA56F425D7289CD8DF4B5473B48,
+	ObjectDispatcherProxy_GetTypeChangesAndClear_m1C0128E4406F8FDB3F7778113263EEA7EC7BECD3,
+	ObjectDispatcherProxy_DispatchTransformChangesAndClear_m8FE3172B44201673B01F6BA9A857E91DAE900CE6,
+	ObjectDispatcherProxy_DispatchTypeChangesAndClear_mB008F7EF809274AD623569B0C081FEC0093E517A,
+	ObjectDispatcherProxy_DispatchTransformHierarchyChangesAndClear_mCFA18AA8E8C12DB93FA3D412C545A9705CCE28D7,
+	ObjectDispatcherProxy_DispatchTransformLocalTRSChangesAndClear_m77EB191C7999840BDAE9146BA7F7C0575874D25B,
+	ObjectDispatcherProxy__cctor_mC76AE53B2E42C5AA4A4C4F5B4097F68D6C617BAA,
+	TypeDispatchData_Dispose_m02A3B5A0D410D2B3E39EF079BAB261B58D8EC3B5,
+	TransformDispatchData__ctor_mFFE94306547F67D8DBBDC0792E6539059F6EED16,
+	TransformDispatchData_Dispose_m5EACCE8A7CC23DB430401F699A4D472E9CB72E66,
+	TextureBridge_SetAllowReadingInEditor_mE885382A98D86ABA23ADF409EBB0890302CC1847,
+	TextureBridge_GetAllowReadingInEditor_mB6757054574308D73A50175AFADB1B8D144C04CF,
+	RendererBridge_GetSortingKey_m01AAD856FD79DE2E1EEC6610A11741A94AC472C5,
+	RendererBridge_GetSortingGroupId_m317E1F6DBE61B3D2B6A2F79D115B992001308371,
+	RendererBridge_GetSortingGroupOrder_mB87572E395E192D95660CE76532625CDB2043FCC,
+	RendererBridge_GetSortingGroupKey_mD84301D0FD30954790FEE92331702C8EA5A68509,
+	SortingGroupBridge_GetSortingGroupId_mDFC24B466313E73A6C943A6143C674723E20E47F,
+	SortingGroupBridge_GetSortingGroupOrder_mE4D078F17809B92A4B2DF3770D77BC5DD672234B,
+	SortingGroupBridge_GetIndex_mEAC9F99B688B84A71BDB44D827F609396EA490D1,
+	SortingGroupBridge_GetSortingKey_mE0B2C89406912929CF0EC133C254484CA2BD7CD3,
+	SpriteRendererBridge_GetCurrentMeshData_m77E4147E98D82DD4318BC98CE82A96D502482901,
+	NULL,
+	NULL,
+	FontBridge_DefaultFont_mE881D34F8EE8B8C8301013A31E8324E7C934BB97,
+	RenderPipelineManagerBridge_RecreateCurrentPipeline_m6713FD5BB3277BE05B7C0F93C15E03AEF95CC392,
+	CubemapBridge_CreateExternalCubemap_m9D4DB591C3DB09174A46C40160B8C3A934824097,
+	HaloBridge_get_HaloType_mDE7312DA8D7C988129FAF332F7AA96B9EDD295D9,
+	HaloBridge_set_HaloType_m334D14C35C737357617DD07B25AD7570CD229583,
+	HaloBridge__cctor_m607F3CD12AF4AB7DD5798C501565FD258876A151,
+	SerializableAttributesTestType_get_NativeProperty_m7C8D8DA549373DA2DB39D5C6082D1DD5C84D9AFC,
+	SerializableAttributesTestType_set_NativeProperty_mE53F6B5054267B358CABE973BC98A5F096F86A7F,
+	SerializableAttributesTestType__ctor_m8D6A6ABB4EEE15402E2C3AE0A21046A1D7584B51,
+};
+extern void TypeDispatchData_Dispose_m02A3B5A0D410D2B3E39EF079BAB261B58D8EC3B5_AdjustorThunk (void);
+extern void TransformDispatchData__ctor_mFFE94306547F67D8DBBDC0792E6539059F6EED16_AdjustorThunk (void);
+extern void TransformDispatchData_Dispose_m5EACCE8A7CC23DB430401F699A4D472E9CB72E66_AdjustorThunk (void);
+static Il2CppTokenAdjustorThunkPair s_adjustorThunks[3] = 
+{
+	{ 0x06000017, TypeDispatchData_Dispose_m02A3B5A0D410D2B3E39EF079BAB261B58D8EC3B5_AdjustorThunk },
+	{ 0x06000018, TransformDispatchData__ctor_mFFE94306547F67D8DBBDC0792E6539059F6EED16_AdjustorThunk },
+	{ 0x06000019, TransformDispatchData_Dispose_m5EACCE8A7CC23DB430401F699A4D472E9CB72E66_AdjustorThunk },
+};
+static const int32_t s_InvokerIndices[47] = 
+{
+	41398,
+	22949,
+	38919,
+	38920,
+	-1,
+	-1,
+	39631,
+	22949,
+	17496,
+	8784,
+	22949,
+	8176,
+	17496,
+	8176,
+	8176,
+	8784,
+	595,
+	3968,
+	17496,
+	17496,
+	17496,
+	41347,
+	22949,
+	17733,
+	22949,
+	34973,
+	38294,
+	39457,
+	38596,
+	38596,
+	39457,
+	38596,
+	38596,
+	38596,
+	39457,
+	40423,
+	-1,
+	-1,
+	41249,
+	41347,
+	24885,
+	41249,
+	39631,
+	41347,
+	22459,
+	17283,
+	22949,
+};
+static const Il2CppTokenRangePair s_rgctxIndices[4] = 
+{
+	{ 0x06000005, { 0, 1 } },
+	{ 0x06000006, { 1, 1 } },
+	{ 0x06000025, { 2, 2 } },
+	{ 0x06000026, { 4, 3 } },
+};
+extern const uint32_t g_rgctx_T_t5960FC0E23984D957B7C70ABF1E7B3D71863DC90;
+extern const uint32_t g_rgctx_T_t4300C4C6F29C65675C0C290C7479AC0AA3359DEF;
+extern const uint32_t g_rgctx_List_1_t69617FED14BE58D7CD09022A767F8FA368DBD67A;
+extern const uint32_t g_rgctx_NoAllocHelpers_EnsureListElemCount_TisT_t97F051DF22F131C86DADF2C67FF79436D1236EFC_m89B39745F8694E74981F8F98860FE262D1DDA0E2;
+extern const uint32_t g_rgctx_List_1_tAE3A88400FDDC306D7E033D3ADCE6A4C14C9F0AE;
+extern const uint32_t g_rgctx_NoAllocHelpers_ExtractArrayFromList_TisT_t7F4F3B6139CECA70705353B43A9C3BA192DE48B0_m64297B0C4F10335CAE4E71A638FF6A81C49E7A17;
+extern const uint32_t g_rgctx_TU5BU5D_tC08AA7FA66D868DEA559BEEE9EF25486C3435277;
+static const Il2CppRGCTXDefinition s_rgctxValues[7] = 
+{
+	{ (Il2CppRGCTXDataType)2, (const void *)&g_rgctx_T_t5960FC0E23984D957B7C70ABF1E7B3D71863DC90 },
+	{ (Il2CppRGCTXDataType)2, (const void *)&g_rgctx_T_t4300C4C6F29C65675C0C290C7479AC0AA3359DEF },
+	{ (Il2CppRGCTXDataType)2, (const void *)&g_rgctx_List_1_t69617FED14BE58D7CD09022A767F8FA368DBD67A },
+	{ (Il2CppRGCTXDataType)3, (const void *)&g_rgctx_NoAllocHelpers_EnsureListElemCount_TisT_t97F051DF22F131C86DADF2C67FF79436D1236EFC_m89B39745F8694E74981F8F98860FE262D1DDA0E2 },
+	{ (Il2CppRGCTXDataType)2, (const void *)&g_rgctx_List_1_tAE3A88400FDDC306D7E033D3ADCE6A4C14C9F0AE },
+	{ (Il2CppRGCTXDataType)3, (const void *)&g_rgctx_NoAllocHelpers_ExtractArrayFromList_TisT_t7F4F3B6139CECA70705353B43A9C3BA192DE48B0_m64297B0C4F10335CAE4E71A638FF6A81C49E7A17 },
+	{ (Il2CppRGCTXDataType)2, (const void *)&g_rgctx_TU5BU5D_tC08AA7FA66D868DEA559BEEE9EF25486C3435277 },
+};
+IL2CPP_EXTERN_C const Il2CppCodeGenModule g_Unity_InternalAPIEngineBridge_021_CodeGenModule;
+const Il2CppCodeGenModule g_Unity_InternalAPIEngineBridge_021_CodeGenModule = 
+{
+	"Unity.InternalAPIEngineBridge.021.dll",
+	47,
+	s_methodPointers,
+	3,
+	s_adjustorThunks,
+	s_InvokerIndices,
+	0,
+	NULL,
+	4,
+	s_rgctxIndices,
+	7,
+	s_rgctxValues,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+};

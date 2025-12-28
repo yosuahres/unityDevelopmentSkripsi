@@ -1,0 +1,121 @@
+//swiftuisampleplugin.swift
+
+import Foundation
+import SwiftUI
+
+// These methods are exported from Swift with an explicit C-style name using @_cdecl,
+// to match what DllImport expects. You will need to do appropriate conversion from
+// C-style argument types (including UnsafePointers and other friends) into Swift
+// as appropriate.
+
+// SetNativeCallback is called from the SwiftUIDriver MonoBehaviour in OnEnable,
+// to give Swift code a way to make calls back into C#. You can use one callback or
+// many, as appropriate for your application.
+//
+// Declared in C# as: delegate void CallbackDelegate(string command);
+typealias CallbackDelegateType = @convention(c) (UnsafePointer<CChar>, Int32) -> Void
+public typealias SetFPSDelegateType = (Float) -> Void
+
+var callbackDelegate: CallbackDelegateType? = nil
+var setFPSDelegate: SetFPSDelegateType? = nil
+var pendingCommand: String? = nil   
+
+// Declared in C# as: static extern void SetNativeCallback(CallbackDelegate callback);
+@_cdecl("SetNativeCallback")
+func setNativeCallback(_ delegate: CallbackDelegateType)
+{
+    print("############ SET NATIVE CALLBACK")
+    callbackDelegate = delegate
+
+    // If we have a pending command that was sent before Unity registered the callback,
+    // flush it now so Unity can handle it.
+    if let pending = pendingCommand {
+        pending.withCString { cstr in
+            delegate(cstr, 0)
+        }
+        pendingCommand = nil
+    }
+}
+
+// This is a function for your own use from the enclosing Unity-VisionOS app, to call the delegate
+// from your own windows/views (HelloWorldContentView uses this)
+public func CallCSharpCallback(_ str: String, _ value: Int32 = 0)
+{
+    // If Unity hasn't registered the native callback yet, buffer this command.
+    if (callbackDelegate == nil) {
+        pendingCommand = str
+        return
+    }
+
+    str.withCString {
+        callbackDelegate!($0, value)
+    }
+    pendingCommand = nil
+}
+
+// Declared in C# as: static extern void OpenSwiftUIWindow(string name);
+@_cdecl("OpenSwiftUIWindow")
+func openSwiftUIWindow(_ cname: UnsafePointer<CChar>)
+{
+    let openWindow = EnvironmentValues().openWindow
+
+    let name = String(cString: cname)
+    print("############ OPEN WINDOW \(name)")
+    openWindow(id: name)
+}
+
+// Declared in C# as: static extern void CloseSwiftUIWindow(string name);
+@_cdecl("CloseSwiftUIWindow")
+func closeSwiftUIWindow(_ cname: UnsafePointer<CChar>)
+{
+    let dismissWindow = EnvironmentValues().dismissWindow
+
+    let name = String(cString: cname)
+    print("############ CLOSE WINDOW \(name)")
+    dismissWindow(id: name)
+}
+
+// Declared in C# as: static extern void SendCommandToSwift(string command, int value);
+@_cdecl("SendCommandToSwift")
+func sendCommandToSwift(_ ccommand: UnsafePointer<CChar>, _ value: Int32)
+{
+    let command = String(cString: ccommand)
+    print("############ SEND COMMAND TO SWIFT: \(command) \(value)")
+    CallCSharpCallback(command, value)
+}
+
+// immersive space scene controls
+@_cdecl("OpenControlsUIWindow")  
+func openControlsUIWindow(_ cname: UnsafePointer<CChar>)
+{
+    let openWindow = EnvironmentValues().openWindow
+
+    let name = String(cString: cname)
+    print("############ OPEN WINDOW \(name)")
+    openWindow(id: name)
+}
+
+@_cdecl("CloseControlsUIWindow")
+func closeControlsUIWindow(_ cname: UnsafePointer<CChar>)
+{
+    let dismissWindow = EnvironmentValues().dismissWindow
+
+    let name = String(cString: cname)
+    print("############ CLOSE WINDOW \(name)")
+    dismissWindow(id: name)
+}
+
+// Declared in C# as: static extern void SetFPS(float fps);
+@_cdecl("SetFPS")
+func setFPS(_ fps: Float)
+{
+    print("############ SET FPS: \(fps)")
+    setFPSDelegate?(fps)
+}
+
+// ContentView should call this on appear, setting up a callback for when SwiftFPSCounter pushes new FPS values
+// Only one ContentView is supported. Calling SubscribeToSetFPS multiple times will overwrite setFPSDelegate,
+// so only the most recent caller will get FPS values.
+public func SubscribeToSetFPS(setFPSMethod: @escaping SetFPSDelegateType) {
+    setFPSDelegate = setFPSMethod
+}

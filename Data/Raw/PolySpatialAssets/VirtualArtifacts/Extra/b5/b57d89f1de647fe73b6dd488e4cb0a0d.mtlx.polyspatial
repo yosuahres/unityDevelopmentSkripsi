@@ -1,0 +1,34 @@
+<?xml version ="1.0"?>
+<materialx version = "1.38" colorspace = "lin_rec709">
+    <realitykit_background_blur name = "_1" type = "color4">
+    </realitykit_background_blur>
+    <constant name = "_Tint" type = "color4">
+        <input name = "value" type = "color4" value = "1,1,1,1" />
+    </constant>
+    <multiply name = "_2" type = "vector4">
+        <input name = "in1" type = "vector4" nodename = "_5" />
+        <input name = "in2" type = "vector4" nodename = "_6" />
+    </multiply>
+    <GeometryModification name = "_3" type = "vertexshader">
+    </GeometryModification>
+    <realitykit_unlit name = "_4" type = "surfaceshader">
+        <input name = "applyPostProcessToneMap" type = "boolean" value = "false" />
+        <input name = "color" type = "color3" nodename = "_7" />
+    </realitykit_unlit>
+    <surfacematerial name = "USD_BlurredBackground" type = "material">
+        <input name = "vertexshader" type = "vertexshader" nodename = "_3" />
+        <input name = "surfaceshader" type = "surfaceshader" nodename = "_4" />
+    </surfacematerial>
+    <swizzle name = "_5" type = "vector4">
+        <input name = "in" type = "color4" nodename = "_1" />
+        <input name = "channels" type = "string" value = "rgba" />
+    </swizzle>
+    <swizzle name = "_6" type = "vector4">
+        <input name = "in" type = "color4" nodename = "_Tint" />
+        <input name = "channels" type = "string" value = "rgba" />
+    </swizzle>
+    <swizzle name = "_7" type = "color3">
+        <input name = "in" type = "vector4" nodename = "_2" />
+        <input name = "channels" type = "string" value = "xyz" />
+    </swizzle>
+</materialx>

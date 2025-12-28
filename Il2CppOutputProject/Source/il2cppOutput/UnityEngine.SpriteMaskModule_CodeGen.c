@@ -1,0 +1,84 @@
+﻿#include "pch-c.h"
+
+
+#include "codegen/il2cpp-codegen-metadata.h"
+
+
+
+
+
+extern void SpriteMask_get_frontSortingLayerID_mCDFA70861C17DE5BC7FC178DF5FFD1E7BEE12B3E (void);
+extern void SpriteMask_get_frontSortingOrder_m9F4B657A7E0C3BDC5344C8FD3EAC4B3A04D43979 (void);
+extern void SpriteMask_get_backSortingLayerID_m0A888DD1A63A9AE95D8EDE5C92F106C3669F963D (void);
+extern void SpriteMask_get_backSortingOrder_m47CF66F8F8C4098B438106A423D45BD805EF11DB (void);
+extern void SpriteMask_get_alphaCutoff_m4994EFE29AEEA861928DDD627823DE1F349C8CF9 (void);
+extern void SpriteMask_get_sprite_m56DE2BB449F7A3E0F01373E390B64755ACA121A7 (void);
+extern void SpriteMask_get_isCustomRangeActive_mA0DFDC2307128FAEC2C1B0B9B6B5D382A40CD115 (void);
+extern void SpriteMask_get_frontSortingLayerID_Injected_mAECF5F847A53D829E4CF2DEBA61F13E9231E5CD4 (void);
+extern void SpriteMask_get_frontSortingOrder_Injected_mA33DC103E5C3EEC660D7C858C9E1B3E9D7A87DAD (void);
+extern void SpriteMask_get_backSortingLayerID_Injected_m996AE833E550FEFF4974946A8F961D56EB00B631 (void);
+extern void SpriteMask_get_backSortingOrder_Injected_m59D9683CAA911AD022FCF477862555B9E1093CD5 (void);
+extern void SpriteMask_get_alphaCutoff_Injected_m07165401F892F392A8526DDED7983DFC74A9B28B (void);
+extern void SpriteMask_get_sprite_Injected_mDFEBB03D141A446877F6EC6572D221C307488088 (void);
+extern void SpriteMask_get_isCustomRangeActive_Injected_m68E7B20D011AD64FEEE47B5BA7D9C789E590AF0A (void);
+extern void SpriteMaskUtility_HasSpriteMaskInLayerRange_m7E522D077F4992310FECE3D2911B0C1EE1F72F6B (void);
+extern void SpriteMaskUtility_HasSpriteMaskInLayerRange_Injected_m2C4AA54A7B3110F8F11DEEA22FBA36A1CC77B7CD (void);
+static Il2CppMethodPointer s_methodPointers[16] = 
+{
+	SpriteMask_get_frontSortingLayerID_mCDFA70861C17DE5BC7FC178DF5FFD1E7BEE12B3E,
+	SpriteMask_get_frontSortingOrder_m9F4B657A7E0C3BDC5344C8FD3EAC4B3A04D43979,
+	SpriteMask_get_backSortingLayerID_m0A888DD1A63A9AE95D8EDE5C92F106C3669F963D,
+	SpriteMask_get_backSortingOrder_m47CF66F8F8C4098B438106A423D45BD805EF11DB,
+	SpriteMask_get_alphaCutoff_m4994EFE29AEEA861928DDD627823DE1F349C8CF9,
+	SpriteMask_get_sprite_m56DE2BB449F7A3E0F01373E390B64755ACA121A7,
+	SpriteMask_get_isCustomRangeActive_mA0DFDC2307128FAEC2C1B0B9B6B5D382A40CD115,
+	SpriteMask_get_frontSortingLayerID_Injected_mAECF5F847A53D829E4CF2DEBA61F13E9231E5CD4,
+	SpriteMask_get_frontSortingOrder_Injected_mA33DC103E5C3EEC660D7C858C9E1B3E9D7A87DAD,
+	SpriteMask_get_backSortingLayerID_Injected_m996AE833E550FEFF4974946A8F961D56EB00B631,
+	SpriteMask_get_backSortingOrder_Injected_m59D9683CAA911AD022FCF477862555B9E1093CD5,
+	SpriteMask_get_alphaCutoff_Injected_m07165401F892F392A8526DDED7983DFC74A9B28B,
+	SpriteMask_get_sprite_Injected_mDFEBB03D141A446877F6EC6572D221C307488088,
+	SpriteMask_get_isCustomRangeActive_Injected_m68E7B20D011AD64FEEE47B5BA7D9C789E590AF0A,
+	SpriteMaskUtility_HasSpriteMaskInLayerRange_m7E522D077F4992310FECE3D2911B0C1EE1F72F6B,
+	SpriteMaskUtility_HasSpriteMaskInLayerRange_Injected_m2C4AA54A7B3110F8F11DEEA22FBA36A1CC77B7CD,
+};
+static const int32_t s_InvokerIndices[16] = 
+{
+	22604,
+	22604,
+	22604,
+	22604,
+	22825,
+	22672,
+	22459,
+	38593,
+	38593,
+	38593,
+	38593,
+	39285,
+	38730,
+	38293,
+	38304,
+	38280,
+};
+IL2CPP_EXTERN_C const Il2CppCodeGenModule g_UnityEngine_SpriteMaskModule_CodeGenModule;
+const Il2CppCodeGenModule g_UnityEngine_SpriteMaskModule_CodeGenModule = 
+{
+	"UnityEngine.SpriteMaskModule.dll",
+	16,
+	s_methodPointers,
+	0,
+	NULL,
+	s_InvokerIndices,
+	0,
+	NULL,
+	0,
+	NULL,
+	0,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+};

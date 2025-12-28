@@ -1,0 +1,125 @@
+﻿#include "pch-c.h"
+
+
+#include "codegen/il2cpp-codegen-metadata.h"
+
+
+extern const RuntimeMethod* RealityKitBackend_HostCommandCallbackFromRealityKit_m54A45EB932FE7283DFB4E04608D44694C10354BD_RuntimeMethod_var;
+
+
+
+extern void UnitySourceGeneratedAssemblyMonoScriptTypes_v1_Get_mEF703FE7AE4E83701ECBC57EB0CC304F5FD81BED (void);
+extern void UnitySourceGeneratedAssemblyMonoScriptTypes_v1__ctor_m1FFDDBE1A5E01FF92AF42696970F599FEB99FF24 (void);
+extern void RealityKitBackend_get_NextHostHandler_m654A07D2D5EEAC9F29AC444EB1BEF583F637260C (void);
+extern void RealityKitBackend_set_NextHostHandler_m06A76D716D98D488E76CE73E40FB5501FB10149E (void);
+extern void RealityKitBackend_TryGetAPIPointers_m39BF0D90877972B4D522C3DF6A5ED477A64B2616 (void);
+extern void RealityKitBackend_GetBackendPriority_m58FF463317B4A1853946CE4B8CD9D144DEA835D2 (void);
+extern void RealityKitBackend__ctor_m335CDEFC457C434A892793CE0CE7F3F724E98490 (void);
+extern void RealityKitBackend_HostCommandCallbackFromRealityKit_m54A45EB932FE7283DFB4E04608D44694C10354BD (void);
+extern void RealityKitBackend_HandleCommand_mDDF59ED88DCC336EF3CAEAC1EF5440B9AFC1A48E (void);
+extern void RealityKitBackend_GetCameraPose_m06D3151EDC8B7BADE9DD8814FE7B483550C4F527 (void);
+extern void RealityKitBackend_ObsoleteTakeScreenshot_m145C63CCB0F01DB8CA239BF294F373CABB8F7C7A (void);
+extern void RealityKitBackend_TakeScreenshot_mFC6044A478639704E473F03F45C6FAEF3076AEAA (void);
+extern void RealityKitBackend_CanReceiveNativeMesh_m7415CCB419CD45C519AA213DCE8CD4014C130D7B (void);
+extern void RealityKitBackend__cctor_m73B50CA97F44C57FFD7B84149203A6A0E79D0986 (void);
+extern void RKRuntimeFuncs_GetPolySpatialNativeAPI_static_mCA2433F613CA9024ED9FD398154B1E40228DECCB (void);
+extern void RKRuntimeFuncs_GetPolySpatialNativeAPI_mE2254CB9DD6A5BABD4FEF5DF5AA6FEE065482184 (void);
+extern void RKRuntimeFuncs_SetupHandles_m84D22F05B893C91929C332AE38F380982F641296 (void);
+extern void RKRuntimeFuncs_Shutdown_m1F4E9BDC2A0AA8D38F8CD523DCEEE2E9729E2F0D (void);
+extern void RKRuntimeFuncs_TryLoadFunctionPointers_m5B0C20B5D521AA85ABB55BCCE1798766FB111A0E (void);
+extern void RKRuntimeFuncs_dlopen_mD39616CD418C6577B26BC110365410D5A63B6629 (void);
+extern void RKRuntimeFuncs_dlclose_mBCA15ADDD6AF31E8D9E165A2505E06B70F2CD7C1 (void);
+extern void RKRuntimeFuncs_dlsym_m105E7B1D383B81BD9A5F89AF0EC539DD78FE0451 (void);
+extern void RKRuntimeFuncs_dlerror_m6A2D0E96E82EC5348A6EEBB3EC518F48628BDC96 (void);
+extern void RKRuntimeFuncs_dlerror_string_mDC4A58026B09F060D4B28E8594EAF3242C334808 (void);
+extern void GetPolySpatialNativeApiFn__ctor_mE8FF04D04C676CB83365005D31EE7F224C5811A2 (void);
+extern void GetPolySpatialNativeApiFn_Invoke_mC5ED42BC0B3BC97E44B589CA63B093764DBB0CA4 (void);
+extern void GetPolySpatialNativeApiFn_BeginInvoke_mA6F5C032ADBE890C636850BEBE94E7065956E3B1 (void);
+extern void GetPolySpatialNativeApiFn_EndInvoke_mA0F1E105A2641189AD066209F5340564D97A2D4D (void);
+static Il2CppMethodPointer s_methodPointers[28] = 
+{
+	UnitySourceGeneratedAssemblyMonoScriptTypes_v1_Get_mEF703FE7AE4E83701ECBC57EB0CC304F5FD81BED,
+	UnitySourceGeneratedAssemblyMonoScriptTypes_v1__ctor_m1FFDDBE1A5E01FF92AF42696970F599FEB99FF24,
+	RealityKitBackend_get_NextHostHandler_m654A07D2D5EEAC9F29AC444EB1BEF583F637260C,
+	RealityKitBackend_set_NextHostHandler_m06A76D716D98D488E76CE73E40FB5501FB10149E,
+	RealityKitBackend_TryGetAPIPointers_m39BF0D90877972B4D522C3DF6A5ED477A64B2616,
+	RealityKitBackend_GetBackendPriority_m58FF463317B4A1853946CE4B8CD9D144DEA835D2,
+	RealityKitBackend__ctor_m335CDEFC457C434A892793CE0CE7F3F724E98490,
+	RealityKitBackend_HostCommandCallbackFromRealityKit_m54A45EB932FE7283DFB4E04608D44694C10354BD,
+	RealityKitBackend_HandleCommand_mDDF59ED88DCC336EF3CAEAC1EF5440B9AFC1A48E,
+	RealityKitBackend_GetCameraPose_m06D3151EDC8B7BADE9DD8814FE7B483550C4F527,
+	RealityKitBackend_ObsoleteTakeScreenshot_m145C63CCB0F01DB8CA239BF294F373CABB8F7C7A,
+	RealityKitBackend_TakeScreenshot_mFC6044A478639704E473F03F45C6FAEF3076AEAA,
+	RealityKitBackend_CanReceiveNativeMesh_m7415CCB419CD45C519AA213DCE8CD4014C130D7B,
+	RealityKitBackend__cctor_m73B50CA97F44C57FFD7B84149203A6A0E79D0986,
+	RKRuntimeFuncs_GetPolySpatialNativeAPI_static_mCA2433F613CA9024ED9FD398154B1E40228DECCB,
+	RKRuntimeFuncs_GetPolySpatialNativeAPI_mE2254CB9DD6A5BABD4FEF5DF5AA6FEE065482184,
+	RKRuntimeFuncs_SetupHandles_m84D22F05B893C91929C332AE38F380982F641296,
+	RKRuntimeFuncs_Shutdown_m1F4E9BDC2A0AA8D38F8CD523DCEEE2E9729E2F0D,
+	RKRuntimeFuncs_TryLoadFunctionPointers_m5B0C20B5D521AA85ABB55BCCE1798766FB111A0E,
+	RKRuntimeFuncs_dlopen_mD39616CD418C6577B26BC110365410D5A63B6629,
+	RKRuntimeFuncs_dlclose_mBCA15ADDD6AF31E8D9E165A2505E06B70F2CD7C1,
+	RKRuntimeFuncs_dlsym_m105E7B1D383B81BD9A5F89AF0EC539DD78FE0451,
+	RKRuntimeFuncs_dlerror_m6A2D0E96E82EC5348A6EEBB3EC518F48628BDC96,
+	RKRuntimeFuncs_dlerror_string_mDC4A58026B09F060D4B28E8594EAF3242C334808,
+	GetPolySpatialNativeApiFn__ctor_mE8FF04D04C676CB83365005D31EE7F224C5811A2,
+	GetPolySpatialNativeApiFn_Invoke_mC5ED42BC0B3BC97E44B589CA63B093764DBB0CA4,
+	GetPolySpatialNativeApiFn_BeginInvoke_mA6F5C032ADBE890C636850BEBE94E7065956E3B1,
+	GetPolySpatialNativeApiFn_EndInvoke_mA0F1E105A2641189AD066209F5340564D97A2D4D,
+};
+static const int32_t s_InvokerIndices[28] = 
+{
+	41402,
+	22949,
+	22672,
+	17496,
+	41193,
+	41229,
+	22949,
+	28541,
+	3027,
+	12278,
+	12541,
+	3550,
+	12541,
+	41347,
+	39615,
+	39615,
+	41347,
+	41347,
+	38293,
+	33284,
+	39629,
+	33279,
+	41231,
+	41249,
+	8776,
+	17227,
+	3515,
+	7294,
+};
+static const Il2CppTokenIndexMethodTuple s_reversePInvokeIndices[1] = 
+{
+	{ 0x06000008, 31,  (void**)&RealityKitBackend_HostCommandCallbackFromRealityKit_m54A45EB932FE7283DFB4E04608D44694C10354BD_RuntimeMethod_var, 0 },
+};
+IL2CPP_EXTERN_C const Il2CppCodeGenModule g_Unity_PolySpatial_RealityKit_CodeGenModule;
+const Il2CppCodeGenModule g_Unity_PolySpatial_RealityKit_CodeGenModule = 
+{
+	"Unity.PolySpatial.RealityKit.dll",
+	28,
+	s_methodPointers,
+	0,
+	NULL,
+	s_InvokerIndices,
+	1,
+	s_reversePInvokeIndices,
+	0,
+	NULL,
+	0,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+};

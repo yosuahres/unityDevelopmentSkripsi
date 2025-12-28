@@ -1,0 +1,58 @@
+<?xml version ="1.0"?>
+<materialx version = "1.38" colorspace = "lin_rec709">
+    <realitykit_hover_state name = "_1" type = "float">
+    </realitykit_hover_state>
+    <multiply name = "_2" type = "vector3">
+        <input name = "in1" type = "vector3" nodename = "_3" />
+        <input name = "in2" type = "vector3" value = "1,1,-1" />
+    </multiply>
+    <realitykit_hover_state name = "_3" type = "vector3">
+    </realitykit_hover_state>
+    <realitykit_hover_state name = "_4" type = "float">
+    </realitykit_hover_state>
+    <realitykit_hover_state name = "_5" type = "boolean">
+    </realitykit_hover_state>
+    <constant name = "_BaseColor" type = "color4">
+        <input name = "value" type = "color4" value = "1,1,1,1" />
+    </constant>
+    <mix name = "_6" type = "vector4">
+        <input name = "bg" type = "vector4" nodename = "_10" />
+        <input name = "fg" type = "vector4" nodename = "_11" />
+        <input name = "mix" type = "float" nodename = "_4" />
+    </mix>
+    <constant name = "_HoverColor" type = "color4">
+        <input name = "value" type = "color4" value = "0,0.7575798,1,1" />
+    </constant>
+    <GeometryModification name = "_7" type = "vertexshader">
+    </GeometryModification>
+    <realitykit_pbr name = "_8" type = "surfaceshader">
+        <input name = "baseColor" type = "color3" nodename = "_12" />
+        <input name = "metallic" type = "float" value = "0" />
+        <input name = "emissiveColor" type = "color3" value = "0,0,0" />
+        <input name = "ambientOcclusion" type = "float" value = "1" />
+        <input name = "specular" type = "float" value = "0.5" />
+        <input name = "roughness" type = "float" nodename = "_9" />
+        <input name = "clearcoat" type = "float" value = "0" />
+        <input name = "clearcoatRoughness" type = "float" value = "0.01" />
+    </realitykit_pbr>
+    <surfacematerial name = "USD_IntensityHover" type = "material">
+        <input name = "vertexshader" type = "vertexshader" nodename = "_7" />
+        <input name = "surfaceshader" type = "surfaceshader" nodename = "_8" />
+    </surfacematerial>
+    <subtract name = "_9" type = "float">
+        <input name = "in1" type = "float" value = "1" />
+        <input name = "in2" type = "float" value = "0.5" />
+    </subtract>
+    <swizzle name = "_10" type = "vector4">
+        <input name = "in" type = "color4" nodename = "_BaseColor" />
+        <input name = "channels" type = "string" value = "rgba" />
+    </swizzle>
+    <swizzle name = "_11" type = "vector4">
+        <input name = "in" type = "color4" nodename = "_HoverColor" />
+        <input name = "channels" type = "string" value = "rgba" />
+    </swizzle>
+    <swizzle name = "_12" type = "color3">
+        <input name = "in" type = "vector4" nodename = "_6" />
+        <input name = "channels" type = "string" value = "xyz" />
+    </swizzle>
+</materialx>

@@ -1,0 +1,197 @@
+#usda 1.0
+(
+    metersPerUnit = 1
+    upAxis = "Y"
+)
+
+def "MaterialX"
+{
+    def "Materials"
+    {
+        def Material "USD_TMP_SDFHDRPUNLIT"
+        {
+            color4f inputs:_UnderlayColor = (0, 0, 0, 1)
+            float inputs:_UnderlaySoftness = 0
+            float inputs:_UnderlayDilate = 0
+            float2 inputs:_UnderlayOffset = (0, 0)
+            asset inputs:_MainTex = @placeholder.png@ (colorSpace = "srgb_texture")
+            float4 inputs:_IsoPerimeter = (0, 0, 0, 0)
+            float4 inputs:_OutlineColor2 = (0.009433985, 0.02534519, 1, 1)
+            float4 inputs:TextureTransform_MainTex = (1, 1, 0, 0)
+            float3 inputs:TextureSize_MainTex = (0, 0, 0)
+            float inputs:_GradientScale = 10
+            float4 inputs:_OutlineColor3 = (0, 0, 0, 1)
+            float4 inputs:_Softness = (0, 0, 0, 0)
+            float4 inputs:TextureTransform_OutlineTex = (1, 1, 0, 0)
+            float4 inputs:_OutlineTex_ST = (1, 1, 0, 0)
+            float2 inputs:_OutlineUVSpeed = (0, 0)
+            float4 inputs:_OutlineColor1 = (0, 1, 1, 1)
+            float4 inputs:TextureTransform_FaceTex = (1, 1, 0, 0)
+            asset inputs:_FaceTex = @placeholder.png@ (colorSpace = "srgb_texture")
+            float4 inputs:_FaceTex_ST = (1, 1, 0, 0)
+            float2 inputs:_FaceUVSpeed = (0, 0)
+            float4 inputs:_FaceColor = (1, 1, 1, 1)
+            float2 inputs:_OutlineOffset1 = (0, 0)
+            float2 inputs:_OutlineOffset2 = (0, 0)
+            float2 inputs:_OutlineOffset3 = (0, 0)
+            float inputs:_OutlineMode = 0
+            asset inputs:_OutlineTex = @placeholder.png@ (colorSpace = "srgb_texture")
+            bool inputs:polySpatial_HasVertexColors = 0
+
+            token outputs:mtlx:surface.connect = <realitykit_pbr.outputs:out>
+            token outputs:realitykit:vertex.connect = <GeometryModifier.outputs:out>
+
+            def Shader "realitykit_pbr"
+            {
+                uniform token info:id = "ND_realitykit_pbr_surfaceshader"
+                color3f inputs:baseColor.connect = <../_209.outputs:out>
+                float3 inputs:normal = (0, 0, 0)
+                color3f inputs:emissiveColor = (0, 0, 0)
+                float inputs:specular = 0.5
+                float inputs:ambientOcclusion = 1
+                float inputs:metallic = 0
+                float inputs:roughness = 0.5
+                float inputs:clearcoat = 0
+                float inputs:clearcoatRoughness = 0.01
+                token outputs:out
+            }
+
+            def Shader "GeometryModifier"
+            {
+                uniform token info:id = "ND_realitykit_geometrymodifier_vertexshader"
+                token outputs:out
+            }
+
+            def Shader "_209"
+            {
+                uniform token info:id = "ND_swizzle_vector3_color3"
+                float3 inputs:in.connect = <../_100.outputs:out>
+                string inputs:channels = "xyz"
+                color3f outputs:out
+            }
+
+            def Shader "_100"
+            {
+                uniform token info:id = "ND_dot_vector3"
+                float3 inputs:in.connect = <../_101.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "_101"
+            {
+                uniform token info:id = "ND_combine3_vector3"
+                float inputs:in1.connect = <../_96.outputs:out>
+                float inputs:in2.connect = <../_97.outputs:out>
+                float inputs:in3.connect = <../_98.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "_96"
+            {
+                uniform token info:id = "ND_dot_float"
+                float inputs:in.connect = <../_50.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "_50"
+            {
+                uniform token info:id = "ND_extract_vector4"
+                float4 inputs:in.connect = <../_49.outputs:out>
+                int inputs:index = 0
+                float outputs:out
+            }
+
+            def Shader "_49"
+            {
+                uniform token info:id = "ND_dot_vector4"
+                float4 inputs:in.connect = <../_48.outputs:out>
+                float4 outputs:out
+            }
+
+            def Shader "_48"
+            {
+                uniform token info:id = "ND_multiply_vector4"
+                float4 inputs:in1 = (0, 0, 0, 0)
+                float4 inputs:in2.connect = <../_205.outputs:out>
+                float4 outputs:out
+            }
+
+            def Shader "_205"
+            {
+                uniform token info:id = "ND_swizzle_float_vector4"
+                float inputs:in.connect = <../_116.outputs:out>
+                string inputs:channels = "xxxx"
+                float4 outputs:out
+            }
+
+            def Shader "_116"
+            {
+                uniform token info:id = "ND_extract_vector4"
+                float4 inputs:in.connect = <../_112.outputs:out>
+                int inputs:index = 3
+                float outputs:out
+            }
+
+            def Shader "_112"
+            {
+                uniform token info:id = "ND_dot_vector4"
+                float4 inputs:in.connect = <../_207.outputs:out>
+                float4 outputs:out
+            }
+
+            def Shader "_207"
+            {
+                uniform token info:id = "ND_swizzle_color4_vector4"
+                color4f inputs:in.connect = <../_117.outputs:out>
+                string inputs:channels = "rgba"
+                float4 outputs:out
+            }
+
+            def Shader "_117"
+            {
+                uniform token info:id = "ND_ifequal_color4B"
+                bool inputs:value1.connect = <../.inputs:polySpatial_HasVertexColors>
+                bool inputs:value2 = 0
+                color4f inputs:in1 = (1, 1, 1, 1)
+                color4f inputs:in2.connect = <../_118.outputs:out>
+                color4f outputs:out
+            }
+
+            def Shader "_118"
+            {
+                uniform token info:id = "ND_geomcolor_color4"
+                color4f outputs:out
+            }
+
+            def Shader "_97"
+            {
+                uniform token info:id = "ND_dot_float"
+                float inputs:in.connect = <../_51.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "_51"
+            {
+                uniform token info:id = "ND_extract_vector4"
+                float4 inputs:in.connect = <../_49.outputs:out>
+                int inputs:index = 1
+                float outputs:out
+            }
+
+            def Shader "_98"
+            {
+                uniform token info:id = "ND_dot_float"
+                float inputs:in.connect = <../_52.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "_52"
+            {
+                uniform token info:id = "ND_extract_vector4"
+                float4 inputs:in.connect = <../_49.outputs:out>
+                int inputs:index = 2
+                float outputs:out
+            }
+        }
+    }
+}
