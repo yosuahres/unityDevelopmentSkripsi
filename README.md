@@ -3,7 +3,7 @@
 ## Folder Structure
 
 ### 1. on Unity
-[!image](./images/unity-structure.png)
+![Unity Structure](./images/unity-structure.png)
 
 - Model OBJ yang diproses Unity, ada di ./Resources.
 - Model USDZ yang diproses visionOS, ada di ./StreamingAssets (bawaan default biar kebaca visionOS).
@@ -27,7 +27,7 @@
 ## Package yang dipakai
 cara cek package on Mac.  
 window -> package management -> package Manager.  
-[!image](./images/package-navigation.png)
+![Package Navigation](./images/package-navigation.png)
 ### 1. OpenFracture
 ### 2. PolySpatial
 ### 3. XR Plugin Management
@@ -35,7 +35,7 @@ window -> package management -> package Manager.
 
 ## Penjelasan Hierachy Scene
 Hierachy untuk setiap scene itu sama, terdiri atas 4.   
-[!image](./images/scene-structure.png)
+![Scene Structure](./images/scene-structure.png)
 - Directional light: untuk input lighting ke environment biasak
 - ScriptManager: buat masukin semua scene yang bakal dipakai di scene tersebut
 - VolumeCamera: game object yang ngedefine volume dari scene tersebut. Kan di visionOS ada dua, bounded or unbounded volume, nah itu didefine disini. By default unbounded, kalau ga diset
@@ -50,11 +50,11 @@ videos-> https://youtu.be/Dl2pKxeY-n4
   - Run in Xcode as: release aja.
 
 2. Open Scene List, dalam build profiles.  
-[!image](./images/scenelist-navigation.png)
+![Scene List Navigation](./images/scenelist-navigation.png)
   - pastiin ketiga scene udah dicentang, dan sesuai urutan.
 
 3. Lalu ke player settings (dalam build profiles).  
-[!image](./images/playersetting-navigation.png)
+![Player Setting Navigation](./images/playersetting-navigation.png)
 
   - Pertama ke bagian polyspatial.  
     buat default volume camera window config ke: unbounded.  
@@ -68,4 +68,4 @@ videos-> https://youtu.be/Dl2pKxeY-n4
     set target frame setup rate on startup: gosah dicentang
     sisanya default
 
-4. Build and run, auto running ke sims jika ke sims. 
+4. Build and run, auto running ke sims jika ke sims.
