@@ -34,7 +34,7 @@ window -> package management -> package Manager.
 ### 4. Apple visionOS XR Plugin
 
 ## Penjelasan Hierachy Scene
-Hierachy untuk setiap scene itu sama, terdiri atas 4.
+Hierachy untuk setiap scene itu sama, terdiri atas 4.   
 [!image](./images/scene-structure.png)
 - Directional light: untuk input lighting ke environment biasak
 - ScriptManager: buat masukin semua scene yang bakal dipakai di scene tersebut
@@ -42,6 +42,7 @@ Hierachy untuk setiap scene itu sama, terdiri atas 4.
 - SceneCamera: game object yang tracking eye input, pengganti main camera kalau di unity biasa.
 
 ## Cara Build
+videos-> https://youtu.be/Dl2pKxeY-n4
 1. Cek Build profiles dahulu (file -> Build Profiles).  
   - Platforms: visionOS
   - Target SDK: simulator SDK(kalau coba ke sims), Device SDK (kalau coba ke physical device).
