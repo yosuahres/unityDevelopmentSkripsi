@@ -32,7 +32,7 @@ namespace Assets.Scripts.Scripts
         void OnDisable()
         {
             SetNativeCallback(null);
-            CloseSwiftUIWindow("Configuration");
+            ForceCloseWindow();
         }
 
         public void ForceCloseWindow()

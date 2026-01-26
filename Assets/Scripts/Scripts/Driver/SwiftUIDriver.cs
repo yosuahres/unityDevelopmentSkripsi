@@ -31,7 +31,7 @@ namespace Assets.Scripts.Scripts
         void OnDisable()
         {
             SetNativeCallback(null);
-            CloseSwiftUIWindow("HomeView");
+            ForceCloseWindow();
         }
 
         public void ForceCloseWindow()

@@ -487,15 +487,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Scripts.Scripts.GizmoVisualizer
   gizmoPrefabZ: {fileID: 919132149155446097, guid: 2646cf277bc3248c38a74c7b81ef2ea4, type: 3}
-  gizmoColorZ: {r: 1, g: 0, b: 0, a: 0.5}
+  gizmoColorZ: {r: 0.011764706, g: 1, b: 0, a: 0.5}
   gizmoZRotation: 90
   gizmoPrefabX: {fileID: 919132149155446097, guid: 2646cf277bc3248c38a74c7b81ef2ea4, type: 3}
-  gizmoColorX: {r: 0, g: 1, b: 0, a: 0.5}
+  gizmoColorX: {r: 0, g: 0.10349059, b: 1, a: 0.5}
   gizmoXRotation: 0
-  cylinderPrefabY: {fileID: 1437054715619624019, guid: 3ba6944c6441548b5b202b0b978963a1, type: 3}
+  cylinderPrefabY: {fileID: 1437054715619624019, guid: 8ac9720533b6d432592289cb004bc401, type: 3}
   cylinderColorY: {r: 0.011764706, g: 1, b: 0, a: 1}
   cylinderScale: 10
-  cylinderPrefabRotated: {fileID: 1437054715619624019, guid: fcde0bdc53de047cbab97bea06a8094a, type: 3}
+  cylinderPrefabRotated: {fileID: 1437054715619624019, guid: 3ba6944c6441548b5b202b0b978963a1, type: 3}
   cylinderColorRotated: {r: 1, g: 0, b: 0, a: 1}
   LeftCylinderRotationAngle: 90
   RightCylinderRotationAngle: 90
@@ -668,53 +668,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: cef99035c800c4eceb2ea0971f087e83, type: 3}
---- !u!1 &1747253519
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1747253521}
-  - component: {fileID: 1747253520}
-  m_Layer: 0
-  m_Name: AR Session
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1747253520
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1747253519}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3859a92a05d4f5d418cb6ca605290e74, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.XR.ARFoundation::UnityEngine.XR.ARFoundation.ARSession
-  m_AttemptUpdate: 1
-  m_MatchFrameRate: 1
-  m_TrackingMode: 2
---- !u!4 &1747253521
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1747253519}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -724,4 +677,3 @@ SceneRoots:
   - {fileID: 409778642}
   - {fileID: 1676097988}
   - {fileID: 1252617239}
-  - {fileID: 1747253521}

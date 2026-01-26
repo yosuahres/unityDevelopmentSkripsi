@@ -150,7 +150,7 @@ public class TouchInput : MonoBehaviour {
 
         //kalau ke device, pakai pointedKind.Touch aja.
         // || touchData.Kind == SpatialPointerKind.IndirectPinch
-        if (touchData.targetObject != null && touchData.Kind == SpatialPointerKind.Touch)
+        if (touchData.targetObject != null && (touchData.Kind == SpatialPointerKind.Touch || touchData.Kind == SpatialPointerKind.IndirectPinch))
         {
             ISpatialTouchable touchable = touchData.targetObject.GetComponent<ISpatialTouchable>();
             bool isSpawnable = touchData.targetObject.CompareTag(SPAWNABLE_TAG);

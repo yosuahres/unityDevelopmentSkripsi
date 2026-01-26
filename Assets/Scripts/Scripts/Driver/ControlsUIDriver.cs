@@ -29,7 +29,7 @@ namespace Assets.Scripts.Scripts
         void OnDisable()
         {
             SetNativeCallback(null);
-            CloseControlsUIWindow("ControlView");
+            ForceCloseWindow();
         }
 
         public void ForceCloseWindow()
