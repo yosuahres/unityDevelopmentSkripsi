@@ -1,4 +1,3 @@
-//osteotomyplanlogic.cs
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,7 +10,7 @@ namespace Assets.Scripts.Scripts
         public static bool HasPerformedSlice { get; private set; } = false;
 
         [Header("Model Setup")]
-        public Vector3 fragmentModelScale = new Vector3(0.001f, 0.001f, 0.001f);
+        public Vector3 fragmentModelScale = new Vector3(0.001f, 0.001f, 0.01f);
         public Vector3 wholeModelScale = new Vector3(0.01f, 0.01f, 0.01f);
         public float spawnDistance = 2.0f;
         public float spawnHeight = 1.5f;
@@ -21,274 +20,104 @@ namespace Assets.Scripts.Scripts
         public SliceOptions osteotomySliceOptions;
         public CallbackOptions osteotomyCallbackOptions;
 
-        
         [Header("Gizmo Component")]
-        public GizmoVisualizer gizmoVisualizer; 
+        public GizmoVisualizer gizmoVisualizer;
+
         private GameObject m_LoadedFragment;
         private GameObject m_WholeModel;
         private GameObject m_InitialFragmentPrefab;
         private List<GameObject> m_ActiveFragments = new List<GameObject>();
 
+        #region Initialization
+
         void Start()
         {
+            if (!ValidateDependencies()) return;
+            InitializeOsteotomySystem();
+        }
+
+        private bool ValidateDependencies()
+        {
             HasPerformedSlice = false;
-            
-            
+            if (gizmoVisualizer == null) gizmoVisualizer = GetComponent<GizmoVisualizer>();
+
             if (gizmoVisualizer == null)
             {
-                gizmoVisualizer = GetComponent<GizmoVisualizer>();
-            }
-            if (gizmoVisualizer == null)
-            {
-                Debug.LogError("OsteotomyPlanLogic: GizmoVisualizer component is missing on this GameObject!");
-                return;
+                Debug.LogError("OsteotomyPlanLogic: GizmoVisualizer missing!");
+                return false;
             }
 
-            if (DataManager.Instance == null)
+            if (DataManager.Instance == null || DataManager.Instance.SelectedFragment == null)
             {
-                Debug.LogError("OsteotomyPlanLogic: DataManager.Instance is null! Cannot load models.");
-                return;
+                Debug.LogError("OsteotomyPlanLogic: DataManager or SelectedFragment is null!");
+                return false;
             }
+            return true;
+        }
 
-            if (DataManager.Instance.SelectedFragment == null)
-            {
-                Debug.LogError("OsteotomyPlanLogic: DataManager.Instance.SelectedFragment is null! Cannot load models.");
-                return;
-            }
-
+        private void InitializeOsteotomySystem()
+        {
             GameObject sourceFragment = DataManager.Instance.SelectedFragment;
-            DataManager.Instance.SelectedFragment = null;
+            DataManager.Instance.SelectedFragment = null; 
 
-            string originalModelName = sourceFragment.name.Replace("(Clone)", "").Replace("_Left", "").Replace("_Right", "");
-            var wholeModelPrefab = Resources.Load<GameObject>(originalModelName);
-
-
+            string originalModelName = sourceFragment.name
+                .Replace("(Clone)", "")
+                .Replace("_Left", "")
+                .Replace("_Right", "");
 
             m_InitialFragmentPrefab = Instantiate(sourceFragment);
             m_InitialFragmentPrefab.name = sourceFragment.name + "_InitialCopy";
             m_InitialFragmentPrefab.SetActive(false);
             DontDestroyOnLoad(m_InitialFragmentPrefab);
-
-
-            if (m_InitialFragmentPrefab.GetComponent<TouchableObject>() == null)
-                m_InitialFragmentPrefab.AddComponent<TouchableObject>();
-            m_InitialFragmentPrefab.tag = TouchInput.SPAWNABLE_TAG;
-
-            var initialHoverEffect = m_InitialFragmentPrefab.GetComponent<VisionOSHoverEffect>();
-            if (initialHoverEffect == null)
-                initialHoverEffect = m_InitialFragmentPrefab.AddComponent<VisionOSHoverEffect>();
-
-            initialHoverEffect.Type = VisionOSHoverEffect.EffectType.Highlight;
-            initialHoverEffect.Color = Color.white;
-            initialHoverEffect.IntensityMultiplier = 0.5f;
-
-
-            StartCoroutine(SafeSetupCollider(m_InitialFragmentPrefab));
-
+            SetupModelCommonRequirements(m_InitialFragmentPrefab, TouchInput.SPAWNABLE_TAG);
 
             m_LoadedFragment = sourceFragment;
+            SetupModelCommonRequirements(m_LoadedFragment, TouchInput.SPAWNABLE_TAG);
             PositionFragment(m_LoadedFragment);
-            if (m_LoadedFragment.GetComponent<TouchableObject>() == null)
-                m_LoadedFragment.AddComponent<TouchableObject>();
-            m_LoadedFragment.tag = TouchInput.SPAWNABLE_TAG;
-
-            StartCoroutine(SafeSetupCollider(m_LoadedFragment));
+            
+            m_ActiveFragments.Add(m_LoadedFragment);
             m_LoadedFragment.SetActive(true);
 
-            var hoverEffect = m_LoadedFragment.GetComponent<VisionOSHoverEffect>();
-            if (hoverEffect == null)
-                hoverEffect = m_LoadedFragment.AddComponent<VisionOSHoverEffect>();
-            else
-                hoverEffect.enabled = true;
-
-
-            hoverEffect.Type = VisionOSHoverEffect.EffectType.Highlight;
-            hoverEffect.Color = Color.white;
-            hoverEffect.IntensityMultiplier = 0.5f;
-
-            m_ActiveFragments.Add(m_LoadedFragment);
-
-            
-            
-            
-            
             gizmoVisualizer.SetupAndCenterGizmo(m_LoadedFragment);
-            
-            // --- MODIFICATION: Set gizmo visibility to false by default on Start ---
-            if (gizmoVisualizer != null)
-            {
-                gizmoVisualizer.SetGizmoVisibility(false); 
-                // FIX: Removed the cylinder visibility call from here. It is now controlled solely by the Lock button.
-            }
-            // ----------------------------------------------------------------------
+            gizmoVisualizer.SetGizmoVisibility(false);
 
+            LoadWholeModel(originalModelName);
+        }
 
-            if (wholeModelPrefab != null)
+        private void LoadWholeModel(string modelName)
+        {
+            GameObject prefab = Resources.Load<GameObject>(modelName);
+            if (prefab != null)
             {
-                m_WholeModel = Instantiate(wholeModelPrefab);
+                m_WholeModel = Instantiate(prefab);
                 DontDestroyOnLoad(m_WholeModel);
-                m_WholeModel.tag = "ROTATEONLY";
+                SetupModelCommonRequirements(m_WholeModel, "ROTATEONLY");
                 PositionWholeModel(m_WholeModel, m_LoadedFragment.transform.position);
-                if (m_WholeModel.GetComponent<TouchableObject>() == null)
-                    m_WholeModel.AddComponent<TouchableObject>();
-                StartCoroutine(SafeSetupCollider(m_WholeModel));
                 m_WholeModel.SetActive(true);
             }
-            else
-            {
-                Debug.LogError($"OsteotomyPlanLogic: Could not find original model '{originalModelName}' in Resources to load whole model.");
-            }
         }
 
-        
-        
+        #endregion
 
-        private void PositionFragment(GameObject fragment)
-        {
-            Camera mainCamera = Camera.main;
-
-            var volumeCamera = Object.FindFirstObjectByType<VolumeCamera>();
-
-
-            fragment.transform.SetParent(volumeCamera.transform, false);
-            fragment.transform.localPosition = new Vector3(0, spawnHeight, spawnDistance);
-            fragment.transform.localScale = fragmentModelScale;
-
-            if (mainCamera != null)
-                fragment.transform.LookAt(mainCamera.transform, mainCamera.transform.up);
-
-            if (fragment.name.Contains("Left"))
-                fragment.transform.Rotate(0, 90, 0, Space.Self); 
-            else if (fragment.name.Contains("Right"))
-                fragment.transform.Rotate(0, -90, 0, Space.Self); 
-        }
-
-        private void PositionWholeModel(GameObject wholeModel, Vector3 referencePosition)
-        {
-            Camera mainCamera = Camera.main;
-
-            var volumeCamera = Object.FindFirstObjectByType<VolumeCamera>();
-
-            wholeModel.transform.SetParent(volumeCamera.transform, false);
-
-            wholeModel.transform.localPosition = referencePosition + new Vector3(1.0f, 1.0f, 0f);
-            wholeModel.transform.localScale = wholeModelScale;
-
-            if (mainCamera != null)
-                wholeModel.transform.LookAt(mainCamera.transform, mainCamera.transform.up);
-        }
-
-
-        private IEnumerator SafeSetupCollider(GameObject model)
-        {
-            yield return StartCoroutine(ForceConvexMeshCollider(model));
-            yield return new WaitForEndOfFrame();
-            yield return StartCoroutine(ForceConvexMeshCollider(model));
-        }
-
-        private IEnumerator ForceConvexMeshCollider(GameObject model)
-        {
-            if (model == null) yield break;
-
-            MeshFilter mf = model.GetComponent<MeshFilter>();
-            while (mf == null || mf.sharedMesh == null)
-            {
-                yield return null;
-                mf = model.GetComponent<MeshFilter>();
-            }
-
-            MeshCollider col = model.GetComponent<MeshCollider>();
-            if (col == null)
-                col = model.AddComponent<MeshCollider>();
-
-            const int attempts = 5;
-
-            for (int i = 0; i < attempts; i++)
-            {
-                col.sharedMesh = null;
-                yield return null;
-
-                col.sharedMesh = mf.sharedMesh;
-                col.convex = true;
-
-                if (col.sharedMesh != null && col.convex)
-                {
-                    Debug.Log($"OsteotomyPlanLogic: Convex MeshCollider OK after {i + 1} tries.");
-                    yield break;
-                }
-
-                Debug.LogWarning($"OsteotomyPlanLogic: Convex retry {i + 1} failed.");
-                yield return null;
-            }
-
-            Debug.LogError("OsteotomyPlanLogic: Convex MeshCollider FAILED after all retries.");
-        }
-
-        
-        
-        
-        
-        
-        [UnityEngine.Scripting.Preserve]
-        public void SetGizmoVisibility(bool isVisible)
-        {
-            if (gizmoVisualizer != null)
-            {
-                gizmoVisualizer.SetGizmoVisibility(isVisible);
-            }
-        }
-
+        #region Core Functionality (Slicing & Reverting)
 
         [UnityEngine.Scripting.Preserve]
         public void PerformOsteotomySlice()
         {
-            if (m_ActiveFragments == null || m_ActiveFragments.Count == 0)
-            {
-                Debug.LogWarning("OsteotomyPlanLogic: No active fragments to slice.");
-                return;
-            }
-
-            
+            if (m_ActiveFragments.Count == 0) return;
 
             List<GameObject> currentPlanes = TouchInput.currentCuttingPlanes;
-
-            foreach (var plane in currentPlanes)
-            {
-            if (plane == null) continue;
-
-            var hoverPlane = plane.GetComponent<VisionOSHoverEffect>();
-            if (hoverPlane == null)
-                hoverPlane = plane.AddComponent<VisionOSHoverEffect>();
-
-
-            hoverPlane.Type = VisionOSHoverEffect.EffectType.Highlight;
-            hoverPlane.Color = Color.white;
-            hoverPlane.IntensityMultiplier = 0.5f;
-            }
-
-            if (currentPlanes == null || currentPlanes.Count == 0)
-            {
-                Debug.LogWarning("OsteotomyPlanLogic: No cutting planes found in TouchInput.");
-                return;
-            }
+            if (currentPlanes == null || currentPlanes.Count == 0) return;
 
             HasPerformedSlice = true;
-            Debug.Log("OsteotomyPlanLogic: Slice performed. Plane spawning is now disabled.");
-
             List<GameObject> currentSetOfFragments = new List<GameObject>(m_ActiveFragments);
             m_ActiveFragments.Clear();
 
+            Dictionary<GameObject, (Vector3 pos, Quaternion rot)> initialTransforms = new Dictionary<GameObject, (Vector3, Quaternion)>();
+            foreach (var f in currentSetOfFragments) 
+                if (f != null) initialTransforms[f] = (f.transform.position, f.transform.rotation);
 
-            Dictionary<GameObject, (Vector3 position, Quaternion rotation)> initialTransforms = new Dictionary<GameObject, (Vector3 position, Quaternion rotation)>();
-            foreach (GameObject frag in currentSetOfFragments)
-            {
-                if (frag != null)
-                {
-                    initialTransforms[frag] = (frag.transform.position, frag.transform.rotation);
-                }
-            }
-
-
+            // slicing
             foreach (GameObject plane in currentPlanes)
             {
                 List<GameObject> nextSet = new List<GameObject>();
@@ -296,15 +125,9 @@ namespace Assets.Scripts.Scripts
                 {
                     if (frag == null || !frag.activeSelf) continue;
 
-                    Vector3 sliceOrigin = plane.transform.position;
-                    Vector3 sliceNormal = plane.transform.up;
+                    var captured = initialTransforms.ContainsKey(frag) ? initialTransforms[frag] : (frag.transform.position, frag.transform.rotation);
 
-
-                    (Vector3 position, Quaternion rotation) capturedTransform = initialTransforms.ContainsKey(frag)
-                                                                               ? initialTransforms[frag]
-                                                                               : (frag.transform.position, frag.transform.rotation);
-
-                    AddSliceComponents(frag, sliceOrigin, sliceNormal, capturedTransform, (fragA, fragB) =>
+                    AddSliceComponents(frag, plane.transform.position, plane.transform.up, captured, (fragA, fragB) =>
                     {
                         if (fragA != null) nextSet.Add(fragA);
                         if (fragB != null) nextSet.Add(fragB);
@@ -313,284 +136,225 @@ namespace Assets.Scripts.Scripts
                 currentSetOfFragments = nextSet;
             }
 
-            m_ActiveFragments = currentSetOfFragments;
-            if (m_ActiveFragments.Count > 0 && currentPlanes.Count > 1)
+            // filtering
+            if (currentPlanes.Count > 1)
             {
-                
-                Vector3 sumNormal = Vector3.zero;
-                foreach (GameObject plane in currentPlanes)
-                {
-                    sumNormal += plane.transform.up;
-                }
-                Vector3 filterNormal = sumNormal.normalized;
-
-                GameObject referencePlane = currentPlanes[0];
-                Vector3 originPosition = referencePlane.transform.position;
-
-                
-                
-                float minProjectionDistance = 0f;
-                float maxProjectionDistance = 0f;
-
-                foreach (GameObject plane in currentPlanes)
-                {
-                    
-                    float currentProjectionDistance = Vector3.Dot(plane.transform.position - originPosition, filterNormal);
-
-                    minProjectionDistance = Mathf.Min(minProjectionDistance, currentProjectionDistance);
-                    maxProjectionDistance = Mathf.Max(maxProjectionDistance, currentProjectionDistance);
-                }
-
-                List<GameObject> kept = new List<GameObject>();
-                foreach (GameObject frag in m_ActiveFragments)
-                {
-                    if (frag == null) continue;
-                    MeshRenderer mr = frag.GetComponent<MeshRenderer>();
-
-                    if (mr == null)
-                    {
-                        kept.Add(frag);
-                        frag.SetActive(true);
-                        continue;
-                    }
-
-                    
-                    Vector3 fragmentCenter = mr.bounds.center;
-                    float fragmentProjectionDistance = Vector3.Dot(fragmentCenter - originPosition, filterNormal);
-
-                    
-                    
-                    if (fragmentProjectionDistance < minProjectionDistance || fragmentProjectionDistance > maxProjectionDistance)
-                    {
-                        kept.Add(frag);
-                        frag.SetActive(true);
-                    }
-                    else
-                    {
-                        frag.SetActive(false);
-                    }
-                }
-
-                m_ActiveFragments = kept;
-                Debug.Log($"OsteotomyPlanLogic: Robustly filtered fragments using Average Normal. Kept {m_ActiveFragments.Count} pieces.");
+                m_ActiveFragments = FilterFragmentsBetweenPlanes(currentSetOfFragments, currentPlanes);
             }
             else
             {
-                foreach (GameObject frag in m_ActiveFragments)
-                    if (frag != null) frag.SetActive(true);
+                m_ActiveFragments = currentSetOfFragments;
+                foreach (var frag in m_ActiveFragments) if (frag != null) frag.SetActive(true);
             }
 
-            
-            
-            
-            
-            if (m_ActiveFragments.Count > 0 && gizmoVisualizer != null)
-            {
-                
-                gizmoVisualizer.SetupAndCenterGizmo(m_ActiveFragments[0]);
-                gizmoVisualizer.SetGizmoVisibility(false); // Gizmo hidden after slice
-                // Cylinder visibility remains unchanged, relying on the Lock button state
-            }
-            else
-            {
-                if (gizmoVisualizer != null) gizmoVisualizer.SetGizmoVisibility(false);
-            }
-            
-
-            TouchInput.SetPlaneVisibility(false);
-            TouchInput.SetRulerVisibility(false);
+            FinalizeSliceUI();
         }
 
+        private List<GameObject> FilterFragmentsBetweenPlanes(List<GameObject> fragments, List<GameObject> planes)
+        {
+            Vector3 sumNormal = Vector3.zero;
+            foreach (var plane in planes) sumNormal += plane.transform.up;
+            Vector3 filterNormal = sumNormal.normalized;
+
+            Vector3 originPosition = planes[0].transform.position;
+            float minProj = 0f;
+            float maxProj = 0f;
+
+            foreach (var plane in planes)
+            {
+                float proj = Vector3.Dot(plane.transform.position - originPosition, filterNormal);
+                minProj = Mathf.Min(minProj, proj);
+                maxProj = Mathf.Max(maxProj, proj);
+            }
+
+            List<GameObject> kept = new List<GameObject>();
+            foreach (var frag in fragments)
+            {
+                if (frag == null) continue;
+                MeshRenderer mr = frag.GetComponent<MeshRenderer>();
+                
+                if (mr == null)
+                {
+                    kept.Add(frag);
+                    frag.SetActive(true);
+                    continue;
+                }
+
+                float fragProj = Vector3.Dot(mr.bounds.center - originPosition, filterNormal);
+
+                // disable fragments
+                if (fragProj < minProj || fragProj > maxProj)
+                {
+                    kept.Add(frag);
+                    frag.SetActive(true);
+                }
+                else
+                {
+                    frag.SetActive(false);
+                }
+            }
+            return kept;
+        }
 
         [UnityEngine.Scripting.Preserve]
         public void RevertToUncutModel()
         {
-            Debug.Log("OsteotomyPlanLogic: Reverting to uncut model.");
+            Vector3 lastPos = m_LoadedFragment ? m_LoadedFragment.transform.position : Vector3.zero;
+            Quaternion lastRot = m_LoadedFragment ? m_LoadedFragment.transform.rotation : Quaternion.identity;
 
-            
-
-            Vector3 lastFragmentPosition = Vector3.zero;
-            Quaternion lastFragmentRotation = Quaternion.identity;
-
-
-            GameObject fragmentToCapture = m_LoadedFragment;
-            if (fragmentToCapture == null && m_ActiveFragments.Count > 0)
-            {
-                fragmentToCapture = m_ActiveFragments[0];
-            }
-
-            if (fragmentToCapture != null)
-            {
-                lastFragmentPosition = fragmentToCapture.transform.position;
-                lastFragmentRotation = fragmentToCapture.transform.rotation;
-                Debug.Log($"OsteotomyPlanLogic: Captured last position: {lastFragmentPosition}, rotation: {lastFragmentRotation}");
-            }
-
-
-            foreach (GameObject frag in m_ActiveFragments)
-            {
-                if (frag != null)
-                    Destroy(frag);
-            }
+            foreach (GameObject frag in m_ActiveFragments) if (frag != null) Destroy(frag);
             m_ActiveFragments.Clear();
+            if (m_LoadedFragment != null) Destroy(m_LoadedFragment);
 
-            if (m_LoadedFragment != null)
-            {
-                Destroy(m_LoadedFragment);
-                m_LoadedFragment = null;
-            }
-
-
-            if (m_InitialFragmentPrefab == null)
-            {
-                Debug.LogError("OsteotomyPlanLogic: Cannot revert. Initial fragment prefab is missing.");
-                return;
-            }
-
+            if (m_InitialFragmentPrefab == null) return;
 
             GameObject newFragment = Instantiate(m_InitialFragmentPrefab);
             newFragment.name = m_InitialFragmentPrefab.name.Replace("_InitialCopy", "");
+            
+            var volumeCamera = Object.FindFirstObjectByType<VolumeCamera>();
+            newFragment.transform.SetParent(volumeCamera?.transform, true);
+            newFragment.transform.position = lastPos;
+            newFragment.transform.rotation = lastRot;
+            newFragment.transform.localScale = fragmentModelScale;
 
-
-            if (fragmentToCapture != null)
-            {
-
-                var volumeCamera = Object.FindFirstObjectByType<VolumeCamera>();
-                if (volumeCamera != null)
-                {
-
-                    newFragment.transform.SetParent(volumeCamera.transform, true);
-                }
-                else
-                {
-
-                    newFragment.transform.SetParent(null);
-                }
-
-
-                newFragment.transform.position = lastFragmentPosition;
-                newFragment.transform.rotation = lastFragmentRotation;
-
-
-                newFragment.transform.localScale = fragmentModelScale;
-            }
-            else
-            {
-
-                PositionFragment(newFragment);
-                Debug.LogWarning("OsteotomyPlanLogic: Reverting to initial position (no last fragment found).");
-            }
-
+            SetupModelCommonRequirements(newFragment, TouchInput.SPAWNABLE_TAG);
             newFragment.SetActive(true);
-
 
             m_LoadedFragment = newFragment;
             m_ActiveFragments.Add(m_LoadedFragment);
             HasPerformedSlice = false;
 
-            
-            
-            
-            
-            if (gizmoVisualizer != null)
-            {
-                gizmoVisualizer.SetupAndCenterGizmo(m_LoadedFragment);
-                gizmoVisualizer.SetGizmoVisibility(false); // Gizmo remains hidden after revert, unless Swift enables it.
-                // Cylinder visibility remains unchanged, relying on the Lock button state
-            }
-            
+            gizmoVisualizer.SetupAndCenterGizmo(m_LoadedFragment);
+            gizmoVisualizer.SetGizmoVisibility(false);
 
             TouchInput.SetPlaneVisibility(true);
             TouchInput.SetRulerVisibility(true);
-
-            Debug.Log($"OsteotomyPlanLogic: Successfully reverted to uncut model: {m_LoadedFragment.name}.");
         }
 
+        #endregion
 
-        private void AddSliceComponents(GameObject target, Vector3 sliceOriginWorld, Vector3 sliceNormalWorld,
-                                        (Vector3 position, Quaternion rotation) capturedTransform,
-                                        System.Action<GameObject, GameObject> onFinished)
+        #region Helpers
+
+        private void SetupModelCommonRequirements(GameObject obj, string tag)
+        {
+            obj.tag = tag;
+            if (obj.GetComponent<TouchableObject>() == null) obj.AddComponent<TouchableObject>();
+
+            var hover = obj.GetComponent<VisionOSHoverEffect>() ?? obj.AddComponent<VisionOSHoverEffect>();
+            hover.Type = VisionOSHoverEffect.EffectType.Highlight;
+            hover.Color = Color.white;
+            hover.IntensityMultiplier = 0.5f;
+
+            StartCoroutine(SafeSetupCollider(obj));
+        }
+
+        private void PositionFragment(GameObject fragment)
+        {
+            var volumeCamera = Object.FindFirstObjectByType<VolumeCamera>();
+            fragment.transform.SetParent(volumeCamera?.transform, false);
+            fragment.transform.localPosition = new Vector3(0, spawnHeight, spawnDistance);
+            fragment.transform.localScale = fragmentModelScale;
+
+            ApplyLookRotation(fragment);
+            if (fragment.name.Contains("Left")) fragment.transform.Rotate(0, 90, 0, Space.Self);
+            else if (fragment.name.Contains("Right")) fragment.transform.Rotate(0, -90, 0, Space.Self);
+        }
+
+        private void PositionWholeModel(GameObject wholeModel, Vector3 referencePosition)
+        {
+            var volumeCamera = Object.FindFirstObjectByType<VolumeCamera>();
+            wholeModel.transform.SetParent(volumeCamera?.transform, false);
+            wholeModel.transform.localPosition = referencePosition + new Vector3(1.0f, 1.0f, 0f);
+            wholeModel.transform.localScale = wholeModelScale;
+            ApplyLookRotation(wholeModel);
+        }
+
+        private void ApplyLookRotation(GameObject obj)
+        {
+            Camera main = Camera.main;
+            if (main != null) obj.transform.LookAt(main.transform, main.transform.up);
+        }
+
+        private void AddSliceComponents(GameObject target, Vector3 sliceOrigin, Vector3 sliceNormal,
+                                        (Vector3 pos, Quaternion rot) captured, System.Action<GameObject, GameObject> onFinished)
         {
             if (target == null) return;
-
-            if (target.GetComponent<MeshFilter>() == null)
-                target.AddComponent<MeshFilter>();
-
-            MeshRenderer rend = target.GetComponent<MeshRenderer>();
-            if (rend == null)
-                rend = target.AddComponent<MeshRenderer>();
-
-            if (rend.sharedMaterial == null)
-                rend.sharedMaterial = osteotomySliceCapMaterial;
-
-            StartCoroutine(ForceConvexMeshCollider(target));
-
-            Slice slice = target.GetComponent<Slice>();
-            if (slice != null) Destroy(slice);
-            slice = target.AddComponent<Slice>();
-
-            if (osteotomySliceOptions == null)
-                osteotomySliceOptions = new SliceOptions();
-
-            slice.sliceOptions = osteotomySliceOptions;
+            
+            var slice = target.GetComponent<Slice>() ?? target.AddComponent<Slice>();
+            slice.sliceOptions = osteotomySliceOptions ?? new SliceOptions();
             slice.sliceOptions.insideMaterial = osteotomySliceCapMaterial;
-
-            if (osteotomyCallbackOptions == null)
-                osteotomyCallbackOptions = new CallbackOptions();
-
-            slice.callbackOptions = osteotomyCallbackOptions;
+            slice.callbackOptions = osteotomyCallbackOptions ?? new CallbackOptions();
 
             slice.OnSliceFinished = (fragA, fragB) =>
             {
-
-                HandleNewFragment(fragA, target.name + "_A", capturedTransform);
-                HandleNewFragment(fragB, target.name + "_B", capturedTransform);
+                HandleNewFragment(fragA, target.name + "_A", captured);
+                HandleNewFragment(fragB, target.name + "_B", captured);
                 onFinished?.Invoke(fragA, fragB);
-
-                if (fragA != null || fragB != null)
-                    target.SetActive(false);
+                target.SetActive(false);
             };
 
-            slice.ComputeSlice(sliceNormalWorld, sliceOriginWorld);
+            slice.ComputeSlice(sliceNormal, sliceOrigin);
         }
 
-        private void HandleNewFragment(GameObject fragment, string name, (Vector3 position, Quaternion rotation) capturedTransform)
+        private void HandleNewFragment(GameObject fragment, string name, (Vector3 pos, Quaternion rot) captured)
         {
             if (fragment == null) return;
-
             fragment.name = name;
-
-
+            
             var volumeCamera = Object.FindFirstObjectByType<VolumeCamera>();
-            if (volumeCamera != null)
-            {
-
-                fragment.transform.SetParent(volumeCamera.transform, true);
-            }
-
-
-            fragment.transform.position = capturedTransform.position;
-            fragment.transform.rotation = capturedTransform.rotation;
+            fragment.transform.SetParent(volumeCamera?.transform, true);
+            fragment.transform.position = captured.pos;
+            fragment.transform.rotation = captured.rot;
             fragment.transform.localScale = fragmentModelScale;
 
-
-            if (fragment.GetComponent<TouchableObject>() == null)
-                fragment.AddComponent<TouchableObject>();
-
-            StartCoroutine(ForceConvexMeshCollider(fragment));
-
-            var hoverEffect = fragment.GetComponent<VisionOSHoverEffect>();
-            if (hoverEffect == null)
-                hoverEffect = fragment.AddComponent<VisionOSHoverEffect>();
-            else
-                hoverEffect.enabled = true;
-
-
-            hoverEffect.Type = VisionOSHoverEffect.EffectType.Highlight;
-            hoverEffect.Color = Color.white;
-            hoverEffect.IntensityMultiplier = 0.5f;
-
+            SetupModelCommonRequirements(fragment, TouchInput.SPAWNABLE_TAG);
             fragment.SetActive(true);
         }
+
+        private void FinalizeSliceUI()
+        {
+            if (m_ActiveFragments.Count > 0 && gizmoVisualizer != null)
+            {
+                gizmoVisualizer.SetupAndCenterGizmo(m_ActiveFragments[0]);
+                gizmoVisualizer.SetGizmoVisibility(false);
+            }
+            TouchInput.SetPlaneVisibility(false);
+            TouchInput.SetRulerVisibility(false);
+        }
+
+        private IEnumerator SafeSetupCollider(GameObject model)
+        {
+            if (model == null) yield break;
+            yield return StartCoroutine(ForceConvexMeshCollider(model));
+            yield return new WaitForEndOfFrame();
+            if (model != null) yield return StartCoroutine(ForceConvexMeshCollider(model));
+        }
+
+        private IEnumerator ForceConvexMeshCollider(GameObject model)
+        {
+            if (model == null) yield break;
+            MeshFilter mf = model.GetComponent<MeshFilter>();
+            
+            float timer = 0;
+            while ((mf == null || mf.sharedMesh == null) && timer < 2f)
+            {
+                yield return null;
+                timer += Time.deltaTime;
+                if (model == null) yield break;
+                mf = model.GetComponent<MeshFilter>();
+            }
+
+            MeshCollider col = model.GetComponent<MeshCollider>() ?? model.AddComponent<MeshCollider>();
+            for (int i = 0; i < 3; i++)
+            {
+                col.sharedMesh = null;
+                yield return null;
+                if (model == null) yield break;
+                col.sharedMesh = mf.sharedMesh;
+                col.convex = true;
+                if (col.sharedMesh != null && col.convex) yield break;
+            }
+        }
+        #endregion
     }
 }

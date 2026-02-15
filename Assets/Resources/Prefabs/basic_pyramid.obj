@@ -1,18 +1,3 @@
-# Exported from 3D Builder
-mtllib basic_pyramid.mtl
-
-o Object.1
-v -30.253960 -30.253960 0.000000
-v 30.253952 -30.253960 0.000000
-v 0.003021 0.003021 41.924591
-v -30.253960 30.253952 0.000000
-v 30.253952 30.253952 0.000000
-
-
-usemtl Yellow
-f 1 2 3
-f 4 2 1
-f 1 3 4
-f 2 5 3
-f 5 4 3
-f 5 2 4
+version https://git-lfs.github.com/spec/v1
+oid sha256:f603b378e13cbe516cedaec74623ce7dbb08f1eaf9ee1a9f0237a00fe2a2ae23
+size 286
