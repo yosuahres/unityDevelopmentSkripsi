@@ -12,6 +12,7 @@ namespace Assets.Scripts.Scripts
         [Header("Model Setup")]
         public Vector3 fragmentModelScale = new Vector3(0.001f, 0.001f, 0.01f);
         public Vector3 wholeModelScale = new Vector3(0.01f, 0.01f, 0.01f);
+        public Vector3 fibulaModelScale = new Vector3(0.001f, 0.001f, 0.01f); // Added for Fibula
         public float spawnDistance = 2.0f;
         public float spawnHeight = 1.5f;
 
@@ -25,6 +26,7 @@ namespace Assets.Scripts.Scripts
 
         private GameObject m_LoadedFragment;
         private GameObject m_WholeModel;
+        private GameObject m_FibulaModel; // Reference for Fibula
         private GameObject m_InitialFragmentPrefab;
         private List<GameObject> m_ActiveFragments = new List<GameObject>();
 
@@ -57,6 +59,7 @@ namespace Assets.Scripts.Scripts
 
         private void InitializeOsteotomySystem()
         {
+            // 1. Extract and Clean Data
             GameObject sourceFragment = DataManager.Instance.SelectedFragment;
             DataManager.Instance.SelectedFragment = null; 
 
@@ -65,12 +68,14 @@ namespace Assets.Scripts.Scripts
                 .Replace("_Left", "")
                 .Replace("_Right", "");
 
+            // 2. Setup Reference Prefab
             m_InitialFragmentPrefab = Instantiate(sourceFragment);
             m_InitialFragmentPrefab.name = sourceFragment.name + "_InitialCopy";
             m_InitialFragmentPrefab.SetActive(false);
             DontDestroyOnLoad(m_InitialFragmentPrefab);
             SetupModelCommonRequirements(m_InitialFragmentPrefab, TouchInput.SPAWNABLE_TAG);
 
+            // 3. Setup Active Fragment
             m_LoadedFragment = sourceFragment;
             SetupModelCommonRequirements(m_LoadedFragment, TouchInput.SPAWNABLE_TAG);
             PositionFragment(m_LoadedFragment);
@@ -78,10 +83,13 @@ namespace Assets.Scripts.Scripts
             m_ActiveFragments.Add(m_LoadedFragment);
             m_LoadedFragment.SetActive(true);
 
+            // 4. Gizmo Setup
             gizmoVisualizer.SetupAndCenterGizmo(m_LoadedFragment);
             gizmoVisualizer.SetGizmoVisibility(false);
 
+            // 5. Load Secondary Models
             LoadWholeModel(originalModelName);
+            LoadFibulaModel("Fibula"); // Added Fibula loader call
         }
 
         private void LoadWholeModel(string modelName)
@@ -94,6 +102,28 @@ namespace Assets.Scripts.Scripts
                 SetupModelCommonRequirements(m_WholeModel, "ROTATEONLY");
                 PositionWholeModel(m_WholeModel, m_LoadedFragment.transform.position);
                 m_WholeModel.SetActive(true);
+            }
+        }
+
+        private void LoadFibulaModel(string modelName)
+        {
+            GameObject prefab = Resources.Load<GameObject>(modelName);
+            if (prefab != null)
+            {
+                m_FibulaModel = Instantiate(prefab);
+                DontDestroyOnLoad(m_FibulaModel);
+                
+                // Fibula doesn't necessarily need to be spawnable/sliceable, 
+                // but we keep common requirements for visual consistency.
+                SetupModelCommonRequirements(m_FibulaModel, "ROTATEONLY"); 
+                
+                PositionFibulaModel(m_FibulaModel, m_LoadedFragment.transform.position);
+                m_FibulaModel.SetActive(true);
+                Debug.Log("OsteotomyPlanLogic: Fibula model loaded successfully.");
+            }
+            else
+            {
+                Debug.LogWarning($"OsteotomyPlanLogic: Could not find '{modelName}' in Resources.");
             }
         }
 
@@ -117,7 +147,6 @@ namespace Assets.Scripts.Scripts
             foreach (var f in currentSetOfFragments) 
                 if (f != null) initialTransforms[f] = (f.transform.position, f.transform.rotation);
 
-            // slicing
             foreach (GameObject plane in currentPlanes)
             {
                 List<GameObject> nextSet = new List<GameObject>();
@@ -136,7 +165,7 @@ namespace Assets.Scripts.Scripts
                 currentSetOfFragments = nextSet;
             }
 
-            // filtering
+            // Apply Visibility Filter for wedge removal
             if (currentPlanes.Count > 1)
             {
                 m_ActiveFragments = FilterFragmentsBetweenPlanes(currentSetOfFragments, currentPlanes);
@@ -182,7 +211,6 @@ namespace Assets.Scripts.Scripts
 
                 float fragProj = Vector3.Dot(mr.bounds.center - originPosition, filterNormal);
 
-                // disable fragments
                 if (fragProj < minProj || fragProj > maxProj)
                 {
                     kept.Add(frag);
@@ -233,7 +261,7 @@ namespace Assets.Scripts.Scripts
 
         #endregion
 
-        #region Helpers
+        #region Helpers & Positioners
 
         private void SetupModelCommonRequirements(GameObject obj, string tag)
         {
@@ -264,9 +292,29 @@ namespace Assets.Scripts.Scripts
         {
             var volumeCamera = Object.FindFirstObjectByType<VolumeCamera>();
             wholeModel.transform.SetParent(volumeCamera?.transform, false);
-            wholeModel.transform.localPosition = referencePosition + new Vector3(1.0f, 1.0f, 0f);
+
+            wholeModel.transform.localPosition = referencePosition + new Vector3(-1.0f, 1.0f, 0f);
             wholeModel.transform.localScale = wholeModelScale;
             ApplyLookRotation(wholeModel);
+        }
+
+        private void PositionFibulaModel(GameObject fibula, Vector3 referencePosition)
+        {
+            var volumeCamera = Object.FindFirstObjectByType<VolumeCamera>();
+            
+            fibula.transform.SetParent(null);
+            fibula.transform.localScale = Vector3.one;
+            fibula.transform.SetParent(volumeCamera?.transform, false);
+            
+            fibula.transform.localPosition = referencePosition + new Vector3(0.5f, 0f, 0f); 
+            fibula.transform.localScale = fibulaModelScale;
+            
+            ApplyLookRotation(fibula);
+
+            var mesh = fibula.GetComponentInChildren<MeshFilter>()?.sharedMesh;
+            if (mesh != null) {
+                Debug.Log($"Fibula Mesh Bounds: {mesh.bounds.size}");
+            }
         }
 
         private void ApplyLookRotation(GameObject obj)
@@ -345,14 +393,17 @@ namespace Assets.Scripts.Scripts
             }
 
             MeshCollider col = model.GetComponent<MeshCollider>() ?? model.AddComponent<MeshCollider>();
-            for (int i = 0; i < 3; i++)
+            
+            col.sharedMesh = null;
+            yield return new WaitForEndOfFrame(); 
+
+            if (model != null)
             {
-                col.sharedMesh = null;
-                yield return null;
-                if (model == null) yield break;
                 col.sharedMesh = mf.sharedMesh;
                 col.convex = true;
-                if (col.sharedMesh != null && col.convex) yield break;
+                // Force a sync with PolySpatial
+                col.enabled = false;
+                col.enabled = true;
             }
         }
         #endregion
