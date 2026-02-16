@@ -19,7 +19,7 @@ public class TouchInput : MonoBehaviour {
     public static readonly float maxPlaneScale = 0.5f;
 
     
-    public static int maxCuttingPlanes = 1; 
+    public static int maxCuttingPlanes = 2; 
 
     public static List<GameObject> currentCuttingPlanes { get; private set; } = new List<GameObject>();
     private List<GameObject> activeRulers = new List<GameObject>();
@@ -95,32 +95,22 @@ public class TouchInput : MonoBehaviour {
     
     public static void CheckAndEnforceMaxPlanes()
     {
-        
         while (currentCuttingPlanes.Count > maxCuttingPlanes)
         {
             if (currentCuttingPlanes.Count > 0)
             {
-                
                 GameObject planeToDelete = currentCuttingPlanes[currentCuttingPlanes.Count - 1];
                 Destroy(planeToDelete);
                 currentCuttingPlanes.RemoveAt(currentCuttingPlanes.Count - 1);
-                Debug.Log($"TouchInput: Deleted last plane to enforce new max ({maxCuttingPlanes}). {currentCuttingPlanes.Count} planes remaining.");
-
-                
-                
                 
                 if (instance != null && instance.activeRulers.Count > 0)
                 {
                     GameObject rulerToDelete = instance.activeRulers[instance.activeRulers.Count - 1];
                     Destroy(rulerToDelete);
                     instance.activeRulers.RemoveAt(instance.activeRulers.Count - 1);
-                    Debug.Log($"TouchInput: Deleted last ruler. {instance.activeRulers.Count} rulers remaining.");
                 }
             }
-            else
-            {
-                break; 
-            }
+            else { break; }
         }
     }
 

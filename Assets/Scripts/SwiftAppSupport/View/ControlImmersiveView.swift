@@ -7,7 +7,8 @@ import PolySpatialRealityKit
 struct ControlImmersiveView: View {
     var appState: AppState
     @State private var currentPlaneValue: Float = 0.1
-    @State private var currentMaxPlaneValue: Int = 1 
+    // @State private var currentMaxPlaneValue: Int = 1 
+    @State private var currentMaxSegmentValue: Int = 1
     @State private var hasPerformedSlice: Bool = false
 
     init(appState: AppState = AppState.shared) {
@@ -117,37 +118,34 @@ struct ControlImmersiveView: View {
                             .buttonStyle(.plain)
                         }
 
-                        
-                        Text("Set Max Planes")
+                        //math maxplane =  max segment + 1
+                        Text("Set Max Segment")
                             .font(.title)
                             .fixedSize(horizontal: false, vertical: true) 
 
-                        HStack(spacing: 20) {
+                            HStack(spacing: 20) {
                             Button(action: {
-                                currentMaxPlaneValue = max(1, currentMaxPlaneValue - 1)
-                                CallCSharpCallback("SetMaxPlane", Int32(currentMaxPlaneValue))
+                                currentMaxSegmentValue = max(1, currentMaxSegmentValue - 1)
+                                CallCSharpCallback("SetMaxPlane", Int32(currentMaxSegmentValue + 1))
                             }) {
-                                Image(systemName: "minus.circle.fill")
-                                    .font(.system(size: 80))
+                                Image(systemName: "minus.circle.fill").font(.system(size: 80))
                             }
-                            .buttonStyle(.plain)
-                            .simultaneousGesture(LongPressGesture().onEnded { _ in
-                                currentMaxPlaneValue = 1 
-                                CallCSharpCallback("SetMaxPlane", Int32(currentMaxPlaneValue))
-                            })
 
-                            Text("\(currentMaxPlaneValue)")
-                                .font(.system(size: 80, weight: .bold))
-                                .frame(minWidth: 100)
+                            VStack {
+                                Text("\(currentMaxSegmentValue)")
+                                    .font(.system(size: 80, weight: .bold))
+                                Text("(\(currentMaxSegmentValue + 1) Planes)")
+                                    .font(.caption)
+                            }
+                            .frame(minWidth: 100)
 
                             Button(action: {
-                                currentMaxPlaneValue = min(5, currentMaxPlaneValue + 1)
-                                CallCSharpCallback("SetMaxPlane", Int32(currentMaxPlaneValue))
+                                // max at 3
+                                currentMaxSegmentValue = min(3, currentMaxSegmentValue + 1)
+                                CallCSharpCallback("SetMaxPlane", Int32(currentMaxSegmentValue + 1))
                             }) {
-                                Image(systemName: "plus.circle.fill")
-                                    .font(.system(size: 80))
+                                Image(systemName: "plus.circle.fill").font(.system(size: 80))
                             }
-                            .buttonStyle(.plain)
                         }
                     }
 

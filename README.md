@@ -2,6 +2,9 @@
 
 ## Folder Structure
 
+### Additional
+- butuh git lfs, file .obj cukup gede
+
 ### 1. on Unity
 ![Unity Structure](./images/unity-structure.png)
 

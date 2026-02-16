@@ -12,7 +12,7 @@ namespace Assets.Scripts.Scripts
         [Header("Model Setup")]
         public Vector3 fragmentModelScale = new Vector3(0.001f, 0.001f, 0.01f);
         public Vector3 wholeModelScale = new Vector3(0.01f, 0.01f, 0.01f);
-        public Vector3 fibulaModelScale = new Vector3(0.001f, 0.001f, 0.01f); // Added for Fibula
+        public Vector3 fibulaModelScale = new Vector3(0.001f, 0.001f, 0.001f); 
         public float spawnDistance = 2.0f;
         public float spawnHeight = 1.5f;
 
@@ -26,7 +26,7 @@ namespace Assets.Scripts.Scripts
 
         private GameObject m_LoadedFragment;
         private GameObject m_WholeModel;
-        private GameObject m_FibulaModel; // Reference for Fibula
+        private GameObject m_FibulaModel; 
         private GameObject m_InitialFragmentPrefab;
         private List<GameObject> m_ActiveFragments = new List<GameObject>();
 
@@ -59,7 +59,6 @@ namespace Assets.Scripts.Scripts
 
         private void InitializeOsteotomySystem()
         {
-            // 1. Extract and Clean Data
             GameObject sourceFragment = DataManager.Instance.SelectedFragment;
             DataManager.Instance.SelectedFragment = null; 
 
@@ -68,14 +67,12 @@ namespace Assets.Scripts.Scripts
                 .Replace("_Left", "")
                 .Replace("_Right", "");
 
-            // 2. Setup Reference Prefab
             m_InitialFragmentPrefab = Instantiate(sourceFragment);
             m_InitialFragmentPrefab.name = sourceFragment.name + "_InitialCopy";
             m_InitialFragmentPrefab.SetActive(false);
             DontDestroyOnLoad(m_InitialFragmentPrefab);
             SetupModelCommonRequirements(m_InitialFragmentPrefab, TouchInput.SPAWNABLE_TAG);
 
-            // 3. Setup Active Fragment
             m_LoadedFragment = sourceFragment;
             SetupModelCommonRequirements(m_LoadedFragment, TouchInput.SPAWNABLE_TAG);
             PositionFragment(m_LoadedFragment);
@@ -83,13 +80,11 @@ namespace Assets.Scripts.Scripts
             m_ActiveFragments.Add(m_LoadedFragment);
             m_LoadedFragment.SetActive(true);
 
-            // 4. Gizmo Setup
             gizmoVisualizer.SetupAndCenterGizmo(m_LoadedFragment);
             gizmoVisualizer.SetGizmoVisibility(false);
 
-            // 5. Load Secondary Models
             LoadWholeModel(originalModelName);
-            LoadFibulaModel("Fibula"); // Added Fibula loader call
+            LoadFibulaModel("Fibula"); 
         }
 
         private void LoadWholeModel(string modelName)
@@ -113,8 +108,6 @@ namespace Assets.Scripts.Scripts
                 m_FibulaModel = Instantiate(prefab);
                 DontDestroyOnLoad(m_FibulaModel);
                 
-                // Fibula doesn't necessarily need to be spawnable/sliceable, 
-                // but we keep common requirements for visual consistency.
                 SetupModelCommonRequirements(m_FibulaModel, "ROTATEONLY"); 
                 
                 PositionFibulaModel(m_FibulaModel, m_LoadedFragment.transform.position);
@@ -165,7 +158,6 @@ namespace Assets.Scripts.Scripts
                 currentSetOfFragments = nextSet;
             }
 
-            // Apply Visibility Filter for wedge removal
             if (currentPlanes.Count > 1)
             {
                 m_ActiveFragments = FilterFragmentsBetweenPlanes(currentSetOfFragments, currentPlanes);
@@ -401,7 +393,6 @@ namespace Assets.Scripts.Scripts
             {
                 col.sharedMesh = mf.sharedMesh;
                 col.convex = true;
-                // Force a sync with PolySpatial
                 col.enabled = false;
                 col.enabled = true;
             }
