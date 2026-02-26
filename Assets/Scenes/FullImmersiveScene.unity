@@ -428,7 +428,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Scripts.Scripts.OsteotomyPlanLogic
   fragmentModelScale: {x: 0.001, y: 0.001, z: 0.001}
   wholeModelScale: {x: 0.01, y: 0.01, z: 0.01}
-  fibulaModelScale: {x: 0.001, y: 0.001, z: 0.001}
+  fibulaModelScale: {x: 0.01, y: 0.01, z: 0.01}
   spawnDistance: 0.8
   spawnHeight: 1.5
   osteotomySliceCapMaterial: {fileID: -3033667219593020291, guid: 47bbdf297579740118235cfeed1abbcc, type: 3}
@@ -461,6 +461,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TouchInput
   planeFragmentPrefab: {fileID: 1593688726762680407, guid: 5fe7aa6209fc24128806f474b9b23467, type: 3}
+  fibulaPlanePrefab: {fileID: 1593688726762680407, guid: f9d7206c86d3449c2948ce5a50463934, type: 3}
   rulerPrefab: {fileID: 1100098469447799450, guid: 70f1f525725da46c79f443807a7cc298, type: 3}
 --- !u!114 &424541899
 MonoBehaviour:

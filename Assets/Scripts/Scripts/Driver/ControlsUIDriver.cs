@@ -1,4 +1,4 @@
-//controlsuidriver.cs
+//controlsuidriver.cs for ControlImmersiveView.swift
 using System;
 using System.Collections.Generic;
 using AOT;
@@ -54,6 +54,7 @@ namespace Assets.Scripts.Scripts
                 {
                     var osteotomyPlanLogic = FindFirstObjectByType<OsteotomyPlanLogic>();
                     osteotomyPlanLogic.PerformOsteotomySlice();
+                    osteotomyPlanLogic.PerformFibulaSlice();
                 }
                 else if(command == "RevertToUncutModel")
                 {

@@ -1,3 +1,4 @@
+//osteotomyplanlogic.cs
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,11 +11,15 @@ namespace Assets.Scripts.Scripts
         public static bool HasPerformedSlice { get; private set; } = false;
 
         [Header("Model Setup")]
-        public Vector3 fragmentModelScale = new Vector3(0.001f, 0.001f, 0.01f);
+        public Vector3 fragmentModelScale = new Vector3(0.001f, 0.001f, 0.001f);
         public Vector3 wholeModelScale = new Vector3(0.01f, 0.01f, 0.01f);
         public Vector3 fibulaModelScale = new Vector3(0.001f, 0.001f, 0.001f); 
         public float spawnDistance = 2.0f;
         public float spawnHeight = 1.5f;
+
+        [Header("Fibula Offset")]
+        [Tooltip("Offset (in meters) from the fibula tip for the first cutting plane.")]
+        public float fibulaStartOffsetCm = 0.05f; // 5 cm
 
         [Header("Slicing Setup")]
         public Material osteotomySliceCapMaterial;
@@ -28,7 +33,10 @@ namespace Assets.Scripts.Scripts
         private GameObject m_WholeModel;
         private GameObject m_FibulaModel; 
         private GameObject m_InitialFragmentPrefab;
+        private GameObject m_InitialFibulaPrefab;
+        private List<GameObject> m_FibulaPlanes = new List<GameObject>();
         private List<GameObject> m_ActiveFragments = new List<GameObject>();
+        private List<GameObject> m_ActiveFibulaFragments = new List<GameObject>();
 
         #region Initialization
 
@@ -36,6 +44,14 @@ namespace Assets.Scripts.Scripts
         {
             if (!ValidateDependencies()) return;
             InitializeOsteotomySystem();
+        }
+
+        void Update()
+        {
+            if (TouchInput.currentCuttingPlanes != null && TouchInput.currentCuttingPlanes.Count > 0)
+            {
+                SyncAllPlanesToFibula();
+            }
         }
 
         private bool ValidateDependencies()
@@ -107,11 +123,16 @@ namespace Assets.Scripts.Scripts
             {
                 m_FibulaModel = Instantiate(prefab);
                 DontDestroyOnLoad(m_FibulaModel);
+
+                m_InitialFibulaPrefab = Instantiate(prefab);
+                m_InitialFibulaPrefab.name = modelName + "_InitialCopy";
+                m_InitialFibulaPrefab.SetActive(false);
+                DontDestroyOnLoad(m_InitialFibulaPrefab);
                 
                 SetupModelCommonRequirements(m_FibulaModel, "ROTATEONLY"); 
-                
                 PositionFibulaModel(m_FibulaModel, m_LoadedFragment.transform.position);
                 m_FibulaModel.SetActive(true);
+
                 Debug.Log("OsteotomyPlanLogic: Fibula model loaded successfully.");
             }
             else
@@ -120,16 +141,242 @@ namespace Assets.Scripts.Scripts
             }
         }
 
+        public void UpdateFibulaBridgeOrientations()
+        {
+            
+            
+        }
+        
+        private void TrimFibulaPlanes(int requiredCount)
+        {
+            while (TouchInput.fibulaPlanes.Count > requiredCount)
+            {
+                int lastIdx = TouchInput.fibulaPlanes.Count - 1;
+                GameObject excessPlane = TouchInput.fibulaPlanes[lastIdx];
+                if (excessPlane != null) Destroy(excessPlane);
+                TouchInput.fibulaPlanes.RemoveAt(lastIdx);
+            }
+        }
+
+        public void SyncAllPlanesToFibula()
+        {
+            List<GameObject> mPlanes = TouchInput.currentCuttingPlanes;
+            if (mPlanes.Count < 2 || m_FibulaModel == null || m_LoadedFragment == null)
+            {
+                
+                TrimFibulaPlanes(0);
+                return;
+            }
+
+            int requiredFibulaPlanes = mPlanes.Count <= 2 ? mPlanes.Count : (mPlanes.Count - 2) * 2 + 2;
+
+            
+            TrimFibulaPlanes(requiredFibulaPlanes);
+
+            while (TouchInput.fibulaPlanes.Count < requiredFibulaPlanes)
+            {
+                TouchInput.Instance.SpawnPlaneExternal(Vector3.zero, Quaternion.identity);
+            }
+
+            List<GameObject> fPlanes = TouchInput.fibulaPlanes;
+            MeshRenderer fibulaRenderer = m_FibulaModel.GetComponentInChildren<MeshRenderer>();
+
+            
+            Vector3 fibulaBoneAxis = m_FibulaModel.transform.right;
+
+            // Project the AABB extent onto the actual bone axis to find the correct half-length
+            Vector3 ext = fibulaRenderer.bounds.extents;
+            float projectedExtent = Mathf.Abs(fibulaBoneAxis.x) * ext.x
+                                  + Mathf.Abs(fibulaBoneAxis.y) * ext.y
+                                  + Mathf.Abs(fibulaBoneAxis.z) * ext.z;
+            Vector3 fibulaStart = fibulaRenderer.bounds.center + (fibulaBoneAxis * projectedExtent)
+                                  - (fibulaBoneAxis * fibulaStartOffsetCm); // apply start offset
+
+            Vector3 mandibleBoneAxis = (mPlanes[mPlanes.Count - 1].transform.position - mPlanes[0].transform.position).normalized;
+            Quaternion boneMapping = Quaternion.FromToRotation(mandibleBoneAxis, -fibulaBoneAxis);
+
+            // Pre-compute cumulative distances along the mandible path (segment-by-segment)
+            float[] cumulativeDist = new float[mPlanes.Count];
+            cumulativeDist[0] = 0f;
+            for (int i = 1; i < mPlanes.Count; i++)
+            {
+                cumulativeDist[i] = cumulativeDist[i - 1]
+                    + Vector3.Distance(mPlanes[i - 1].transform.position, mPlanes[i].transform.position);
+            }
+
+            int fibIndex = 0;
+            for (int i = 0; i < mPlanes.Count; i++)
+            {
+                float worldDist = cumulativeDist[i];
+                Vector3 targetBasePos = fibulaStart - (fibulaBoneAxis * worldDist);
+
+                
+                Quaternion targetRotation = boneMapping * mPlanes[i].transform.rotation;
+
+                if (i == 0 || i == mPlanes.Count - 1)
+                {
+                    fPlanes[fibIndex].transform.position = targetBasePos;
+                    fPlanes[fibIndex].transform.rotation = targetRotation;
+                    fibIndex++;
+                }
+                else
+                {
+                    float wedgeGap = 0.001f;
+
+                    
+                    Vector3 segBefore = (mPlanes[i].transform.position - mPlanes[i - 1].transform.position).normalized;
+                    Vector3 segAfter  = (mPlanes[i + 1].transform.position - mPlanes[i].transform.position).normalized;
+                    float wedgeHalfAngle = Vector3.Angle(segBefore, segAfter) * 0.5f;
+
+                    
+                    
+                    Vector3 bendCross = Vector3.Cross(segBefore, segAfter);
+                    Vector3 fibulaBendAxis;
+                    if (bendCross.sqrMagnitude > 0.0001f)
+                        fibulaBendAxis = (boneMapping * bendCross.normalized).normalized;
+                    else
+                        fibulaBendAxis = m_FibulaModel.transform.up; 
+
+                    fPlanes[fibIndex].transform.position     = targetBasePos + (fibulaBoneAxis * wedgeGap);
+                    fPlanes[fibIndex + 1].transform.position = targetBasePos - (fibulaBoneAxis * wedgeGap);
+
+                    
+                    fPlanes[fibIndex].transform.rotation     = Quaternion.AngleAxis( wedgeHalfAngle, fibulaBendAxis) * targetRotation;
+                    fPlanes[fibIndex + 1].transform.rotation = Quaternion.AngleAxis(-wedgeHalfAngle, fibulaBendAxis) * targetRotation;
+                    fibIndex += 2;
+                }
+            }
+        }
+        
         #endregion
 
-        #region Core Functionality (Slicing & Reverting)
+        #region slicing & reverting
 
         [UnityEngine.Scripting.Preserve]
+
+        public void PerformFibulaSlice()
+        {
+            if (m_FibulaModel == null) return;
+
+            List<GameObject> mPlanes = TouchInput.currentCuttingPlanes;
+            if (mPlanes == null || mPlanes.Count < 2) return;
+
+            
+            int requiredFibulaPlanes = mPlanes.Count <= 2 ? mPlanes.Count : (mPlanes.Count - 2) * 2 + 2;
+
+            
+            List<GameObject> allFibulaPlanes = TouchInput.fibulaPlanes;
+            if (allFibulaPlanes == null || allFibulaPlanes.Count < 2) return;
+            int planesToUse = Mathf.Min(allFibulaPlanes.Count, requiredFibulaPlanes);
+            List<GameObject> fPlanes = allFibulaPlanes.GetRange(0, planesToUse);
+
+            Debug.Log($"PerformFibulaSlice: {mPlanes.Count} mandible planes → {planesToUse} fibula planes (of {allFibulaPlanes.Count} total)");
+
+            
+            Vector3 fibulaBoneAxis = m_FibulaModel.transform.right;
+            Vector3 fibulaPos = m_FibulaModel.transform.position;
+            Quaternion fibulaRot = m_FibulaModel.transform.rotation;
+
+            
+            int expectedSegments = planesToUse + 1;
+            
+            int expectedGrafts = mPlanes.Count - 1;
+
+            
+            List<GameObject> fibulaSegments = new List<GameObject> { m_FibulaModel };
+
+            foreach (GameObject plane in fPlanes)
+            {
+                if (plane == null) continue;
+                List<GameObject> nextSegments = new List<GameObject>();
+                foreach (GameObject segment in fibulaSegments)
+                {
+                    if (segment == null || !segment.activeSelf) continue;
+
+                    AddSliceComponents(segment, plane.transform.position, plane.transform.up,
+                        (fibulaPos, fibulaRot), (fragA, fragB) =>
+                    {
+                        if (fragA != null) nextSegments.Add(fragA);
+                        if (fragB != null) nextSegments.Add(fragB);
+                    });
+                }
+                fibulaSegments = nextSegments;
+            }
+
+            Debug.Log($"PerformFibulaSlice: Produced {fibulaSegments.Count} segments (expected {expectedSegments})");
+
+            if (fibulaSegments.Count < 3)
+            {
+                Debug.LogWarning("PerformFibulaSlice: Not enough segments produced.");
+                return;
+            }
+
+            
+            fibulaSegments.Sort((a, b) =>
+            {
+                float projA = ProjectOntoAxis(a, fibulaPos, fibulaBoneAxis);
+                float projB = ProjectOntoAxis(b, fibulaPos, fibulaBoneAxis);
+                return projB.CompareTo(projA);
+            });
+
+            m_ActiveFibulaFragments.Clear();
+
+            
+            fibulaSegments[0].SetActive(false);
+            fibulaSegments[fibulaSegments.Count - 1].SetActive(false);
+
+            
+            List<GameObject> interiorSegments = new List<GameObject>();
+            for (int i = 1; i < fibulaSegments.Count - 1; i++)
+            {
+                if (fibulaSegments[i] != null)
+                    interiorSegments.Add(fibulaSegments[i]);
+            }
+
+            
+            interiorSegments.Sort((a, b) =>
+            {
+                float sizeA = GetSegmentBoundsSize(a);
+                float sizeB = GetSegmentBoundsSize(b);
+                return sizeB.CompareTo(sizeA);
+            });
+
+            
+            int graftsToTake = Mathf.Min(expectedGrafts, interiorSegments.Count);
+            for (int i = 0; i < graftsToTake; i++)
+            {
+                m_ActiveFibulaFragments.Add(interiorSegments[i]);
+            }
+
+            
+            for (int i = graftsToTake; i < interiorSegments.Count; i++)
+            {
+                interiorSegments[i].SetActive(false);
+            }
+
+            
+            m_ActiveFibulaFragments.Sort((a, b) =>
+            {
+                float projA = ProjectOntoAxis(a, fibulaPos, fibulaBoneAxis);
+                float projB = ProjectOntoAxis(b, fibulaPos, fibulaBoneAxis);
+                return projB.CompareTo(projA);
+            });
+
+            Debug.Log($"PerformFibulaSlice: {interiorSegments.Count} interior segments, selected {m_ActiveFibulaFragments.Count} grafts (expected {expectedGrafts})");
+
+            
+            MapFibulaGraftsToMandible(mPlanes, fibulaBoneAxis, fibulaRot);
+
+            Debug.Log($"Fibula sliced: {fibulaSegments.Count} total, {m_ActiveFibulaFragments.Count} grafts mapped to mandible (expected {expectedGrafts}).");
+        }
+
         public void PerformOsteotomySlice()
         {
-            if (m_ActiveFragments.Count == 0) return;
+            if (m_ActiveFragments.Count == 0 || m_FibulaModel == null) return;
 
             List<GameObject> currentPlanes = TouchInput.currentCuttingPlanes;
+            List<GameObject> currentFibulaPlanes = TouchInput.fibulaPlanes;
+
             if (currentPlanes == null || currentPlanes.Count == 0) return;
 
             HasPerformedSlice = true;
@@ -222,12 +469,19 @@ namespace Assets.Scripts.Scripts
             Vector3 lastPos = m_LoadedFragment ? m_LoadedFragment.transform.position : Vector3.zero;
             Quaternion lastRot = m_LoadedFragment ? m_LoadedFragment.transform.rotation : Quaternion.identity;
 
+            
             foreach (GameObject frag in m_ActiveFragments) if (frag != null) Destroy(frag);
             m_ActiveFragments.Clear();
             if (m_LoadedFragment != null) Destroy(m_LoadedFragment);
 
+            
+            foreach (var graft in m_ActiveFibulaFragments) if (graft != null) Destroy(graft);
+            m_ActiveFibulaFragments.Clear();
+            if (m_FibulaModel != null) { Destroy(m_FibulaModel); m_FibulaModel = null; }
+
             if (m_InitialFragmentPrefab == null) return;
 
+            
             GameObject newFragment = Instantiate(m_InitialFragmentPrefab);
             newFragment.name = m_InitialFragmentPrefab.name.Replace("_InitialCopy", "");
             
@@ -244,6 +498,17 @@ namespace Assets.Scripts.Scripts
             m_ActiveFragments.Add(m_LoadedFragment);
             HasPerformedSlice = false;
 
+            
+            if (m_InitialFibulaPrefab != null)
+            {
+                m_FibulaModel = Instantiate(m_InitialFibulaPrefab);
+                m_FibulaModel.name = "Fibula";
+                DontDestroyOnLoad(m_FibulaModel);
+                SetupModelCommonRequirements(m_FibulaModel, "ROTATEONLY");
+                PositionFibulaModel(m_FibulaModel, m_LoadedFragment.transform.position);
+                m_FibulaModel.SetActive(true);
+            }
+
             gizmoVisualizer.SetupAndCenterGizmo(m_LoadedFragment);
             gizmoVisualizer.SetGizmoVisibility(false);
 
@@ -253,7 +518,7 @@ namespace Assets.Scripts.Scripts
 
         #endregion
 
-        #region Helpers & Positioners
+        #region utils & positioning
 
         private void SetupModelCommonRequirements(GameObject obj, string tag)
         {
@@ -298,10 +563,11 @@ namespace Assets.Scripts.Scripts
             fibula.transform.localScale = Vector3.one;
             fibula.transform.SetParent(volumeCamera?.transform, false);
             
-            fibula.transform.localPosition = referencePosition + new Vector3(0.5f, 0f, 0f); 
+            fibula.transform.localPosition = referencePosition + new Vector3(0.5f, -0.5f, 0f); 
             fibula.transform.localScale = fibulaModelScale;
             
             ApplyLookRotation(fibula);
+            
 
             var mesh = fibula.GetComponentInChildren<MeshFilter>()?.sharedMesh;
             if (mesh != null) {
@@ -345,10 +611,75 @@ namespace Assets.Scripts.Scripts
             fragment.transform.SetParent(volumeCamera?.transform, true);
             fragment.transform.position = captured.pos;
             fragment.transform.rotation = captured.rot;
-            fragment.transform.localScale = fragmentModelScale;
 
-            SetupModelCommonRequirements(fragment, TouchInput.SPAWNABLE_TAG);
+            if (name.Contains("Fibula")) {
+                fragment.transform.localScale = fibulaModelScale;
+                SetupModelCommonRequirements(fragment, "ROTATEONLY");
+            } else {
+                fragment.transform.localScale = fragmentModelScale;
+                SetupModelCommonRequirements(fragment, TouchInput.SPAWNABLE_TAG);
+            }
+            
             fragment.SetActive(true);
+        }
+
+        private float ProjectOntoAxis(GameObject obj, Vector3 origin, Vector3 axis)
+        {
+            MeshRenderer mr = obj.GetComponentInChildren<MeshRenderer>();
+            Vector3 center = (mr != null) ? mr.bounds.center : obj.transform.position;
+            return Vector3.Dot(center - origin, axis);
+        }
+        
+        private float GetSegmentBoundsSize(GameObject obj)
+        {
+            MeshRenderer mr = obj.GetComponentInChildren<MeshRenderer>();
+            return (mr != null) ? mr.bounds.size.magnitude : 0f;
+        }
+        
+        private void MapFibulaGraftsToMandible(List<GameObject> mPlanes, Vector3 fibulaBoneAxis, Quaternion fibulaOriginalRot)
+        {
+            if (m_ActiveFibulaFragments.Count == 0 || mPlanes.Count < 2) return;
+
+            var volumeCamera = Object.FindFirstObjectByType<VolumeCamera>();
+            int numGrafts = mPlanes.Count - 1;
+            int graftsToMap = Mathf.Min(m_ActiveFibulaFragments.Count, numGrafts);
+
+            for (int i = 0; i < graftsToMap; i++)
+            {
+                GameObject graft = m_ActiveFibulaFragments[i];
+                if (graft == null) continue;
+
+                
+                Vector3 segStart = mPlanes[i].transform.position;
+                Vector3 segEnd   = mPlanes[i + 1].transform.position;
+                Vector3 segCenter = (segStart + segEnd) / 2f;
+                Vector3 segDir = (segEnd - segStart).normalized;
+
+                
+                
+                
+                Quaternion alignRot = Quaternion.FromToRotation(-fibulaBoneAxis, segDir);
+                graft.transform.rotation = alignRot * fibulaOriginalRot;
+                graft.transform.localScale = fibulaModelScale;
+
+                
+                MeshRenderer mr = graft.GetComponentInChildren<MeshRenderer>();
+                if (mr != null)
+                {
+                    Vector3 boundsOffset = mr.bounds.center - graft.transform.position;
+                    graft.transform.position = segCenter - boundsOffset;
+                }
+                else
+                {
+                    graft.transform.position = segCenter;
+                }
+
+                graft.transform.SetParent(volumeCamera?.transform, true);
+                graft.tag = TouchInput.SPAWNABLE_TAG;
+                graft.SetActive(true);
+
+                Debug.Log($"Graft {i}: mapped to mandible segment [{i}→{i+1}], pos={graft.transform.position}");
+            }
         }
 
         private void FinalizeSliceUI()

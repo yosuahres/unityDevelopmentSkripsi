@@ -6,141 +6,114 @@ using UnityEngine.InputSystem.EnhancedTouch;
 using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 using TouchPhase = UnityEngine.InputSystem.TouchPhase;
 using UnityEngine.InputSystem.LowLevel;
-using System.Collections.Generic; 
-using Assets.Scripts.Scripts; 
+using System.Collections.Generic;
+using Assets.Scripts.Scripts;
 
-public class TouchInput : MonoBehaviour {
+public class TouchInput : MonoBehaviour
+{
+    [Header("Settings")]
     public static readonly string SPAWNABLE_TAG = "SPAWNABLE";
-    public GameObject planeFragmentPrefab;
-    public GameObject rulerPrefab;
-
-    public static float currentPlaneScale = 0.1f; 
+    public static float currentPlaneScale = 0.1f;
+    public static float fibulaPlaneScale = 0.05f;
     public static readonly float minPlaneScale = 0.1f;
     public static readonly float maxPlaneScale = 0.5f;
+    public static int maxCuttingPlanes = 2;
 
-    
-    public static int maxCuttingPlanes = 2; 
+    [Header("Prefabs")]
+    [Tooltip("Prefab used for the primary mandible cutting planes.")]
+    public GameObject planeFragmentPrefab;
+    [Tooltip("Prefab used specifically for the fibula reconstruction planes.")]
+    public GameObject fibulaPlanePrefab;
+    public GameObject rulerPrefab;
 
+    // State Tracking
     public static List<GameObject> currentCuttingPlanes { get; private set; } = new List<GameObject>();
+    public static List<GameObject> fibulaPlanes { get; private set; } = new List<GameObject>();
     private List<GameObject> activeRulers = new List<GameObject>();
 
-    private static TouchInput instance;
-    void Awake()
+    public static TouchInput Instance { get; private set; }
+
+    private void Awake()
     {
-        instance = this;
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
     }
 
-    void OnEnable()
-    {
-        EnhancedTouchSupport.Enable();
-    }
-    
+    private void OnEnable() => EnhancedTouchSupport.Enable();
+
+    #region Visibility and Scaling
     public static void SetPlaneVisibility(bool isVisible)
     {
-        foreach (var plane in currentCuttingPlanes)
-        {
-            if (plane != null)
-            {
-                plane.SetActive(isVisible);
-            }
-        }
-    }   
+        foreach (var plane in currentCuttingPlanes) if (plane != null) plane.SetActive(isVisible);
+        foreach (var plane in fibulaPlanes) if (plane != null) plane.SetActive(isVisible);
+    }
 
     public static void SetRulerVisibility(bool isVisible)
     {
-        if (instance != null)
-        {
-            foreach (var ruler in instance.activeRulers)
-            {
-                if (ruler != null)
-                {
-                    ruler.SetActive(isVisible);
-                }
-            }
-        }
-    }
-
-    public static void ClearPlaneList()
-    {
-        foreach (var plane in currentCuttingPlanes)
-        {
-            Destroy(plane);
-        }
-        currentCuttingPlanes.Clear();
-        
-        if (instance != null)
-        {
-            foreach (var ruler in instance.activeRulers)
-            {
-                Destroy(ruler);
-            }
-            instance.activeRulers.Clear();
-        }
+        if (Instance == null) return;
+        foreach (var ruler in Instance.activeRulers) if (ruler != null) ruler.SetActive(isVisible);
     }
 
     public static void SetPlaneScale(float scale)
     {
         currentPlaneScale = Mathf.Clamp(scale, minPlaneScale, maxPlaneScale);
-        Debug.Log($"TouchInput: Setting plane scale to {currentPlaneScale}");
+        Vector3 newScale = new Vector3(currentPlaneScale, 0.0002f, currentPlaneScale);
 
-        foreach (var plane in currentCuttingPlanes)
+        foreach (var plane in currentCuttingPlanes) if (plane != null) plane.transform.localScale = newScale;
+        foreach (var plane in fibulaPlanes) if (plane != null) plane.transform.localScale = newScale;
+    }
+    #endregion
+
+    #region Cleanup
+    public static void ClearPlaneList()
+    {
+        foreach (var plane in currentCuttingPlanes) Destroy(plane);
+        foreach (var plane in fibulaPlanes) Destroy(plane);
+        currentCuttingPlanes.Clear();
+        fibulaPlanes.Clear();
+
+        if (Instance != null)
         {
-            if(plane != null)
-            {
-                plane.transform.localScale = new Vector3(currentPlaneScale, 0.0002f, currentPlaneScale);
-            }
+            foreach (var ruler in Instance.activeRulers) Destroy(ruler);
+            Instance.activeRulers.Clear();
         }
     }
 
-    
     public static void CheckAndEnforceMaxPlanes()
     {
         while (currentCuttingPlanes.Count > maxCuttingPlanes)
         {
-            if (currentCuttingPlanes.Count > 0)
+            int lastIdx = currentCuttingPlanes.Count - 1;
+            Destroy(currentCuttingPlanes[lastIdx]);
+            currentCuttingPlanes.RemoveAt(lastIdx);
+
+            if (Instance != null && Instance.activeRulers.Count > 0)
             {
-                GameObject planeToDelete = currentCuttingPlanes[currentCuttingPlanes.Count - 1];
-                Destroy(planeToDelete);
-                currentCuttingPlanes.RemoveAt(currentCuttingPlanes.Count - 1);
-                
-                if (instance != null && instance.activeRulers.Count > 0)
-                {
-                    GameObject rulerToDelete = instance.activeRulers[instance.activeRulers.Count - 1];
-                    Destroy(rulerToDelete);
-                    instance.activeRulers.RemoveAt(instance.activeRulers.Count - 1);
-                }
+                int lastRulerIdx = Instance.activeRulers.Count - 1;
+                Destroy(Instance.activeRulers[lastRulerIdx]);
+                Instance.activeRulers.RemoveAt(lastRulerIdx);
             }
-            else { break; }
         }
     }
+    #endregion
 
-    void Update()
+    #region Spawning Logic
+    private void Update()
     {
-        if (Touch.activeTouches.Count > 0)
+        foreach (var touch in Touch.activeTouches)
         {
-            foreach (var touch in Touch.activeTouches)
-            {
-                if (touch.phase == TouchPhase.Began)
-                {
-                    HandleTouchBegan(touch);
-                }
-            }
+            if (touch.phase == TouchPhase.Began) HandleTouchBegan(touch);
         }
     }
 
     private void HandleTouchBegan(Touch touch)
     {
-        if (OsteotomyPlanLogic.HasPerformedSlice)
-        {
-            Debug.Log("TouchInput: Slice has already been performed. Skipping plane spawn.");
-            return; 
-        }
+        if (OsteotomyPlanLogic.HasPerformedSlice) return;
 
         SpatialPointerState touchData = EnhancedSpatialPointerSupport.GetPointerState(touch);
 
-        //kalau ke device, pakai pointedKind.Touch aja.
-        // || touchData.Kind == SpatialPointerKind.IndirectPinch
-        if (touchData.targetObject != null && (touchData.Kind == SpatialPointerKind.Touch || touchData.Kind == SpatialPointerKind.IndirectPinch))
+        //|| touchData.Kind == SpatialPointerKind.IndirectPinch
+        if (touchData.targetObject != null && (touchData.Kind == SpatialPointerKind.Touch || touchData.Kind == SpatialPointerKind.IndirectPinch) )
         {
             ISpatialTouchable touchable = touchData.targetObject.GetComponent<ISpatialTouchable>();
             bool isSpawnable = touchData.targetObject.CompareTag(SPAWNABLE_TAG);
@@ -148,83 +121,59 @@ public class TouchInput : MonoBehaviour {
             if (touchable != null && isSpawnable)
             {
                 Vector3 spawnPosition = touchData.interactionPosition;
-                Vector3 touchNormal = touchData.inputDeviceRotation * UnityEngine.Vector3.forward; 
-                Quaternion spawnRotation = Quaternion.FromToRotation(Vector3.up, touchNormal);
+                Vector3 touchNormal = touchData.inputDeviceRotation * Vector3.forward;
+                Quaternion spawnRotation = Quaternion.FromToRotation(Vector3.up, touchNormal) * Quaternion.Euler(0, 100f, 0);
 
-                spawnRotation *= Quaternion.Euler(0, 100f, 0); 
-
-                SpawnPlaneFragment(spawnPosition, spawnRotation);
-
+                SpawnMandiblePlane(spawnPosition, spawnRotation);
                 touchable.OnSpatialTouch(spawnPosition, touchNormal);
             }
-            else if (touchable != null && !isSpawnable)
-            {
-                Debug.Log($"TouchInput: Touched object '{touchData.targetObject.name}' is touchable but does not have the required '{SPAWNABLE_TAG}' tag. Plane spawn skipped.");
-            }
-            else
-            {
-                Debug.LogWarning($"TouchInput: Touched object '{touchData.targetObject.name}' does not have an ISpatialTouchable component.");
-            }
-        }
-        else if (touchData.targetObject == null)
-        {
-            Debug.LogWarning("TouchInput: No target object found for touch. Raycast might not be hitting a collider.");
-        }
-        else
-        {
-            Debug.LogWarning($"TouchInput: Touch kind '{touchData.Kind}' is not handled for target object '{touchData.targetObject.name}'.");
         }
     }
 
-    private void SpawnPlaneFragment(Vector3 position, Quaternion rotation)
+    private void SpawnMandiblePlane(Vector3 position, Quaternion rotation)
     {
-        
-        if (currentCuttingPlanes.Count >= maxCuttingPlanes) 
-        {
-            Debug.Log($"TouchInput: Max planes reached ({maxCuttingPlanes}). Cannot spawn another plane.");
-            return; 
-        }
+        if (currentCuttingPlanes.Count >= maxCuttingPlanes || planeFragmentPrefab == null) return;
 
-        if (planeFragmentPrefab != null)
-        {
-            GameObject spawnedPlane = Instantiate(planeFragmentPrefab, position, rotation);
-            spawnedPlane.tag = "PLANE";
-            
-            spawnedPlane.transform.localScale = new Vector3(currentPlaneScale, 0.0002f, currentPlaneScale); 
-            currentCuttingPlanes.Add(spawnedPlane);
-            Debug.Log($"TouchInput: Spawned new plane ({currentCuttingPlanes.Count} total) at {position}");
+        GameObject plane = Instantiate(planeFragmentPrefab, position, rotation);
+        plane.tag = "PLANE";
+        plane.transform.localScale = new Vector3(currentPlaneScale, 0.0002f, currentPlaneScale);
+        currentCuttingPlanes.Add(plane);
 
-            if (currentCuttingPlanes.Count >= 2)
-            {
-                if (rulerPrefab != null)
-                {
-                    Transform p1 = currentCuttingPlanes[currentCuttingPlanes.Count - 2].transform;
-                    Transform p2 = currentCuttingPlanes[currentCuttingPlanes.Count - 1].transform;
+        var logic = Object.FindFirstObjectByType<OsteotomyPlanLogic>();
+        if (logic != null) logic.SyncAllPlanesToFibula();
 
-                    Vector3 rulerPosition = (p1.position + p2.position) / 2f;
-                    Quaternion rulerRotation = Quaternion.identity; 
-                    GameObject newRuler = Instantiate(rulerPrefab, rulerPosition, rulerRotation);
-                    activeRulers.Add(newRuler);
-
-                    RulerVisualizer rulerVisualizer = newRuler.GetComponent<RulerVisualizer>();
-                    if (rulerVisualizer != null)
-                    {
-                        rulerVisualizer.SetPoints(p1, p2);
-                    }
-                    else
-                    {
-                        Debug.LogWarning("TouchInput: RulerPrefab does not have a RulerVisualizer component.");
-                    }
-                }
-                else
-                {
-                    Debug.LogWarning("TouchInput: rulerPrefab is not assigned. Cannot spawn ruler.");
-                }
-            }
-        }
-        else
-        {
-            Debug.LogError("TouchInput: planeFragmentPrefab is not assigned. Cannot spawn plane.");
-        }
+        if (currentCuttingPlanes.Count >= 2) 
+            CreateRulerBetween(currentCuttingPlanes[currentCuttingPlanes.Count - 2].transform, plane.transform);
     }
+
+    public void SpawnPlaneExternal(Vector3 position, Quaternion rotation, bool ignoreLimit = false)
+    {
+        // Use fibula-specific prefab, fallback to fragment prefab if null
+        GameObject prefabToUse = fibulaPlanePrefab != null ? fibulaPlanePrefab : planeFragmentPrefab;
+        if (prefabToUse == null) return;
+
+        GameObject plane = Instantiate(prefabToUse, position, rotation);
+        
+        var volumeCamera = Object.FindFirstObjectByType<VolumeCamera>();
+        if (volumeCamera != null) plane.transform.SetParent(volumeCamera.transform, true);
+
+        plane.tag = "PLANE_FIBULA";
+        plane.transform.localScale = new Vector3(fibulaPlaneScale, 0.0002f, fibulaPlaneScale);
+        fibulaPlanes.Add(plane);
+
+        if (fibulaPlanes.Count >= 2) 
+            CreateRulerBetween(fibulaPlanes[fibulaPlanes.Count - 2].transform, plane.transform);
+    }
+
+    private void CreateRulerBetween(Transform p1, Transform p2)
+    {
+        if (rulerPrefab == null) return;
+
+        Vector3 rulerPosition = (p1.position + p2.position) / 2f;
+        GameObject newRuler = Instantiate(rulerPrefab, rulerPosition, Quaternion.identity);
+        activeRulers.Add(newRuler);
+
+        if (newRuler.TryGetComponent<RulerVisualizer>(out var rv)) rv.SetPoints(p1, p2);
+    }
+    #endregion
 }
